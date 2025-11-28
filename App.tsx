@@ -17,13 +17,15 @@ import StoresPage from './components/StoresPage';
 import ProductCarousel from './components/ProductCarousel';
 import CheckoutPage from './components/CheckoutPage';
 import InfoPage from './components/InfoPage';
+import BlogPage from './components/BlogPage';
+import ContactPage from './components/ContactPage';
 import AdminLayout from './components/admin/AdminLayout';
 import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Order } from './types';
 import { useCart } from './CartContext';
 
-type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'ADMIN';
+type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
@@ -40,7 +42,7 @@ function App() {
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes
-    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG', 'ADMIN'].includes(category)) {
+    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG', 'CONTACT', 'ADMIN'].includes(category)) {
         setCurrentView(category as View);
         window.scrollTo(0, 0);
         return;
@@ -474,8 +476,16 @@ function App() {
       {currentView === 'STORES' && (
         <StoresPage />
       )}
+      
+      {currentView === 'BLOG' && (
+        <BlogPage />
+      )}
 
-      {(currentView === 'PRIVACY' || currentView === 'TERMS' || currentView === 'SHIPPING' || currentView === 'BLOG') && (
+      {currentView === 'CONTACT' && (
+        <ContactPage />
+      )}
+
+      {(currentView === 'PRIVACY' || currentView === 'TERMS' || currentView === 'SHIPPING') && (
           <InfoPage type={currentView} />
       )}
 

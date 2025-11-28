@@ -5,6 +5,7 @@ import { useWishlist } from '../WishlistContext';
 import { User, Package, MapPin, LogOut, ChevronRight, Edit2, Heart, ShoppingBag } from 'lucide-react';
 import { Order, Product } from '../types';
 import ProductCard from './ProductCard';
+import OrderDetailsModal from './OrderDetailsModal';
 
 interface Props {
   onProductClick?: (product: Product) => void;
@@ -15,6 +16,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
   const { user, logout } = useAuth();
   const { wishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'ORDERS' | 'ADDRESS' | 'WISHLIST'>('DETAILS');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   if (!user) return null;
 
@@ -138,7 +140,9 @@ const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
                                     <p className="text-xs text-gray-400 uppercase tracking-wide">Status</p>
                                     <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full mt-1 ${
                                         order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-                                        order.status === 'Processing' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                                        order.status === 'Processing' ? 'bg-yellow-100 text-yellow-700' : 
+                                        order.status === 'Shipped' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-gray-100 text-gray-700'
                                     }`}>
                                         {order.status}
                                     </span>
@@ -160,7 +164,10 @@ const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
                             </div>
                             
                             <div className="mt-4 pt-4 flex justify-end">
-                                <button className="text-[#8B7E66] text-sm font-bold uppercase tracking-wide flex items-center gap-1 hover:text-[#5D6D55]">
+                                <button 
+                                    onClick={() => setSelectedOrder(order)}
+                                    className="text-[#8B7E66] text-sm font-bold uppercase tracking-wide flex items-center gap-1 hover:text-[#5D6D55]"
+                                >
                                     View Details <ChevronRight size={16} />
                                 </button>
                             </div>
@@ -231,6 +238,13 @@ const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
           </div>
         </div>
       </div>
+      
+      {/* Order Details Modal */}
+      <OrderDetailsModal 
+        isOpen={!!selectedOrder} 
+        order={selectedOrder} 
+        onClose={() => setSelectedOrder(null)} 
+      />
     </div>
   );
 };
