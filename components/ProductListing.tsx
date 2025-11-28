@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { ALL_PRODUCTS, NAV_ITEMS } from '../constants';
+import { NAV_ITEMS } from '../constants';
 import { ChevronRight, Filter, X, Search } from 'lucide-react';
 import { Product } from '../types';
 
 interface Props {
+  products: Product[];
   initialCategory: string;
   initialSubCategory?: string;
   initialSearchQuery?: string;
@@ -13,7 +14,7 @@ interface Props {
   onProductClick: (product: Product) => void;
 }
 
-const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
+const ProductListing: React.FC<Props> = ({ products, initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeSubCategory, setActiveSubCategory] = useState<string | undefined>(initialSubCategory);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -25,7 +26,7 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
     setSearchQuery(initialSearchQuery || '');
   }, [initialCategory, initialSubCategory, initialSearchQuery]);
 
-  const filteredProducts = ALL_PRODUCTS.filter(product => {
+  const filteredProducts = products.filter(product => {
     // 1. Search Logic
     if (activeCategory === 'SEARCH') {
         if (!searchQuery) return true;

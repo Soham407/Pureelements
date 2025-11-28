@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Facebook, Instagram, Youtube, Phone, Mail, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Phone, Mail, MapPin, Lock } from 'lucide-react';
 
 interface Props {
   onNavigate: (category: string) => void;
@@ -83,11 +83,23 @@ const Footer: React.FC<Props> = ({ onNavigate }) => {
         {/* Divider */}
         <div className="border-t border-white/20 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-300">
             <p>© 2024 Pure Elements. All Rights Reserved.</p>
-            <div className="mt-4 md:mt-0 flex gap-2">
+            <div className="mt-4 md:mt-0 flex gap-4 items-center">
                  {/* Payment Icons Placeholder */}
-                 <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">VISA</div>
-                 <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">MasterCard</div>
-                 <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">UPI</div>
+                 <div className="flex gap-2">
+                   <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">VISA</div>
+                   <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">MasterCard</div>
+                   <div className="bg-white px-2 py-1 rounded text-gray-800 font-bold text-xs">UPI</div>
+                 </div>
+                 
+                 {/* Admin Login Link */}
+                 <button 
+                    onClick={() => onNavigate('ADMIN')}
+                    className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors ml-4 border border-white/20 px-2 py-1 rounded-sm hover:bg-white/10"
+                    title="Admin Login"
+                 >
+                    <Lock size={12} />
+                    <span className="text-[10px] font-bold uppercase">Admin</span>
+                 </button>
             </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 
-import { Category, Product, Testimonial, Store, NavItem } from './types';
+import { Category, Product, Testimonial, Store, NavItem, Order } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
   { name: 'ABOUT US', hasDropdown: false },
@@ -228,4 +228,25 @@ export const ALL_PRODUCTS: Product[] = [
   { id: 313, name: "Baby Massage Oil", category: "Kids Care", price: 350, image: "https://picsum.photos/id/1025/400/500", mainCategory: "KIDS-CARE", subCategory: "Baby Oil", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
   { id: 314, name: "Lavender Essential Oil", category: "Wellness", price: 400, image: "https://picsum.photos/id/1026/400/500", mainCategory: "WELLNESS", subCategory: "Essential Oils", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
   { id: 315, name: "Oudh Perfume", category: "Perfumes", price: 1500, image: "https://picsum.photos/id/1027/400/500", mainCategory: "PERFUMES", subCategory: "Unisex", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+];
+
+export const MOCK_ORDERS: Order[] = [
+  {
+    id: 'ORD-7782-9092',
+    date: 'Oct 12, 2023',
+    status: 'Delivered',
+    total: 2380,
+    items: [
+        { productName: 'Kumkumadi Saundarya Face Oil', quantity: 2, price: 2380, image: 'https://picsum.photos/id/202/100/100' }
+    ]
+  },
+  {
+    id: 'ORD-9921-2210',
+    date: 'Sep 28, 2023',
+    status: 'Processing',
+    total: 1290,
+    items: [
+        { productName: 'Aalaap Signature Unisex Perfume', quantity: 1, price: 1290, image: 'https://picsum.photos/id/203/100/100' }
+    ]
+  }
 ];

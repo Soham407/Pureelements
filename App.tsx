@@ -17,12 +17,13 @@ import StoresPage from './components/StoresPage';
 import ProductCarousel from './components/ProductCarousel';
 import CheckoutPage from './components/CheckoutPage';
 import InfoPage from './components/InfoPage';
-import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS } from './constants';
+import AdminLayout from './components/admin/AdminLayout';
+import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Product } from './types';
+import { Product, Order } from './types';
 import { useCart } from './CartContext';
 
-type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG';
+type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'ADMIN';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
@@ -30,12 +31,16 @@ function App() {
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Lifted State for Admin Capability
+  const [allProducts, setAllProducts] = useState<Product[]>(ALL_PRODUCTS);
+  const [allOrders, setAllOrders] = useState<Order[]>(MOCK_ORDERS);
   
   const { closeCart } = useCart();
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes
-    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG'].includes(category)) {
+    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG', 'ADMIN'].includes(category)) {
         setCurrentView(category as View);
         window.scrollTo(0, 0);
         return;
@@ -91,6 +96,38 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  // Admin Actions
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+  };
+
+  const handleAddProduct = (newProduct: Product) => {
+    setAllProducts(prev => [newProduct, ...prev]);
+  };
+
+  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
+    setAllOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  };
+
+  // Filtered lists for Home Page sections based on dynamic state
+  const featuredProducts = allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id));
+  const bestsellerProducts = allProducts.filter(p => BESTSELLERS.some(bp => bp.id === p.id));
+  const offerProducts = allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id));
+
+  // If Admin View
+  if (currentView === 'ADMIN') {
+    return (
+      <AdminLayout 
+        products={allProducts} 
+        orders={allOrders} 
+        onUpdateProduct={handleUpdateProduct}
+        onAddProduct={handleAddProduct}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
+        onExitAdmin={() => handleNavigate('HOME')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} />
@@ -121,7 +158,7 @@ function App() {
               <RevealOnScroll delay={200}>
                   <SectionHeader title="Featured Products" />
                   <ProductCarousel 
-                    products={FEATURED_PRODUCTS}
+                    products={featuredProducts}
                     onProductClick={handleProductClick}
                     itemsPerViewDesktop={4}
                   />
@@ -205,7 +242,7 @@ function App() {
                          {/* Right Product Carousel */}
                          <div className="w-full lg:w-2/3">
                             <ProductCarousel 
-                                products={BESTSELLERS}
+                                products={bestsellerProducts}
                                 onProductClick={handleProductClick}
                                 itemsPerViewDesktop={3}
                             />
@@ -264,7 +301,7 @@ function App() {
               <RevealOnScroll>
                   <SectionHeader title="Offers" />
                   <ProductCarousel 
-                      products={OFFER_PRODUCTS}
+                      products={offerProducts}
                       onProductClick={handleProductClick}
                       variant="offer"
                       itemsPerViewDesktop={4}
@@ -404,6 +441,7 @@ function App() {
 
       {currentView === 'LISTING' && (
         <ProductListing 
+          products={allProducts}
           initialCategory={selectedCategory} 
           initialSubCategory={selectedSubCategory}
           initialSearchQuery={searchQuery}
@@ -415,6 +453,7 @@ function App() {
       {currentView === 'PRODUCT' && selectedProduct && (
         <ProductDetails 
           product={selectedProduct} 
+          allProducts={allProducts}
           onNavigate={handleNavigate}
           onProductClick={handleProductClick}
         />
@@ -425,7 +464,7 @@ function App() {
       )}
 
       {currentView === 'PROFILE' && (
-        <ProfilePage onProductClick={handleProductClick} />
+        <ProfilePage onProductClick={handleProductClick} orders={allOrders} />
       )}
 
       {currentView === 'ABOUT' && (

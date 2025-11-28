@@ -6,33 +6,12 @@ import { User, Package, MapPin, LogOut, ChevronRight, Edit2, Heart, ShoppingBag 
 import { Order, Product } from '../types';
 import ProductCard from './ProductCard';
 
-// Mock Data for orders
-const MOCK_ORDERS: Order[] = [
-  {
-    id: 'ORD-7782-9092',
-    date: 'Oct 12, 2023',
-    status: 'Delivered',
-    total: 2380,
-    items: [
-        { productName: 'Kumkumadi Saundarya Face Oil', quantity: 2, price: 2380, image: 'https://picsum.photos/id/202/100/100' }
-    ]
-  },
-  {
-    id: 'ORD-9921-2210',
-    date: 'Sep 28, 2023',
-    status: 'Processing',
-    total: 1290,
-    items: [
-        { productName: 'Aalaap Signature Unisex Perfume', quantity: 1, price: 1290, image: 'https://picsum.photos/id/203/100/100' }
-    ]
-  }
-];
-
 interface Props {
   onProductClick?: (product: Product) => void;
+  orders: Order[];
 }
 
-const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
+const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
   const { user, logout } = useAuth();
   const { wishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'ORDERS' | 'ADDRESS' | 'WISHLIST'>('DETAILS');
@@ -140,7 +119,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                 <div className="space-y-4 animate-fade-in">
                     <h2 className="font-serif text-2xl text-gray-800 mb-4">Order History</h2>
                     
-                    {MOCK_ORDERS.length > 0 ? MOCK_ORDERS.map(order => (
+                    {orders.length > 0 ? orders.map(order => (
                         <div key={order.id} className="bg-white p-6 shadow-sm rounded-sm border border-gray-100">
                             <div className="flex flex-wrap justify-between items-start gap-4 mb-4 border-b border-gray-100 pb-4">
                                 <div>
