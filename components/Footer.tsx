@@ -1,7 +1,12 @@
+
 import React from 'react';
 import { Facebook, Instagram, Youtube, Phone, Mail, MapPin } from 'lucide-react';
 
-const Footer: React.FC = () => {
+interface Props {
+  onNavigate: (category: string) => void;
+}
+
+const Footer: React.FC<Props> = ({ onNavigate }) => {
   return (
     <footer className="bg-[#8B8B7A] text-white pt-16 pb-8">
       <div className="container mx-auto px-6">
@@ -10,22 +15,22 @@ const Footer: React.FC = () => {
           {/* Column 1: Info */}
           <div>
             <h4 className="font-serif text-xl mb-6 font-bold">Information</h4>
-            <ul className="space-y-3 text-sm font-light text-gray-200">
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Our Stores</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+            <ul className="space-y-3 text-sm font-light text-gray-200 cursor-pointer">
+              <li><a onClick={() => onNavigate('ABOUT US')} className="hover:text-white transition-colors">About Us</a></li>
+              <li><a onClick={() => onNavigate('STORES')} className="hover:text-white transition-colors">Our Stores</a></li>
+              <li><a onClick={() => onNavigate('BLOG')} className="hover:text-white transition-colors">Blog</a></li>
+              <li><a onClick={() => onNavigate('CONTACT')} className="hover:text-white transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
           {/* Column 2: Support */}
           <div>
             <h4 className="font-serif text-xl mb-6 font-bold">Support</h4>
-            <ul className="space-y-3 text-sm font-light text-gray-200">
-              <li><a href="#" className="hover:text-white transition-colors">My Account</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms & Conditions</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Shipping & Delivery</a></li>
+            <ul className="space-y-3 text-sm font-light text-gray-200 cursor-pointer">
+              <li><a onClick={() => onNavigate('PROFILE')} className="hover:text-white transition-colors">My Account</a></li>
+              <li><a onClick={() => onNavigate('TERMS')} className="hover:text-white transition-colors">Terms & Conditions</a></li>
+              <li><a onClick={() => onNavigate('PRIVACY')} className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a onClick={() => onNavigate('SHIPPING')} className="hover:text-white transition-colors">Shipping & Delivery</a></li>
             </ul>
           </div>
 

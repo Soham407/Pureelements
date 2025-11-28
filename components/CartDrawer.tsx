@@ -1,8 +1,13 @@
+
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '../CartContext';
 
-const CartDrawer: React.FC = () => {
+interface Props {
+  onCheckout: () => void;
+}
+
+const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
   const { cart, isCartOpen, closeCart, removeFromCart, updateQuantity } = useCart();
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -150,7 +155,7 @@ const CartDrawer: React.FC = () => {
 
             <button 
               className="w-full bg-[#2C2C2C] text-white py-4 uppercase font-bold tracking-widest text-sm hover:bg-black transition-colors shadow-lg flex items-center justify-center gap-2"
-              onClick={() => alert('Proceeding to Checkout...')}
+              onClick={onCheckout}
             >
               Checkout <span className="font-normal opacity-75">| ₹{subtotal.toLocaleString('en-IN')}</span>
             </button>

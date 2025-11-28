@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from './types';
 
@@ -32,7 +33,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return [...prevCart, { ...product, quantity: 1 }];
     });
-    setIsCartOpen(true); // Open cart when item is added
+    // Removed setIsCartOpen(true) to prevent auto-opening
   };
 
   const removeFromCart = (productId: number) => {

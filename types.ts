@@ -16,6 +16,17 @@ export interface Product {
   rating?: number;
   mainCategory?: string;
   subCategory?: string;
+  marketingImages?: string[];
+  size?: string;
+  fullDescription?: string;
+  legalInfo?: {
+    genericName?: string;
+    usp?: string;
+    bestBefore?: string;
+    manufacturedBy?: string;
+    mfgLicNo?: string;
+    countryOfOrigin?: string;
+  };
 }
 
 export interface Category {
@@ -64,4 +75,15 @@ export interface Order {
     price: number;
     image: string;
   }[];
+}
+
+export interface CheckoutDetails {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  paymentMethod: 'UPI' | 'CARD' | 'COD';
 }

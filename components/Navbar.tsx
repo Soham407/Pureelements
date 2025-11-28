@@ -6,7 +6,7 @@ import { useCart } from '../CartContext';
 import { useAuth } from '../AuthContext';
 
 interface NavbarProps {
-  onNavigate: (category: string, subCategory?: string) => void;
+  onNavigate: (category: string, subCategory?: string, searchQuery?: string) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
@@ -14,6 +14,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const { cartCount, openCart } = useCart();
   const { openAuthModal, isAuthenticated, user } = useAuth();
 
@@ -39,9 +41,23 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   }, [lastScrollY, isOpen]);
 
   const handleNavClick = (name: string, subItem?: string) => {
+    setSearchTerm(''); // Clear search when navigating
     onNavigate(name, subItem);
     setIsOpen(false);
     setActiveDropdown(null);
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchTerm.trim()) {
+      onNavigate('SEARCH', undefined, searchTerm);
+      setIsOpen(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
   };
 
   const handleUserIconClick = () => {
@@ -67,10 +83,16 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             <div className="flex w-full max-w-[280px]">
               <input 
                 type="text" 
-                placeholder="Search ..." 
+                placeholder="Search products..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="w-full border border-gray-200 border-r-0 px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-300 rounded-l-sm"
               />
-              <button className="bg-[#F2C94C] px-4 py-2 flex items-center justify-center hover:bg-[#E0B83E] transition-colors rounded-r-sm">
+              <button 
+                onClick={handleSearchSubmit}
+                className="bg-[#F2C94C] px-4 py-2 flex items-center justify-center hover:bg-[#E0B83E] transition-colors rounded-r-sm"
+              >
                 <Search className="h-5 w-5 text-gray-800" strokeWidth={2} />
               </button>
             </div>
@@ -186,13 +208,15 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       {/* Mobile Menu Content */}
       {isOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 p-4 absolute w-full left-0 shadow-lg h-screen overflow-y-auto pb-24 top-full">
-          <div className="mb-6 flex">
+          <div className="mb-6 flex gap-2">
             <input 
               type="text" 
               placeholder="Search ..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border border-gray-300 px-3 py-2 text-sm outline-none"
             />
-            <button className="bg-[#F2C94C] px-3 py-2">
+            <button onClick={handleSearchSubmit} className="bg-[#F2C94C] px-3 py-2">
               <Search className="h-4 w-4 text-gray-800" />
             </button>
           </div>

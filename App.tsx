@@ -15,19 +15,32 @@ import ProfilePage from './components/ProfilePage';
 import AboutUs from './components/AboutUs';
 import StoresPage from './components/StoresPage';
 import ProductCarousel from './components/ProductCarousel';
+import CheckoutPage from './components/CheckoutPage';
+import InfoPage from './components/InfoPage';
 import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from './types';
+import { useCart } from './CartContext';
 
-type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES';
+type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
   const [selectedCategory, setSelectedCategory] = useState<string>('SKIN CARE');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  const { closeCart } = useCart();
 
-  const handleNavigate = (category: string, subCategory?: string) => {
+  const handleNavigate = (category: string, subCategory?: string, search?: string) => {
+    // Handle specific static routes
+    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG'].includes(category)) {
+        setCurrentView(category as View);
+        window.scrollTo(0, 0);
+        return;
+    }
+
     if (category === 'HOME') {
       setCurrentView('HOME');
       window.scrollTo(0, 0);
@@ -52,8 +65,16 @@ function App() {
        return;
     }
 
+    if (category === 'CHECKOUT') {
+        setCurrentView('CHECKOUT');
+        window.scrollTo(0, 0);
+        return;
+    }
+
+    // Default to Listing View for Categories
     setSelectedCategory(category);
     setSelectedSubCategory(subCategory);
+    setSearchQuery(search);
     setCurrentView('LISTING');
     window.scrollTo(0, 0);
   };
@@ -64,10 +85,16 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleCheckoutClick = () => {
+    closeCart();
+    setCurrentView('CHECKOUT');
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden">
       <Navbar onNavigate={handleNavigate} />
-      <CartDrawer />
+      <CartDrawer onCheckout={handleCheckoutClick} />
       <AuthModal />
       
       {currentView === 'HOME' && (
@@ -379,6 +406,7 @@ function App() {
         <ProductListing 
           initialCategory={selectedCategory} 
           initialSubCategory={selectedSubCategory}
+          initialSearchQuery={searchQuery}
           onNavigate={handleNavigate}
           onProductClick={handleProductClick}
         />
@@ -392,8 +420,12 @@ function App() {
         />
       )}
 
+      {currentView === 'CHECKOUT' && (
+          <CheckoutPage onNavigateHome={() => handleNavigate('HOME')} />
+      )}
+
       {currentView === 'PROFILE' && (
-        <ProfilePage />
+        <ProfilePage onProductClick={handleProductClick} />
       )}
 
       {currentView === 'ABOUT' && (
@@ -404,7 +436,11 @@ function App() {
         <StoresPage />
       )}
 
-      <Footer />
+      {(currentView === 'PRIVACY' || currentView === 'TERMS' || currentView === 'SHIPPING' || currentView === 'BLOG') && (
+          <InfoPage type={currentView} />
+      )}
+
+      <Footer onNavigate={handleNavigate} />
       
       {/* Floating Whatsapp Button */}
       <a href="#" className="fixed bottom-6 right-6 bg-[#25D366] text-white p-3 rounded-full shadow-lg z-50 hover:bg-[#128C7E] transition-colors group">

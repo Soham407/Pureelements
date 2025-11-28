@@ -5,6 +5,7 @@ import App from './App';
 import { CartProvider } from './CartContext';
 import { AuthProvider } from './AuthContext';
 import { WishlistProvider } from './WishlistContext';
+import { ToastProvider } from './ToastContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,11 +16,13 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <App />
-        </WishlistProvider>
-      </CartProvider>
+      <ToastProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <App />
+          </WishlistProvider>
+        </CartProvider>
+      </ToastProvider>
     </AuthProvider>
   </React.StrictMode>
 );

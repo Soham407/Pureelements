@@ -4,6 +4,7 @@ import { Product } from '../types';
 import { Star, Eye, Heart } from 'lucide-react';
 import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
+import { useToast } from '../ToastContext';
 
 interface Props {
   product: Product;
@@ -14,26 +15,33 @@ interface Props {
 }
 
 const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'default', animationDelay = 0, onClick }) => {
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { showToast } = useToast();
+  
   const isOffer = variant === 'offer';
   const isWishlisted = isInWishlist(product.id);
   
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product);
-    // In a real app, you might redirect to checkout immediately
-    alert(`Added ${product.name} to cart. Proceeding to checkout...`);
+    openCart(); // Immediately open cart for "Buy Now" flow
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product);
+    showToast(`${product.name} added to cart!`);
   };
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleWishlist(product);
+    if (!isWishlisted) {
+        showToast('Added to wishlist', 'info');
+    } else {
+        showToast('Removed from wishlist', 'info');
+    }
   };
 
   const handleCardClick = () => {

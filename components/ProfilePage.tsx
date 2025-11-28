@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { User, Package, MapPin, LogOut, ChevronRight, Edit2 } from 'lucide-react';
-import { Order } from '../types';
+import { useWishlist } from '../WishlistContext';
+import { User, Package, MapPin, LogOut, ChevronRight, Edit2, Heart, ShoppingBag } from 'lucide-react';
+import { Order, Product } from '../types';
+import ProductCard from './ProductCard';
 
 // Mock Data for orders
 const MOCK_ORDERS: Order[] = [
@@ -26,9 +28,14 @@ const MOCK_ORDERS: Order[] = [
   }
 ];
 
-const ProfilePage: React.FC = () => {
+interface Props {
+  onProductClick?: (product: Product) => void;
+}
+
+const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'DETAILS' | 'ORDERS' | 'ADDRESS'>('DETAILS');
+  const { wishlist } = useWishlist();
+  const [activeTab, setActiveTab] = useState<'DETAILS' | 'ORDERS' | 'ADDRESS' | 'WISHLIST'>('DETAILS');
 
   if (!user) return null;
 
@@ -40,7 +47,7 @@ const ProfilePage: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
           <div className="w-full md:w-1/4">
-             <div className="bg-white p-6 shadow-sm rounded-sm">
+             <div className="bg-white p-6 shadow-sm rounded-sm sticky top-24">
                 <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-100">
                     <div className="w-12 h-12 bg-[#8B7E66] rounded-full flex items-center justify-center text-white font-bold text-xl">
                         {user.name.charAt(0)}
@@ -67,6 +74,14 @@ const ProfilePage: React.FC = () => {
                         }`}
                     >
                         <Package size={18} /> My Orders
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('WISHLIST')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-sm ${
+                            activeTab === 'WISHLIST' ? 'bg-[#FFFBF2] text-[#8B7E66]' : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                    >
+                        <Heart size={18} /> My Wishlist
                     </button>
                     <button 
                         onClick={() => setActiveTab('ADDRESS')}
@@ -125,7 +140,7 @@ const ProfilePage: React.FC = () => {
                 <div className="space-y-4 animate-fade-in">
                     <h2 className="font-serif text-2xl text-gray-800 mb-4">Order History</h2>
                     
-                    {MOCK_ORDERS.map(order => (
+                    {MOCK_ORDERS.length > 0 ? MOCK_ORDERS.map(order => (
                         <div key={order.id} className="bg-white p-6 shadow-sm rounded-sm border border-gray-100">
                             <div className="flex flex-wrap justify-between items-start gap-4 mb-4 border-b border-gray-100 pb-4">
                                 <div>
@@ -171,8 +186,38 @@ const ProfilePage: React.FC = () => {
                                 </button>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className="bg-white p-12 text-center rounded-sm">
+                            <Package size={48} className="mx-auto text-gray-300 mb-4" />
+                            <p className="text-gray-500">You haven't placed any orders yet.</p>
+                        </div>
+                    )}
                 </div>
+             )}
+
+             {/* Wishlist Tab */}
+             {activeTab === 'WISHLIST' && (
+                 <div className="space-y-6 animate-fade-in">
+                    <h2 className="font-serif text-2xl text-gray-800 mb-4">My Wishlist ({wishlist.length})</h2>
+                    
+                    {wishlist.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {wishlist.map(product => (
+                                <ProductCard 
+                                    key={product.id} 
+                                    product={product} 
+                                    onClick={onProductClick ? () => onProductClick(product) : undefined}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white p-12 text-center rounded-sm">
+                            <Heart size={48} className="mx-auto text-gray-300 mb-4" />
+                            <p className="text-gray-500">Your wishlist is empty.</p>
+                            <button className="mt-4 text-[#8B7E66] font-bold underline hover:text-[#5D6D55]">Start Shopping</button>
+                        </div>
+                    )}
+                 </div>
              )}
 
              {/* Addresses Tab */}
