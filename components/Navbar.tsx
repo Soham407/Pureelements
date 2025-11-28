@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { useCart } from '../CartContext';
+import { useAuth } from '../AuthContext';
 
 interface NavbarProps {
   onNavigate: (category: string, subCategory?: string) => void;
@@ -13,6 +15,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { cartCount, openCart } = useCart();
+  const { openAuthModal, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -41,6 +44,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
     setActiveDropdown(null);
   };
 
+  const handleUserIconClick = () => {
+    if (isAuthenticated) {
+      onNavigate('PROFILE');
+    } else {
+      openAuthModal();
+    }
+  };
+
   return (
     <nav 
       className={`bg-white sticky top-0 z-50 shadow-sm font-sans w-full transition-transform duration-300 ${
@@ -49,10 +60,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
     >
       {/* Top Row: Search, Logo, Actions */}
       <div className="container mx-auto px-4 pt-6 pb-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-0">
           
           {/* Left: Search Bar (Desktop) */}
-          <div className="hidden md:flex items-center w-full md:w-1/3">
+          <div className="hidden lg:flex items-center w-full lg:w-1/3">
             <div className="flex w-full max-w-[280px]">
               <input 
                 type="text" 
@@ -66,31 +77,31 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           </div>
 
           {/* Center: Logo (Mobile & Desktop) */}
-          <div className="flex w-full md:w-auto items-center justify-between md:justify-center md:flex-grow">
-            <button className="md:hidden p-2 -ml-2" onClick={() => setIsOpen(!isOpen)}>
+          <div className="flex w-full lg:w-auto items-center justify-between lg:justify-center lg:flex-grow">
+            <button className="lg:hidden p-2 -ml-2" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             
             <div className="flex items-center justify-center gap-3 cursor-pointer" onClick={() => handleNavClick('HOME')}>
               {/* Logo Icon Placeholder */}
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border-[3px] border-gray-500 p-0.5 flex-shrink-0 flex items-center justify-center">
+              <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full border-[3px] border-gray-500 p-0.5 flex-shrink-0 flex items-center justify-center">
                  <div className="w-full h-full rounded-full bg-[#F5A623] border-[2px] border-white"></div>
               </div>
 
               {/* Logo Text */}
               <div className="flex flex-col items-start">
-                <h1 className="text-xl md:text-3xl font-sans text-[#4A4A4A] uppercase tracking-wide leading-none" style={{ fontWeight: 400 }}>
+                <h1 className="text-xl lg:text-3xl font-sans text-[#4A4A4A] uppercase tracking-wide leading-none" style={{ fontWeight: 400 }}>
                   PURE ELEMENTS
-                  <sup className="text-[8px] md:text-[10px] top-[-0.5em] ml-0.5 text-gray-400">TM</sup>
+                  <sup className="text-[8px] lg:text-[10px] top-[-0.5em] ml-0.5 text-gray-400">TM</sup>
                 </h1>
-                <span className="text-[8px] md:text-[11px] tracking-[0.35em] text-black uppercase font-medium mt-1 w-full text-justify">
+                <span className="text-[8px] lg:text-[11px] tracking-[0.35em] text-black uppercase font-medium mt-1 w-full text-justify">
                   PROMISE OF AYURVEDA
                 </span>
               </div>
             </div>
 
             {/* Mobile Cart Icon */}
-            <div className="md:hidden relative mr-1" onClick={openCart}>
+            <div className="lg:hidden relative mr-1" onClick={openCart}>
               <ShoppingCart className="h-6 w-6 text-[#3A5A40]" />
               <span className="absolute -top-1.5 -right-1.5 bg-[#3A5A40] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {cartCount}
@@ -99,27 +110,33 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           </div>
 
           {/* Right: Actions (Desktop) */}
-          <div className="hidden md:flex items-center justify-end w-full md:w-1/3 gap-6">
+          <div className="hidden lg:flex items-center justify-end w-full lg:w-1/3 gap-6">
             <div className="relative group cursor-pointer" onClick={openCart}>
               <ShoppingCart className="h-7 w-7 text-[#3A5A40]" strokeWidth={1.5} />
               <span className="absolute -top-1.5 -right-1.5 bg-[#3A5A40] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
             </div>
-            <div className="cursor-pointer hover:opacity-70">
+            
+            <div className="cursor-pointer hover:opacity-70 flex items-center gap-2" onClick={handleUserIconClick}>
               <User className="h-7 w-7 text-gray-500" strokeWidth={1.2} />
+              {isAuthenticated && (
+                <span className="text-xs font-bold text-gray-600 uppercase hidden xl:block">
+                    Hi, {user?.name.split(' ')[0]}
+                </span>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Divider Line */}
-      <div className="w-full h-[1px] bg-[#F2C94C] hidden md:block"></div>
+      <div className="w-full h-[1px] bg-[#F2C94C] hidden lg:block"></div>
 
       {/* Bottom Row: Navigation (Desktop) */}
-      <div className="hidden md:block py-3 bg-white relative">
+      <div className="hidden lg:block py-3 bg-white relative">
         <div className="container mx-auto px-4">
-          <ul className="flex flex-wrap items-center justify-between lg:justify-center lg:gap-8 xl:gap-10 text-[13px] font-bold text-[#4A4A4A] tracking-wider relative">
+          <ul className="flex flex-nowrap items-center justify-center gap-5 xl:gap-8 text-[13px] font-bold text-[#4A4A4A] tracking-wider relative whitespace-nowrap">
             {NAV_ITEMS.map((item) => (
               <li 
                 key={item.name} 
@@ -128,7 +145,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <div 
-                  className="flex items-center gap-1 cursor-pointer hover:text-[#F5A623] transition-colors whitespace-nowrap py-2"
+                  className="flex items-center gap-1 cursor-pointer hover:text-[#F5A623] transition-colors py-2"
                   onClick={() => handleNavClick(item.name)}
                 >
                   {item.name}
@@ -149,7 +166,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                             e.preventDefault();
                             handleNavClick(item.name, subItem);
                           }}
-                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-[#F5A623] hover:bg-gray-50 transition-colors text-sm font-normal capitalize"
+                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-[#F5A623] hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal"
                         >
                           {subItem}
                         </a>
@@ -164,11 +181,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       </div>
 
       {/* Divider Line for Bottom of Nav */}
-      <div className="w-full h-[1px] bg-[#F2C94C] opacity-50 hidden md:block"></div>
+      <div className="w-full h-[1px] bg-[#F2C94C] opacity-50 hidden lg:block"></div>
 
       {/* Mobile Menu Content */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 p-4 absolute w-full left-0 shadow-lg h-screen overflow-y-auto pb-24 top-full">
+        <div className="lg:hidden bg-white border-t border-gray-100 p-4 absolute w-full left-0 shadow-lg h-screen overflow-y-auto pb-24 top-full">
           <div className="mb-6 flex">
             <input 
               type="text" 
@@ -216,7 +233,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                 )}
               </li>
             ))}
-            <li className="py-3 text-sm font-bold text-gray-700 uppercase tracking-wider">My Account</li>
+            <li className="py-3 text-sm font-bold text-gray-700 uppercase tracking-wider cursor-pointer" onClick={handleUserIconClick}>
+                {isAuthenticated ? 'My Profile' : 'Login / Signup'}
+            </li>
           </ul>
         </div>
       )}

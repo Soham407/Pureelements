@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { ALL_PRODUCTS, NAV_ITEMS } from '../constants';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Filter, X } from 'lucide-react';
 import { Product } from '../types';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, onNavigate, onProductClick }) => {
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeSubCategory, setActiveSubCategory] = useState<string | undefined>(initialSubCategory);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -21,18 +22,15 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
   }, [initialCategory, initialSubCategory]);
 
   const filteredProducts = ALL_PRODUCTS.filter(product => {
-    // Special handling for OFFERS category to show discounted items
     if (activeCategory === 'OFFERS') {
        return product.originalPrice && product.originalPrice > product.price;
     }
 
-    // 1. Check Main Category
     const productMain = product.mainCategory?.trim().toUpperCase();
     const currentMain = activeCategory.trim().toUpperCase();
 
     if (productMain !== currentMain) return false;
 
-    // 2. Check Sub Category (if selected)
     if (activeSubCategory) {
        return product.subCategory?.trim().toUpperCase() === activeSubCategory.trim().toUpperCase();
     }
@@ -41,37 +39,47 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
   });
 
   const handleSidebarClick = (categoryName: string, subCategoryName?: string) => {
-    // Update local state and parent state
     setActiveCategory(categoryName);
     setActiveSubCategory(subCategoryName);
     onNavigate(categoryName, subCategoryName);
+    setIsMobileFilterOpen(false); // Close mobile menu after selection
   };
 
   const formatTitle = (str: string) => {
     return str.split(/[- ]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
 
-  // Find the configuration for the currently active main category
   const currentNav = NAV_ITEMS.find(item => item.name === activeCategory);
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      {/* Breadcrumb */}
-      <div className="text-xs text-gray-500 mb-8 uppercase tracking-widest flex items-center">
-        <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate('HOME')}>Home</span>
-        <span className="mx-2 text-gray-300">/</span>
-        <span className={`font-bold ${!activeSubCategory ? 'text-[#8B7E66]' : 'text-gray-800'}`}>{formatTitle(activeCategory)}</span>
-        {activeSubCategory && (
-          <>
-            <span className="mx-2 text-gray-300">/</span>
-            <span className="text-[#8B7E66] font-bold">{activeSubCategory}</span>
-          </>
-        )}
+    <div className="container mx-auto px-4 py-8 animate-fade-in min-h-screen">
+      {/* Breadcrumb & Mobile Filter Toggle */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
+        <div className="text-xs text-gray-500 uppercase tracking-widest flex items-center flex-wrap">
+          <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate('HOME')}>Home</span>
+          <span className="mx-2 text-gray-300">/</span>
+          <span className={`font-bold ${!activeSubCategory ? 'text-[#8B7E66]' : 'text-gray-800'}`}>{formatTitle(activeCategory)}</span>
+          {activeSubCategory && (
+            <>
+              <span className="mx-2 text-gray-300">/</span>
+              <span className="text-[#8B7E66] font-bold">{activeSubCategory}</span>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Filter Button */}
+        <button 
+          className="md:hidden flex items-center gap-2 bg-gray-100 px-4 py-2 rounded text-sm font-bold text-gray-700 self-start"
+          onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+        >
+          {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
+          {isMobileFilterOpen ? 'Close Filters' : 'Filter Categories'}
+        </button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar - Context Specific */}
-        <div className="lg:w-1/4 flex-shrink-0">
+        <div className={`lg:w-1/4 flex-shrink-0 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
            <div className="bg-white border border-gray-100 p-6 sticky top-24 shadow-sm rounded-sm">
               <h3 className="font-serif text-xl font-bold mb-6 border-b border-gray-200 pb-4 text-[#2C2C2C]">
                 {currentNav ? formatTitle(currentNav.name) : formatTitle(activeCategory)}
@@ -111,7 +119,6 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
                  ))}
               </ul>
 
-              {/* Message if no subcategories exist (e.g. for OFFERS or simple pages) */}
               {(!currentNav?.subItems || currentNav.subItems.length === 0) && (
                  <div className="mt-4 text-xs text-gray-400 italic px-2">
                     Viewing all items in {formatTitle(activeCategory)}
@@ -121,10 +128,10 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
         </div>
 
         {/* Product Grid */}
-        <div className="lg:w-3/4">
+        <div className="w-full lg:w-3/4">
            <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-100 pb-4">
               <div>
-                  <h1 className="font-serif text-3xl text-gray-800">
+                  <h1 className="font-serif text-2xl md:text-3xl text-gray-800">
                     {activeSubCategory || formatTitle(activeCategory)}
                   </h1>
                   <p className="text-gray-500 text-sm mt-1 font-light tracking-wide">
@@ -134,7 +141,7 @@ const ProductListing: React.FC<Props> = ({ initialCategory, initialSubCategory, 
            </div>
            
            {filteredProducts.length > 0 ? (
-             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                {filteredProducts.map((product, index) => (
                  <div key={product.id} className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${index * 100}ms` }}>
                     <ProductCard 

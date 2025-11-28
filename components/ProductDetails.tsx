@@ -53,11 +53,11 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
 
   return (
     <div className="bg-white min-h-screen animate-fade-in font-sans pb-16">
-      <div className="container mx-auto px-4 py-10 max-w-7xl">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-7xl">
         <div className="flex flex-col md:flex-row gap-8 lg:gap-16 items-start">
           
           {/* Left: Product Images */}
-          <div className="md:w-1/2 w-full sticky top-24">
+          <div className="md:w-1/2 w-full md:sticky md:top-24">
             <div className="relative aspect-square bg-[#F7F7F7] mb-4 overflow-hidden group rounded-sm border border-gray-100">
                <img src={activeImage} alt={product.name} className="w-full h-full object-cover p-1" />
                <div className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer bg-white p-2 rounded-full shadow-sm">
@@ -74,7 +74,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             </div>
             
             {uniqueImages.length > 1 && (
-               <div className="flex justify-center gap-3">
+               <div className="flex justify-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
                   {uniqueImages.map((img, idx) => (
                      <div 
                         key={idx} 
@@ -93,7 +93,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             <p className="text-xs font-bold text-[#8B7E66] tracking-widest uppercase mb-2">
                 {product.subCategory || product.category}
             </p>
-            <h1 className="text-3xl md:text-4xl font-serif text-gray-800 mb-4 leading-tight">{product.name}</h1>
+            <h1 className="text-2xl md:text-4xl font-serif text-gray-800 mb-3 md:mb-4 leading-tight">{product.name}</h1>
             
             {/* Rating */}
             <div className="flex items-center gap-1 mb-6">
@@ -118,8 +118,8 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             <p className="text-xs text-gray-500 mb-8">(inclusive of all taxes)</p>
 
             {/* Quantity & Add to Cart */}
-            <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center border border-gray-300 rounded-sm">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 mb-8">
+                <div className="flex items-center justify-between md:justify-start border border-gray-300 rounded-sm">
                     <button onClick={() => handleQuantityChange(-1)} className="px-3 py-3 hover:bg-gray-50 text-gray-600 disabled:opacity-50" disabled={quantity <= 1}>
                         <Minus size={14} />
                     </button>
@@ -137,7 +137,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                 <button 
                     onClick={handleAddToCart}
                     disabled={product.isSoldOut}
-                    className={`flex-1 max-w-xs px-8 py-3.5 font-bold text-sm uppercase tracking-widest transition-colors shadow-lg rounded-sm ${
+                    className={`flex-1 px-8 py-3.5 font-bold text-sm uppercase tracking-widest transition-colors shadow-lg rounded-sm ${
                         product.isSoldOut 
                         ? 'bg-gray-300 text-white cursor-not-allowed' 
                         : 'bg-[#8B7E66] text-white hover:bg-[#7A6D55]'
@@ -193,7 +193,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             </div>
 
             {/* Badges */}
-            <div className="flex gap-6 mt-8 py-6 grayscale opacity-80">
+            <div className="flex gap-6 mt-8 py-6 grayscale opacity-80 flex-wrap">
                  <div className="flex flex-col items-center gap-1">
                      <CheckCircle2 size={24} className="text-[#5D6D55]" />
                      <span className="text-[10px] uppercase font-bold text-gray-500">Vegan</span>
@@ -212,12 +212,12 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
         </div>
 
         {/* You May Also Like */}
-        <section className="mt-20">
-            <h3 className="font-serif text-2xl md:text-3xl text-center mb-10 text-gray-800 relative inline-block w-full">
+        <section className="mt-16 md:mt-20">
+            <h3 className="font-serif text-2xl md:text-3xl text-center mb-8 md:mb-10 text-gray-800 relative inline-block w-full">
                 <span className="bg-white relative z-10 px-6">You may also like</span>
                 <div className="absolute top-1/2 left-0 w-full h-px bg-gray-200 -z-0"></div>
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {relatedProducts.map((p, i) => (
                     <ProductCard 
                         key={p.id} 

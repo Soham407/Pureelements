@@ -1,7 +1,10 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { CartProvider } from './CartContext';
+import { AuthProvider } from './AuthContext';
+import { WishlistProvider } from './WishlistContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,8 +14,12 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <CartProvider>
-      <App />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <App />
+        </WishlistProvider>
+      </CartProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

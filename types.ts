@@ -44,3 +44,24 @@ export interface NavItem {
   hasDropdown: boolean;
   subItems?: string[];
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  joinedDate: string;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  total: number;
+  items: {
+    productName: string;
+    quantity: number;
+    price: number;
+    image: string;
+  }[];
+}
