@@ -14,6 +14,7 @@ import AuthModal from './components/AuthModal';
 import ProfilePage from './components/ProfilePage';
 import AboutUs from './components/AboutUs';
 import StoresPage from './components/StoresPage';
+import ProductCarousel from './components/ProductCarousel';
 import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from './types';
@@ -92,16 +93,11 @@ function App() {
             <div className="container mx-auto px-4">
               <RevealOnScroll delay={200}>
                   <SectionHeader title="Featured Products" />
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                    {FEATURED_PRODUCTS.map(product => (
-                      <ProductCard 
-                        key={product.id} 
-                        product={product} 
-                        featured 
-                        onClick={() => handleProductClick(product)}
-                      />
-                    ))}
-                  </div>
+                  <ProductCarousel 
+                    products={FEATURED_PRODUCTS}
+                    onProductClick={handleProductClick}
+                    itemsPerViewDesktop={4}
+                  />
               </RevealOnScroll>
             </div>
           </section>
@@ -179,18 +175,13 @@ function App() {
                             </div>
                          </div>
 
-                         {/* Right Product Grid */}
+                         {/* Right Product Carousel */}
                          <div className="w-full lg:w-2/3">
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 h-full content-start">
-                                {BESTSELLERS.map((product, index) => (
-                                   <div key={product.id} style={{ transitionDelay: `${index * 100}ms` }} className="h-full">
-                                        <ProductCard 
-                                            product={product} 
-                                            onClick={() => handleProductClick(product)}
-                                        />
-                                   </div>
-                                ))}
-                            </div>
+                            <ProductCarousel 
+                                products={BESTSELLERS}
+                                onProductClick={handleProductClick}
+                                itemsPerViewDesktop={3}
+                            />
                          </div>
                      </div>
                  </RevealOnScroll>
@@ -245,16 +236,12 @@ function App() {
             <div className="container mx-auto px-4">
               <RevealOnScroll>
                   <SectionHeader title="Offers" />
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    {OFFER_PRODUCTS.map(product => (
-                      <ProductCard 
-                        key={product.id} 
-                        product={product} 
-                        variant="offer" 
-                        onClick={() => handleProductClick(product)}
-                      />
-                    ))}
-                  </div>
+                  <ProductCarousel 
+                      products={OFFER_PRODUCTS}
+                      onProductClick={handleProductClick}
+                      variant="offer"
+                      itemsPerViewDesktop={4}
+                  />
               </RevealOnScroll>
             </div>
           </section>

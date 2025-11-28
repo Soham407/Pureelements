@@ -110,6 +110,58 @@ export const FEATURED_PRODUCTS: Product[] = [
     ingredients: "Cocoa Butter, Vanilla Extract, Aloe Vera, Aqua.",
     howToUse: "Pour onto a loofah or palm, lather over body and rinse off."
   },
+  {
+    id: 5,
+    name: "Saffron & Turmeric Face Cream",
+    category: "Face Creams",
+    price: 850,
+    image: "https://picsum.photos/id/50/400/500",
+    mainCategory: "SKIN CARE",
+    subCategory: "Face Creams",
+    rating: 5,
+    description: DEFAULT_DESCRIPTION,
+    ingredients: DEFAULT_INGREDIENTS,
+    howToUse: DEFAULT_HOW_TO_USE
+  },
+  {
+    id: 6,
+    name: "Hibiscus Hair Oil",
+    category: "Hair Oils",
+    price: 450,
+    image: "https://picsum.photos/id/60/400/500",
+    mainCategory: "HAIR-CARE",
+    subCategory: "Hair Oils",
+    rating: 4,
+    description: DEFAULT_DESCRIPTION,
+    ingredients: DEFAULT_INGREDIENTS,
+    howToUse: DEFAULT_HOW_TO_USE
+  },
+  {
+    id: 7,
+    name: "Charcoal Face Wash",
+    category: "Face Wash",
+    price: 350,
+    image: "https://picsum.photos/id/70/400/500",
+    mainCategory: "SKIN CARE",
+    subCategory: "Face Wash",
+    rating: 4,
+    description: DEFAULT_DESCRIPTION,
+    ingredients: DEFAULT_INGREDIENTS,
+    howToUse: DEFAULT_HOW_TO_USE
+  },
+  {
+    id: 8,
+    name: "Lavender Body Mist",
+    category: "Body Care",
+    price: 600,
+    image: "https://picsum.photos/id/80/400/500",
+    mainCategory: "BODY-CARE",
+    subCategory: "Body Lotions",
+    rating: 5,
+    description: DEFAULT_DESCRIPTION,
+    ingredients: DEFAULT_INGREDIENTS,
+    howToUse: DEFAULT_HOW_TO_USE
+  }
 ];
 
 export const CONCERNS = [
@@ -120,16 +172,25 @@ export const CONCERNS = [
 ];
 
 export const BESTSELLERS: Product[] = [
-  { id: 101, name: "Oudh & White Rose Luxury Bath Bar", category: "Luxury Ayurvedic Soap | 100 % VEGAN | Paraben Free", price: 250.00, originalPrice: 640.00, image: "https://picsum.photos/id/201/400/400", isBestSeller: true, mainCategory: "BODY-CARE", subCategory: "Soaps", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
-  { id: 102, name: "Combo Offer- Kumkumadi Saundarya Face Oil (Pack of 2)", category: "Skin Lightening | Moisturising | Anti-Blemish", price: 2380.00, originalPrice: 3000.00, image: "https://picsum.photos/id/202/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Serums", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
-  { id: 103, name: "Aalaap Signature Unisex Perfume", category: "Signature Unisex Perfume", price: 1290.00, image: "https://picsum.photos/id/203/400/400", isBestSeller: true, mainCategory: "PERFUMES", subCategory: "Unisex", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 101, name: "Oudh & White Rose Luxury Bath Bar", category: "Luxury Ayurvedic Soap", price: 250.00, originalPrice: 640.00, image: "https://picsum.photos/id/201/400/400", isBestSeller: true, mainCategory: "BODY-CARE", subCategory: "Soaps", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 102, name: "Kumkumadi Face Oil", category: "Skin Lightening | Moisturising", price: 2380.00, originalPrice: 3000.00, image: "https://picsum.photos/id/202/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Serums", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 103, name: "Aalaap Unisex Perfume", category: "Signature Unisex Perfume", price: 1290.00, image: "https://picsum.photos/id/203/400/400", isBestSeller: true, mainCategory: "PERFUMES", subCategory: "Unisex", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 104, name: "Neem & Basil Face Cleanser", category: "Acne Control", price: 450.00, image: "https://picsum.photos/id/204/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Face Wash", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 105, name: "Bhringraj Hair Oil", category: "Hair Growth", price: 650.00, image: "https://picsum.photos/id/206/400/400", isBestSeller: true, mainCategory: "HAIR-CARE", subCategory: "Hair Oils", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 106, name: "Sandalwood Face Pack", category: "Skin Brightening", price: 550.00, image: "https://picsum.photos/id/208/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Face Packs", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 107, name: "Rose Water Toner", category: "Pore Tightening", price: 350.00, image: "https://picsum.photos/id/209/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Toners", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 108, name: "Aloe Vera Gel", category: "Hydrating", price: 300.00, image: "https://picsum.photos/id/210/400/400", isBestSeller: true, mainCategory: "SKIN CARE", subCategory: "Moisturizers", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
 ];
 
 export const OFFER_PRODUCTS: Product[] = [
-  { id: 201, name: "Hair Strengthening", category: "₹1,880.00 ₹1,580.00", price: 1580, originalPrice: 1880, image: "https://picsum.photos/id/177/400/500", isSoldOut: true, mainCategory: "HAIR-CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
-  { id: 202, name: "Anti Pigmentation", category: "Dark Spots | Pigmentation", price: 1740, originalPrice: 2150, image: "https://picsum.photos/id/129/400/500", mainCategory: "SKIN CARE", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
-  { id: 203, name: "Anti-Ageing / Post 40 Skin Care", category: "Anti-Ageing / Firming", price: 3180, originalPrice: 3700, image: "https://picsum.photos/id/64/400/500", mainCategory: "SKIN CARE", rating: 3, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
-  { id: 204, name: "Ultimate Hair Wellness Kit", category: "Hair Wellness", price: 1560, originalPrice: 1950, image: "https://picsum.photos/id/445/400/500", mainCategory: "HAIR-CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 201, name: "Hair Strengthening Kit", category: "Hair Wellness", price: 1580, originalPrice: 1880, image: "https://picsum.photos/id/177/400/500", isSoldOut: true, mainCategory: "HAIR-CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 202, name: "Anti Pigmentation Kit", category: "Dark Spots | Pigmentation", price: 1740, originalPrice: 2150, image: "https://picsum.photos/id/129/400/500", mainCategory: "SKIN CARE", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 203, name: "Anti-Ageing Kit", category: "Anti-Ageing / Firming", price: 3180, originalPrice: 3700, image: "https://picsum.photos/id/64/400/500", mainCategory: "SKIN CARE", rating: 3, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 204, name: "Ultimate Hair Wellness", category: "Complete Hair Care", price: 1560, originalPrice: 1950, image: "https://picsum.photos/id/445/400/500", mainCategory: "HAIR-CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 205, name: "Glow Getter Combo", category: "Radiance", price: 1200, originalPrice: 1500, image: "https://picsum.photos/id/446/400/500", mainCategory: "SKIN CARE", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 206, name: "Body Polishing Kit", category: "Body Care", price: 1800, originalPrice: 2200, image: "https://picsum.photos/id/447/400/500", mainCategory: "BODY-CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 207, name: "Daily Essentials", category: "Everyday Care", price: 999, originalPrice: 1200, image: "https://picsum.photos/id/448/400/500", mainCategory: "SKIN CARE", rating: 5, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
+  { id: 208, name: "Travel Mini Kit", category: "Travel Friendly", price: 750, originalPrice: 900, image: "https://picsum.photos/id/449/400/500", mainCategory: "SKIN CARE", rating: 4, description: DEFAULT_DESCRIPTION, ingredients: DEFAULT_INGREDIENTS, howToUse: DEFAULT_HOW_TO_USE },
 ];
 
 export const TESTIMONIALS: Testimonial[] = [
