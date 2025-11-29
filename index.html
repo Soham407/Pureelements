@@ -16,10 +16,10 @@
             },
             colors: {
               brand: {
-                primary: '#8B7E66', // Taupe/Gold from buttons
-                secondary: '#5D6D55', // Muted Green
-                accent: '#A52A2A', // Red/Brown accent
-                cream: '#FFFBF2', // Background cream
+                primary: '#8B7E66', 
+                secondary: '#5D6D55', 
+                accent: '#A52A2A', 
+                cream: '#FFFBF2', 
                 dark: '#2C2C2C',
                 light: '#F9F9F9'
               }
@@ -43,7 +43,6 @@
       }
     </script>
     <style>
-      /* Custom scrollbar for horizontal scrolling sections */
       .scrollbar-hide::-webkit-scrollbar {
           display: none;
       }
@@ -52,18 +51,9 @@
           scrollbar-width: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
-  }
-}
-</script>
-</head>
+  </head>
   <body class="bg-brand-cream text-brand-dark">
     <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
