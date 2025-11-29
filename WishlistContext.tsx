@@ -1,57 +1,92 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product } from './types';
+import { useAuth } from './AuthContext';
+import { wishlistService } from './lib/database';
 
 interface WishlistContextType {
   wishlist: Product[];
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (productId: number) => void;
-  toggleWishlist: (product: Product) => void;
+  addToWishlist: (product: Product) => Promise<void>;
+  removeFromWishlist: (productId: number) => Promise<void>;
+  toggleWishlist: (product: Product) => Promise<void>;
   isInWishlist: (productId: number) => boolean;
   wishlistCount: number;
+  isLoading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user, isAuthenticated } = useAuth();
   const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load from local storage on mount
+  // Load wishlist from Supabase when user is authenticated
   useEffect(() => {
-    const storedWishlist = localStorage.getItem('pure_elements_wishlist');
-    if (storedWishlist) {
+    const loadWishlist = async () => {
+      if (!isAuthenticated || !user) {
+        setWishlist([]);
+        return;
+      }
+
+      setIsLoading(true);
       try {
-        setWishlist(JSON.parse(storedWishlist));
-      } catch (e) {
-        console.error('Failed to parse wishlist', e);
+        const wishlistData = await wishlistService.getWishlist(user.id);
+        setWishlist(wishlistData);
+      } catch (error) {
+        console.error('Error loading wishlist:', error);
+      } finally {
+        setIsLoading(false);
       }
+    };
+
+    loadWishlist();
+  }, [user, isAuthenticated]);
+
+  const addToWishlist = async (product: Product) => {
+    if (!isAuthenticated || !user) {
+      // For non-authenticated users, use localStorage as fallback
+      setWishlist((prev) => {
+        if (prev.some((item) => item.id === product.id)) return prev;
+        return [...prev, product];
+      });
+      return;
     }
-  }, []);
 
-  // Save to local storage whenever wishlist changes
-  useEffect(() => {
-    localStorage.setItem('pure_elements_wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  const addToWishlist = (product: Product) => {
-    setWishlist((prev) => {
-      if (prev.some((item) => item.id === product.id)) return prev;
-      return [...prev, product];
-    });
+    try {
+      await wishlistService.addToWishlist(user.id, product.id);
+      setWishlist((prev) => {
+        if (prev.some((item) => item.id === product.id)) return prev;
+        return [...prev, product];
+      });
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      throw error;
+    }
   };
 
-  const removeFromWishlist = (productId: number) => {
-    setWishlist((prev) => prev.filter((item) => item.id !== productId));
+  const removeFromWishlist = async (productId: number) => {
+    if (!isAuthenticated || !user) {
+      setWishlist((prev) => prev.filter((item) => item.id !== productId));
+      return;
+    }
+
+    try {
+      await wishlistService.removeFromWishlist(user.id, productId);
+      setWishlist((prev) => prev.filter((item) => item.id !== productId));
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      throw error;
+    }
   };
 
-  const toggleWishlist = (product: Product) => {
-    setWishlist((prev) => {
-      const exists = prev.some((item) => item.id === product.id);
-      if (exists) {
-        return prev.filter((item) => item.id !== product.id);
-      }
-      return [...prev, product];
-    });
+  const toggleWishlist = async (product: Product) => {
+    const isInList = wishlist.some((item) => item.id === product.id);
+    if (isInList) {
+      await removeFromWishlist(product.id);
+    } else {
+      await addToWishlist(product);
+    }
   };
 
   const isInWishlist = (productId: number) => {
@@ -65,7 +100,8 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
       removeFromWishlist,
       toggleWishlist,
       isInWishlist,
-      wishlistCount: wishlist.length
+      wishlistCount: wishlist.length,
+      isLoading
     }}>
       {children}
     </WishlistContext.Provider>

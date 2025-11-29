@@ -6,6 +6,7 @@ import { CartProvider } from './CartContext';
 import { AuthProvider } from './AuthContext';
 import { WishlistProvider } from './WishlistContext';
 import { ToastProvider } from './ToastContext';
+import ErrorBoundary from './ErrorBoundary';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,14 +16,16 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <ToastProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <App />
-          </WishlistProvider>
-        </CartProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <App />
+            </WishlistProvider>
+          </CartProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

@@ -9,16 +9,24 @@ interface Props {
 const RevealOnScroll: React.FC<Props> = ({ children, threshold = 0.1, delay = 0 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    // Create observer
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry && entry.isIntersecting) {
           // Add a small delay if requested
           setTimeout(() => {
             setIsVisible(true);
           }, delay);
-          observer.unobserve(entry.target);
+          // Unobserve after triggering
+          if (entry.target) {
+            observer.unobserve(entry.target);
+          }
         }
       },
       {
@@ -27,13 +35,24 @@ const RevealOnScroll: React.FC<Props> = ({ children, threshold = 0.1, delay = 0 
       }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    observerRef.current = observer;
+
+    // Observe the element
+    try {
+      observer.observe(element);
+    } catch (error) {
+      console.error('Error observing element:', error);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      // Cleanup: disconnect observer
+      if (observerRef.current) {
+        try {
+          observerRef.current.disconnect();
+        } catch (error) {
+          console.error('Error disconnecting observer:', error);
+        }
+        observerRef.current = null;
       }
     };
   }, [threshold, delay]);

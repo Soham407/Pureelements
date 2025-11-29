@@ -21,22 +21,13 @@ import BlogPage from './components/BlogPage';
 import ContactPage from './components/ContactPage';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminLogin from './components/admin/AdminLogin';
-import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS, NAV_ITEMS, INITIAL_SLIDES } from './constants';
+import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, NAV_ITEMS, INITIAL_SLIDES } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './CartContext';
+import { productsService, navItemsService, heroSlidesService, categoriesService, ordersService } from './lib/database';
 
 type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN' | 'PAYMENT' | 'REFUND';
-
-// Helper to load from storage or fallback to default
-const loadState = <T,>(key: string, fallback: T): T => {
-  try {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : fallback;
-  } catch (error) {
-    return fallback;
-  }
-};
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
@@ -45,33 +36,68 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Lifted State for Dynamic CMS with Persistence
-  const [allProducts, setAllProducts] = useState<Product[]>(() => 
-    loadState('pe_products', ALL_PRODUCTS)
-  );
-  const [navItems, setNavItems] = useState<NavItem[]>(() => 
-    loadState('pe_nav', NAV_ITEMS)
-  );
-  const [heroSlides, setHeroSlides] = useState<Slide[]>(() => 
-    loadState('pe_hero', INITIAL_SLIDES)
-  );
-  
-  // Orders logic - Persisted to LocalStorage
-  const [allOrders, setAllOrders] = useState<Order[]>(() => 
-    loadState('pe_orders', MOCK_ORDERS)
-  );
-  
-  // Categories (circles) on home page
+  // State for Dynamic CMS
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [navItems, setNavItems] = useState<NavItem[]>(NAV_ITEMS);
+  const [heroSlides, setHeroSlides] = useState<Slide[]>(INITIAL_SLIDES);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   
   const { closeCart } = useCart();
 
-  // Persist changes whenever state updates
-  useEffect(() => { localStorage.setItem('pe_products', JSON.stringify(allProducts)); }, [allProducts]);
-  useEffect(() => { localStorage.setItem('pe_nav', JSON.stringify(navItems)); }, [navItems]);
-  useEffect(() => { localStorage.setItem('pe_hero', JSON.stringify(heroSlides)); }, [heroSlides]);
-  useEffect(() => { localStorage.setItem('pe_orders', JSON.stringify(allOrders)); }, [allOrders]);
+  // Load data from Supabase on mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        // Check if Supabase is configured
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        if (!supabaseUrl) {
+          console.warn('Supabase not configured. Using fallback data.');
+          // Use fallback data from constants
+          setAllProducts([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Load products
+        const products = await productsService.getAll();
+        setAllProducts(products);
+
+        // Load nav items
+        const nav = await navItemsService.getAll();
+        if (nav.length > 0) {
+          setNavItems(nav);
+        }
+
+        // Load hero slides
+        const slides = await heroSlidesService.getAll();
+        if (slides.length > 0) {
+          setHeroSlides(slides);
+        }
+
+        // Load categories
+        const cats = await categoriesService.getAll();
+        if (cats.length > 0) {
+          setCategories(cats);
+        }
+
+        // Load orders (for admin and bestseller calculation)
+        const orders = await ordersService.getAll();
+        setAllOrders(orders);
+      } catch (error) {
+        console.error('Error loading data from Supabase:', error);
+        // Fallback to empty arrays if Supabase fails
+        setAllProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Dynamic Best Seller Engine
   useEffect(() => {
@@ -169,28 +195,60 @@ function App() {
   };
 
   // --- ACTIONS ---
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+  const handleUpdateProduct = async (updatedProduct: Product) => {
+    try {
+      await productsService.update(updatedProduct.id, updatedProduct);
+      setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
   };
 
-  const handleAddProduct = (newProduct: Product) => {
-    setAllProducts(prev => [newProduct, ...prev]);
+  const handleAddProduct = async (newProduct: Product) => {
+    try {
+      const { id, ...productData } = newProduct;
+      const created = await productsService.create(productData);
+      setAllProducts(prev => [created, ...prev]);
+    } catch (error) {
+      console.error('Error adding product:', error);
+      throw error;
+    }
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
-    setAllOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      const updated = await ordersService.updateStatus(orderId, status);
+      setAllOrders(prev => prev.map(o => o.id === orderId ? updated : o));
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
   };
 
-  const handleAddOrder = (newOrder: Order) => {
+  const handleAddOrder = async (newOrder: Order) => {
+    // This will be handled by CheckoutPage with proper user_id
     setAllOrders(prev => [newOrder, ...prev]);
   };
 
-  const handleUpdateNav = (updatedNavItems: NavItem[]) => {
-    setNavItems(updatedNavItems);
+  const handleUpdateNav = async (updatedNavItems: NavItem[]) => {
+    try {
+      const updated = await navItemsService.updateAll(updatedNavItems);
+      setNavItems(updated);
+    } catch (error) {
+      console.error('Error updating nav items:', error);
+      throw error;
+    }
   };
 
-  const handleUpdateHero = (updatedSlides: Slide[]) => {
-    setHeroSlides(updatedSlides);
+  const handleUpdateHero = async (updatedSlides: Slide[]) => {
+    try {
+      const updated = await heroSlidesService.updateAll(updatedSlides);
+      setHeroSlides(updated);
+    } catch (error) {
+      console.error('Error updating hero slides:', error);
+      throw error;
+    }
   };
 
   // Optimized Filtered lists for Home Page using useMemo
@@ -205,6 +263,18 @@ function App() {
   const offerProducts = useMemo(() => 
     allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id)),
   [allProducts]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B7E66] mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If Admin View
   if (currentView === 'ADMIN') {
@@ -577,7 +647,7 @@ function App() {
       )}
 
       {currentView === 'PROFILE' && (
-        <ProfilePage onProductClick={handleProductClick} orders={allOrders} />
+        <ProfilePage onProductClick={handleProductClick} />
       )}
 
       {currentView === 'ABOUT' && (

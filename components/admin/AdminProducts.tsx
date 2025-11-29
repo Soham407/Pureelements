@@ -37,7 +37,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
     } as Product);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingProduct) {
       if (editingProduct.price < 0) {
         showToast('Price cannot be negative', 'error');
@@ -48,17 +48,20 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
         return;
       }
 
-      if (editingProduct.id === 0) {
-        // Create new
-        const newProduct = { ...editingProduct, id: Date.now() };
-        onAddProduct(newProduct);
-        showToast('Product added successfully!', 'success');
-      } else {
-        // Update existing
-        onUpdateProduct(editingProduct);
-        showToast('Product updated successfully!', 'success');
+      try {
+        if (editingProduct.id === 0) {
+          // Create new
+          await onAddProduct(editingProduct);
+          showToast('Product added successfully!', 'success');
+        } else {
+          // Update existing
+          await onUpdateProduct(editingProduct);
+          showToast('Product updated successfully!', 'success');
+        }
+        setEditingProduct(null);
+      } catch (error) {
+        showToast('Failed to save product. Please try again.', 'error');
       }
-      setEditingProduct(null);
     }
   };
 

@@ -5,6 +5,7 @@ import { useAuth } from '../AuthContext';
 import { CheckoutDetails, Order } from '../types';
 import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight } from 'lucide-react';
 import { useToast } from '../ToastContext';
+import { ordersService } from '../lib/database';
 
 interface Props {
   onNavigateHome: () => void;
@@ -63,42 +64,56 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
     return true;
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
+    if (!user) {
+      showToast('Please login to place an order', 'error');
+      return;
+    }
+
     setLoading(true);
 
-    // Simulate API call and Order Creation
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Create order in Supabase
+      const orderItems = cart.map(item => ({
+        productId: item.id,
+        productName: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image
+      }));
+
+      const newOrder = await ordersService.create({
+        user_id: user.id,
+        total: total,
+        status: 'Processing',
+        items: orderItems,
+        shipping_address: formData.address,
+        shipping_city: formData.city,
+        shipping_state: formData.state,
+        shipping_pincode: formData.pincode,
+        payment_method: formData.paymentMethod
+      });
+
+      setPlacedOrderId(newOrder.id);
       
-      const newOrderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-      setPlacedOrderId(newOrderId);
-      
-      // Create Order Object
+      // Notify parent component
       if (onPlaceOrder) {
-        const newOrder: Order = {
-          id: newOrderId,
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'Processing',
-          total: total,
-          items: cart.map(item => ({
-             productId: item.id,
-             productName: item.name,
-             quantity: item.quantity,
-             price: item.price,
-             image: item.image
-          }))
-        };
         onPlaceOrder(newOrder);
       }
 
       setIsOrderPlaced(true);
       showToast('Order placed successfully!', 'success');
-      clearCart(); // Clear the cart after successful order
-    }, 2000);
+      await clearCart(); // Clear the cart after successful order
+    } catch (error: any) {
+      console.error('Error placing order:', error);
+      showToast(error.message || 'Failed to place order. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (isOrderPlaced) {

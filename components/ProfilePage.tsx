@@ -1,22 +1,41 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useWishlist } from '../WishlistContext';
 import { User, Package, MapPin, LogOut, ChevronRight, Edit2, Heart, ShoppingBag } from 'lucide-react';
 import { Order, Product } from '../types';
 import ProductCard from './ProductCard';
 import OrderDetailsModal from './OrderDetailsModal';
+import { ordersService } from '../lib/database';
 
 interface Props {
   onProductClick?: (product: Product) => void;
-  orders: Order[];
 }
 
-const ProfilePage: React.FC<Props> = ({ onProductClick, orders }) => {
+const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
   const { user, logout } = useAuth();
   const { wishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'ORDERS' | 'ADDRESS' | 'WISHLIST'>('DETAILS');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      if (!user) return;
+      setIsLoadingOrders(true);
+      try {
+        const userOrders = await ordersService.getAll(user.id);
+        setOrders(userOrders);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    loadOrders();
+  }, [user]);
 
   if (!user) return null;
 
