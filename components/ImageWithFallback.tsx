@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { ImageOff } from 'lucide-react';
 
 interface Props extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -7,6 +8,11 @@ interface Props extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 const ImageWithFallback: React.FC<Props> = ({ fallbackText, className, ...props }) => {
   const [error, setError] = useState(false);
+
+  // Reset error state when the src changes (e.g. inside a carousel)
+  useEffect(() => {
+    setError(false);
+  }, [props.src]);
 
   if (error) {
     return (

@@ -2,20 +2,22 @@
 import React, { useState } from 'react';
 import { useCart } from '../CartContext';
 import { useAuth } from '../AuthContext';
-import { CheckoutDetails } from '../types';
+import { CheckoutDetails, Order } from '../types';
 import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight } from 'lucide-react';
 import { useToast } from '../ToastContext';
 
 interface Props {
   onNavigateHome: () => void;
+  onPlaceOrder?: (order: Order) => void;
 }
 
-const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
+const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
   const { cart, cartCount, clearCart } = useCart();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState('');
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const shipping = 0; // Free shipping
@@ -68,9 +70,31 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
 
     setLoading(true);
 
-    // Simulate API call
+    // Simulate API call and Order Creation
     setTimeout(() => {
       setLoading(false);
+      
+      const newOrderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+      setPlacedOrderId(newOrderId);
+      
+      // Create Order Object
+      if (onPlaceOrder) {
+        const newOrder: Order = {
+          id: newOrderId,
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          status: 'Processing',
+          total: total,
+          items: cart.map(item => ({
+             productId: item.id,
+             productName: item.name,
+             quantity: item.quantity,
+             price: item.price,
+             image: item.image
+          }))
+        };
+        onPlaceOrder(newOrder);
+      }
+
       setIsOrderPlaced(true);
       showToast('Order placed successfully!', 'success');
       clearCart(); // Clear the cart after successful order
@@ -90,7 +114,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
           </p>
           <div className="bg-gray-50 p-4 rounded-sm mb-8 text-left">
              <p className="text-xs uppercase text-gray-400 font-bold tracking-wider mb-1">Order ID</p>
-             <p className="font-mono text-gray-800 font-bold">ORD-{Math.floor(Math.random() * 1000000)}</p>
+             <p className="font-mono text-gray-800 font-bold">{placedOrderId}</p>
           </div>
           <button 
             onClick={onNavigateHome}

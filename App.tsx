@@ -57,19 +57,21 @@ function App() {
     loadState('pe_hero', INITIAL_SLIDES)
   );
   
-  // Orders logic - typically from DB, here we stick to mock or can persist similarly
-  // For prototype, we keep mock + session changes, or you can persist if needed
-  const [allOrders, setAllOrders] = useState<Order[]>(MOCK_ORDERS);
+  // Orders logic - Persisted to LocalStorage
+  const [allOrders, setAllOrders] = useState<Order[]>(() => 
+    loadState('pe_orders', MOCK_ORDERS)
+  );
   
   // Categories (circles) on home page
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   
   const { closeCart } = useCart();
 
-  // Persist changes whenever state updates (Simulates Backend Database)
+  // Persist changes whenever state updates
   useEffect(() => { localStorage.setItem('pe_products', JSON.stringify(allProducts)); }, [allProducts]);
   useEffect(() => { localStorage.setItem('pe_nav', JSON.stringify(navItems)); }, [navItems]);
   useEffect(() => { localStorage.setItem('pe_hero', JSON.stringify(heroSlides)); }, [heroSlides]);
+  useEffect(() => { localStorage.setItem('pe_orders', JSON.stringify(allOrders)); }, [allOrders]);
 
   // Dynamic Best Seller Engine
   useEffect(() => {
@@ -88,11 +90,12 @@ function App() {
       .slice(0, 5);
 
     // 3. Update Product State
-    // Only update if changes are needed to avoid infinite loops with the persistence effect
     setAllProducts(prevProducts => {
        const hasChanges = prevProducts.some(p => {
+         // Check if status should change
+         const isCurrentlyBestSeller = p.isBestSeller;
          const shouldBeBestSeller = topSellingIds.includes(p.id) || (BESTSELLERS.some(bp => bp.id === p.id) && topSellingIds.length === 0);
-         return p.isBestSeller !== shouldBeBestSeller;
+         return isCurrentlyBestSeller !== shouldBeBestSeller;
        });
 
        if (hasChanges) {
@@ -165,7 +168,7 @@ function App() {
     window.scrollTo(0, 0);
   };
 
-  // --- ADMIN ACTIONS ---
+  // --- ACTIONS ---
   const handleUpdateProduct = (updatedProduct: Product) => {
     setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
   };
@@ -176,6 +179,10 @@ function App() {
 
   const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
     setAllOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  };
+
+  const handleAddOrder = (newOrder: Order) => {
+    setAllOrders(prev => [newOrder, ...prev]);
   };
 
   const handleUpdateNav = (updatedNavItems: NavItem[]) => {
@@ -563,7 +570,10 @@ function App() {
       )}
 
       {currentView === 'CHECKOUT' && (
-          <CheckoutPage onNavigateHome={() => handleNavigate('HOME')} />
+          <CheckoutPage 
+             onNavigateHome={() => handleNavigate('HOME')} 
+             onPlaceOrder={handleAddOrder}
+          />
       )}
 
       {currentView === 'PROFILE' && (
