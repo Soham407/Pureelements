@@ -37,9 +37,12 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
   };
 
   const validateForm = () => {
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
-      showToast('Please enter a valid 10-digit phone number', 'error');
+    // Allow 10 to 12 digits to accommodate country codes (e.g. 919876543210)
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    const phoneRegex = /^\d{10,12}$/;
+    
+    if (!phoneRegex.test(phoneDigits)) {
+      showToast('Please enter a valid phone number (10-12 digits)', 'error');
       return false;
     }
     
