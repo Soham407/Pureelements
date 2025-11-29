@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import SectionHeader from './components/SectionHeader';
@@ -20,9 +20,9 @@ import InfoPage from './components/InfoPage';
 import BlogPage from './components/BlogPage';
 import ContactPage from './components/ContactPage';
 import AdminLayout from './components/admin/AdminLayout';
-import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS } from './constants';
+import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS, NAV_ITEMS, INITIAL_SLIDES } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Product, Order } from './types';
+import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './CartContext';
 
 type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN';
@@ -34,11 +34,42 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Lifted State for Admin Capability
+  // Lifted State for Dynamic CMS
   const [allProducts, setAllProducts] = useState<Product[]>(ALL_PRODUCTS);
   const [allOrders, setAllOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [navItems, setNavItems] = useState<NavItem[]>(NAV_ITEMS);
+  const [heroSlides, setHeroSlides] = useState<Slide[]>(INITIAL_SLIDES);
+  
+  // Note: CATEGORIES circle list on home page could also be lifted if needed,
+  // but for now we are managing the main Navbar via Admin.
+  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   
   const { closeCart } = useCart();
+
+  // Dynamic Best Seller Engine
+  useEffect(() => {
+    // 1. Calculate sales per product
+    const salesMap: Record<number, number> = {};
+    allOrders.forEach(order => {
+      order.items.forEach(item => {
+        salesMap[item.productId] = (salesMap[item.productId] || 0) + item.quantity;
+      });
+    });
+
+    // 2. Determine Top 5 IDs
+    const topSellingIds = Object.keys(salesMap)
+      .map(Number)
+      .sort((a, b) => salesMap[b] - salesMap[a])
+      .slice(0, 5);
+
+    // 3. Update Product State
+    setAllProducts(prevProducts => prevProducts.map(p => ({
+      ...p,
+      isBestSeller: topSellingIds.includes(p.id) || (BESTSELLERS.some(bp => bp.id === p.id) && topSellingIds.length === 0) 
+      // Fallback to static bestsellers if no orders exist yet for demo purposes
+    })));
+
+  }, [allOrders]); // Re-run whenever orders change (e.g. Purchase made or Admin update)
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes
@@ -98,7 +129,7 @@ function App() {
     window.scrollTo(0, 0);
   };
 
-  // Admin Actions
+  // --- ADMIN ACTIONS ---
   const handleUpdateProduct = (updatedProduct: Product) => {
     setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
   };
@@ -111,9 +142,17 @@ function App() {
     setAllOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
   };
 
+  const handleUpdateNav = (updatedNavItems: NavItem[]) => {
+    setNavItems(updatedNavItems);
+  };
+
+  const handleUpdateHero = (updatedSlides: Slide[]) => {
+    setHeroSlides(updatedSlides);
+  };
+
   // Filtered lists for Home Page sections based on dynamic state
   const featuredProducts = allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id));
-  const bestsellerProducts = allProducts.filter(p => BESTSELLERS.some(bp => bp.id === p.id));
+  const bestsellerProducts = allProducts.filter(p => p.isBestSeller); // Now dynamic!
   const offerProducts = allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id));
 
   // If Admin View
@@ -121,10 +160,14 @@ function App() {
     return (
       <AdminLayout 
         products={allProducts} 
-        orders={allOrders} 
+        orders={allOrders}
+        navItems={navItems}
+        slides={heroSlides}
         onUpdateProduct={handleUpdateProduct}
         onAddProduct={handleAddProduct}
         onUpdateOrderStatus={handleUpdateOrderStatus}
+        onUpdateNav={handleUpdateNav}
+        onUpdateHero={handleUpdateHero}
         onExitAdmin={() => handleNavigate('HOME')}
       />
     );
@@ -132,20 +175,20 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden">
-      <Navbar onNavigate={handleNavigate} />
+      <Navbar onNavigate={handleNavigate} navItems={navItems} />
       <CartDrawer onCheckout={handleCheckoutClick} />
       <AuthModal />
       
       {currentView === 'HOME' && (
         <>
-          <Hero />
+          <Hero slides={heroSlides} />
 
           {/* Shop by Category */}
           <section className="py-10 md:py-16 container mx-auto px-4">
             <RevealOnScroll>
                 <SectionHeader title="Category" subtitle="Shop by" />
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-y-8 gap-x-4 md:gap-x-6 justify-items-center max-w-6xl mx-auto">
-                  {CATEGORIES.map(cat => (
+                  {categories.map(cat => (
                     <div key={cat.id} onClick={() => handleNavigate(cat.name.toUpperCase())}>
                        <CategoryCircle category={cat} />
                     </div>
@@ -228,7 +271,7 @@ function App() {
              </RevealOnScroll>
           </section>
 
-          {/* Bestsellers Section (Split Layout) */}
+          {/* Bestsellers Section (Dynamic) */}
           <section className="py-10 md:py-16 bg-white">
              <div className="container mx-auto px-4">
                  <RevealOnScroll>
@@ -238,6 +281,7 @@ function App() {
                             <img src="https://picsum.photos/id/201/600/800" className="w-full h-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-1000" alt="Bestsellers" />
                             <div className="absolute inset-0 flex items-center justify-center p-8 bg-black/10">
                                <h2 className="text-white font-serif text-4xl md:text-5xl drop-shadow-lg text-center leading-tight">Our<br/>Bestsellers</h2>
+                               <p className="absolute bottom-8 text-white/80 text-sm uppercase tracking-widest">Trending Now</p>
                             </div>
                          </div>
 
@@ -444,6 +488,7 @@ function App() {
       {currentView === 'LISTING' && (
         <ProductListing 
           products={allProducts}
+          navItems={navItems}
           initialCategory={selectedCategory} 
           initialSubCategory={selectedSubCategory}
           initialSearchQuery={searchQuery}

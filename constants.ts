@@ -1,5 +1,5 @@
 
-import { Category, Product, Testimonial, Store, NavItem, Order } from './types';
+import { Category, Product, Testimonial, Store, NavItem, Order, Slide } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
   { name: 'ABOUT US', hasDropdown: false },
@@ -49,6 +49,33 @@ export const CATEGORIES: Category[] = [
   { id: 6, name: "Kids Care", image: "https://picsum.photos/id/1069/200/200" },
   { id: 7, name: "Gifting Collection", image: "https://picsum.photos/id/1070/200/200" },
   { id: 8, name: "Luxury Perfumes", image: "https://picsum.photos/id/1080/200/200" },
+];
+
+export const INITIAL_SLIDES: Slide[] = [
+  {
+    id: 1,
+    image: "https://picsum.photos/id/292/1920/1080",
+    subtitle: "NEW LAUNCH",
+    title: "Kumkumadi \nFace Cleanser",
+    description: "Goodness of Saffron for Cleaner & Brighter Skin.",
+    buttonText: "Shop Now"
+  },
+  {
+    id: 2,
+    image: "https://picsum.photos/id/432/1920/1080", 
+    subtitle: "LUXURY COLLECTION",
+    title: "Signature \nPerfumes",
+    description: "Indulge in the essence of togetherness.",
+    buttonText: "Explore Collection"
+  },
+  {
+    id: 3,
+    image: "https://picsum.photos/id/668/1920/1080", 
+    subtitle: "PURE & NATURAL",
+    title: "Ayurvedic \nBody Care",
+    description: "Ancient wisdom for modern wellness.",
+    buttonText: "Discover More"
+  }
 ];
 
 const DEFAULT_DESCRIPTION = "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment and rejuvenates your skin from within. Free from harmful chemicals, parabens, and sulfates.";
@@ -237,7 +264,7 @@ export const MOCK_ORDERS: Order[] = [
     status: 'Delivered',
     total: 2380,
     items: [
-        { productName: 'Kumkumadi Saundarya Face Oil', quantity: 2, price: 2380, image: 'https://picsum.photos/id/202/100/100' }
+        { productId: 102, productName: 'Kumkumadi Saundarya Face Oil', quantity: 2, price: 2380, image: 'https://picsum.photos/id/202/100/100' }
     ]
   },
   {
@@ -246,7 +273,7 @@ export const MOCK_ORDERS: Order[] = [
     status: 'Processing',
     total: 1290,
     items: [
-        { productName: 'Aalaap Signature Unisex Perfume', quantity: 1, price: 1290, image: 'https://picsum.photos/id/203/100/100' }
+        { productId: 103, productName: 'Aalaap Signature Unisex Perfume', quantity: 1, price: 1290, image: 'https://picsum.photos/id/203/100/100' }
     ]
   }
 ];

@@ -1,23 +1,40 @@
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Settings, Image as ImageIcon } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
-import { Product, Order } from '../../types';
+import AdminCategories from './AdminCategories';
+import AdminBanners from './AdminBanners';
+import { Product, Order, NavItem, Slide } from '../../types';
 
 interface Props {
   products: Product[];
   orders: Order[];
+  navItems: NavItem[];
+  slides: Slide[];
   onUpdateProduct: (product: Product) => void;
   onAddProduct: (product: Product) => void;
   onUpdateOrderStatus: (orderId: string, status: Order['status']) => void;
+  onUpdateNav: (items: NavItem[]) => void;
+  onUpdateHero: (slides: Slide[]) => void;
   onExitAdmin: () => void;
 }
 
-type AdminView = 'DASHBOARD' | 'PRODUCTS' | 'ORDERS' | 'SETTINGS';
+type AdminView = 'DASHBOARD' | 'PRODUCTS' | 'ORDERS' | 'CONTENT' | 'SETTINGS';
 
-const AdminLayout: React.FC<Props> = ({ products, orders, onUpdateProduct, onAddProduct, onUpdateOrderStatus, onExitAdmin }) => {
+const AdminLayout: React.FC<Props> = ({ 
+  products, 
+  orders, 
+  navItems,
+  slides,
+  onUpdateProduct, 
+  onAddProduct, 
+  onUpdateOrderStatus, 
+  onUpdateNav,
+  onUpdateHero,
+  onExitAdmin 
+}) => {
   const [currentView, setCurrentView] = useState<AdminView>('DASHBOARD');
 
   const renderContent = () => {
@@ -28,15 +45,10 @@ const AdminLayout: React.FC<Props> = ({ products, orders, onUpdateProduct, onAdd
         return <AdminProducts products={products} onUpdateProduct={onUpdateProduct} onAddProduct={onAddProduct} />;
       case 'ORDERS':
         return <AdminOrders orders={orders} onUpdateStatus={onUpdateOrderStatus} />;
+      case 'CONTENT':
+        return <AdminBanners slides={slides} onUpdateHero={onUpdateHero} />;
       case 'SETTINGS':
-        return (
-            <div className="bg-white p-8 rounded-sm shadow-sm border border-gray-100 flex flex-col items-center justify-center min-h-[400px]">
-                <Settings size={48} className="text-gray-300 mb-4" />
-                <h3 className="text-xl font-bold text-gray-700">Settings</h3>
-                <p className="text-gray-500 mt-2">Global application settings and navbar configuration.</p>
-                <button className="mt-6 px-6 py-2 bg-gray-100 text-gray-600 rounded-sm font-bold text-sm uppercase cursor-not-allowed">Coming Soon</button>
-            </div>
-        );
+        return <AdminCategories navItems={navItems} onUpdateNav={onUpdateNav} />;
       default:
         return <AdminDashboard products={products} orders={orders} />;
     }
@@ -80,6 +92,16 @@ const AdminLayout: React.FC<Props> = ({ products, orders, onUpdateProduct, onAdd
           >
             <ShoppingCart size={20} />
             <span className="text-sm font-bold uppercase tracking-wider">Orders</span>
+          </button>
+
+          <button
+            onClick={() => setCurrentView('CONTENT')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
+              currentView === 'CONTENT' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            <ImageIcon size={20} />
+            <span className="text-sm font-bold uppercase tracking-wider">Content</span>
           </button>
 
           <button

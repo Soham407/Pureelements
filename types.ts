@@ -56,6 +56,15 @@ export interface NavItem {
   subItems?: string[];
 }
 
+export interface Slide {
+  id: number;
+  image: string;
+  subtitle: string;
+  title: string;
+  description: string;
+  buttonText: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -70,6 +79,7 @@ export interface Order {
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   total: number;
   items: {
+    productId: number;
     productName: string;
     quantity: number;
     price: number;

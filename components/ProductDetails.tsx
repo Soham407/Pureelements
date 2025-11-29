@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
-import { Star, Minus, Plus, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, Heart } from 'lucide-react';
+import { Star, Minus, Plus, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, Heart, Sparkles, Clock } from 'lucide-react';
 import { useCart } from '../CartContext';
 import ProductCard from './ProductCard';
 import { useToast } from '../ToastContext';
@@ -14,6 +14,16 @@ interface Props {
   onProductClick: (product: Product) => void;
 }
 
+// Simple rule engine for cross-sells: Main ID -> Complementary ID
+const CROSS_SELL_RULES: Record<number, number> = {
+  104: 106, // Face Cleanser -> Face Pack
+  105: 309, // Hair Oil -> Shampoo
+  309: 308, // Shampoo -> Conditioner
+  302: 102, // Night Cream -> Face Oil
+  108: 107, // Aloe Gel -> Rose Water
+  102: 302, // Face Oil -> Night Cream
+};
+
 const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onProductClick }) => {
   const { addToCart, openCart } = useCart();
   const { showToast } = useToast();
@@ -22,18 +32,47 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   const [activeImage, setActiveImage] = useState(product.image);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>('description');
+  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
 
   const isWishlisted = isInWishlist(product.id);
 
-  // Reset state when product changes
+  // Cross Sell Product Logic
+  const complementaryProductId = CROSS_SELL_RULES[product.id];
+  const complementaryProduct = complementaryProductId 
+    ? allProducts.find(p => p.id === complementaryProductId) 
+    : null;
+
+  // Reset state when product changes & Handle History
   useEffect(() => {
     setActiveImage(product.image);
     setQuantity(1);
     window.scrollTo(0, 0);
-  }, [product]);
+
+    // --- FEATURE: RECENTLY VIEWED ---
+    const storedHistory = localStorage.getItem('pure_elements_viewed');
+    let historyIds: number[] = storedHistory ? JSON.parse(storedHistory) : [];
+
+    // Remove current product if exists to move it to top
+    historyIds = historyIds.filter(id => id !== product.id);
+    
+    // Add current to front
+    historyIds.unshift(product.id);
+    
+    // Limit to 5
+    if (historyIds.length > 5) historyIds.pop();
+
+    localStorage.setItem('pure_elements_viewed', JSON.stringify(historyIds));
+
+    // Resolve products for UI (excluding current)
+    const historyProducts = historyIds
+        .map(id => allProducts.find(p => p.id === id))
+        .filter((p): p is Product => p !== undefined && p.id !== product.id); // Type guard & exclude current
+    
+    setRecentlyViewed(historyProducts);
+
+  }, [product, allProducts]);
 
   const handleAddToCart = () => {
-    // Add quantity times
     for (let i = 0; i < quantity; i++) {
         addToCart(product);
     }
@@ -80,7 +119,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
           {/* Left: Images */}
           <div className="lg:w-1/2">
             <div className="flex flex-col-reverse md:flex-row gap-4">
-               {/* Thumbnail List (Vertical on Desktop, Horizontal on Mobile) */}
+               {/* Thumbnail List */}
                <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide">
                   {images.map((img, idx) => (
                     <div 
@@ -105,8 +144,8 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                     </div>
                   )}
                   {product.isBestSeller && !product.isSoldOut && (
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm border border-gray-100">
-                      Best Seller
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm border border-gray-100 flex items-center gap-1">
+                      <Sparkles size={10} className="text-[#F5A623]" /> Best Seller
                     </div>
                   )}
                </div>
@@ -192,6 +231,34 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                    </div>
                )}
             </div>
+            
+            {/* --- FEATURE: FREQUENTLY BOUGHT TOGETHER --- */}
+            {complementaryProduct && !complementaryProduct.isSoldOut && (
+                <div className="mb-10 p-4 bg-[#FFFBF2] border border-[#8B7E66]/20 rounded-sm">
+                    <h3 className="font-serif text-lg text-[#8B7E66] mb-3 flex items-center gap-2">
+                        <Sparkles size={18} /> Complete Your Routine
+                    </h3>
+                    <div className="flex gap-4 items-center">
+                        <div className="w-16 h-16 bg-white rounded-sm overflow-hidden flex-shrink-0 border border-gray-200">
+                            <img src={complementaryProduct.image} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-bold text-gray-800 text-sm line-clamp-1">{complementaryProduct.name}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Perfect match for {product.subCategory}</p>
+                            <p className="text-sm font-bold text-gray-900 mt-1">₹{complementaryProduct.price}</p>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                addToCart(complementaryProduct);
+                                showToast(`${complementaryProduct.name} added!`);
+                            }}
+                            className="bg-white border border-[#8B7E66] text-[#8B7E66] px-3 py-1.5 text-[10px] uppercase font-bold hover:bg-[#8B7E66] hover:text-white transition-colors"
+                        >
+                            + Add
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Accordions */}
             <div className="border-t border-gray-200">
@@ -247,9 +314,29 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
           </div>
         </div>
         
+        {/* --- FEATURE: RECENTLY VIEWED --- */}
+        {recentlyViewed.length > 0 && (
+            <div className="mt-20 border-t border-gray-100 pt-10">
+                 <h4 className="font-bold text-gray-500 text-sm uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <Clock size={16} /> Recently Viewed
+                 </h4>
+                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {recentlyViewed.map(p => (
+                         <div key={p.id} className="cursor-pointer group" onClick={() => onProductClick(p)}>
+                             <div className="aspect-[4/5] bg-gray-50 overflow-hidden rounded-sm mb-2">
+                                <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt={p.name} />
+                             </div>
+                             <p className="text-xs font-bold text-gray-800 line-clamp-1 group-hover:text-[#8B7E66]">{p.name}</p>
+                             <p className="text-xs text-gray-500">₹{p.price}</p>
+                         </div>
+                    ))}
+                 </div>
+            </div>
+        )}
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-            <div className="mt-20 border-t border-gray-100 pt-16">
+            <div className="mt-16 border-t border-gray-100 pt-16">
                 <div className="text-center mb-10">
                     <h2 className="font-serif text-3xl text-gray-800 relative inline-block">
                         You May Also Like

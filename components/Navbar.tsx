@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
-import { NAV_ITEMS } from '../constants';
+import { NavItem } from '../types';
 import { useCart } from '../CartContext';
 import { useAuth } from '../AuthContext';
 
 interface NavbarProps {
+  navItems: NavItem[];
   onNavigate: (category: string, subCategory?: string, searchQuery?: string) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -159,7 +160,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       <div className="hidden lg:block py-3 bg-white relative">
         <div className="container mx-auto px-4">
           <ul className="flex flex-nowrap items-center justify-center gap-5 xl:gap-8 text-[13px] font-bold text-[#4A4A4A] tracking-wider relative whitespace-nowrap">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <li 
                 key={item.name} 
                 className="group relative"
@@ -221,7 +222,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             </button>
           </div>
           <ul className="flex flex-col space-y-0 divide-y divide-gray-100">
-            {NAV_ITEMS.map(item => (
+            {navItems.map(item => (
               <li key={item.name} className="flex flex-col py-3 text-sm font-bold text-gray-700 uppercase tracking-wider">
                 <div 
                   className="flex items-center justify-between w-full"

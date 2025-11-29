@@ -1,50 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Slide } from '../types';
 
-const SLIDES = [
-  {
-    id: 1,
-    image: "https://picsum.photos/id/292/1920/1080",
-    subtitle: "NEW LAUNCH",
-    title: "Kumkumadi \nFace Cleanser",
-    description: "Goodness of Saffron for Cleaner & Brighter Skin.",
-    buttonText: "Shop Now"
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/id/432/1920/1080", 
-    subtitle: "LUXURY COLLECTION",
-    title: "Signature \nPerfumes",
-    description: "Indulge in the essence of togetherness.",
-    buttonText: "Explore Collection"
-  },
-  {
-    id: 3,
-    image: "https://picsum.photos/id/668/1920/1080", 
-    subtitle: "PURE & NATURAL",
-    title: "Ayurvedic \nBody Care",
-    description: "Ancient wisdom for modern wellness.",
-    buttonText: "Discover More"
-  }
-];
+interface HeroProps {
+  slides: Slide[];
+}
 
-const Hero: React.FC = () => {
+const Hero: React.FC<HeroProps> = ({ slides }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   const nextSlide = () => {
-     setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-     setCurrentSlide((prev) => (prev === 0 ? SLIDES.length - 1 : prev - 1));
+     setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   };
 
   return (
@@ -55,7 +33,7 @@ const Hero: React.FC = () => {
         className="flex h-full transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
-        {SLIDES.map((slide) => (
+        {slides.map((slide) => (
           <div
             key={slide.id}
             className="w-full h-full flex-shrink-0 relative"
@@ -103,7 +81,7 @@ const Hero: React.FC = () => {
 
       {/* Dots */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-        {SLIDES.map((_, idx) => (
+        {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}

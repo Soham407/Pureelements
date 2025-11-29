@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { NAV_ITEMS } from '../constants';
 import { ChevronRight, Filter, X, Search } from 'lucide-react';
-import { Product } from '../types';
+import { Product, NavItem } from '../types';
 
 interface Props {
   products: Product[];
+  navItems: NavItem[];
   initialCategory: string;
   initialSubCategory?: string;
   initialSearchQuery?: string;
@@ -14,7 +14,7 @@ interface Props {
   onProductClick: (product: Product) => void;
 }
 
-const ProductListing: React.FC<Props> = ({ products, initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
+const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeSubCategory, setActiveSubCategory] = useState<string | undefined>(initialSubCategory);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -69,7 +69,7 @@ const ProductListing: React.FC<Props> = ({ products, initialCategory, initialSub
     return str.split(/[- ]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
 
-  const currentNav = NAV_ITEMS.find(item => item.name === activeCategory);
+  const currentNav = navItems.find(item => item.name === activeCategory);
   const isSearchMode = activeCategory === 'SEARCH';
 
   return (
