@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import SectionHeader from './components/SectionHeader';
@@ -20,6 +20,7 @@ import InfoPage from './components/InfoPage';
 import BlogPage from './components/BlogPage';
 import ContactPage from './components/ContactPage';
 import AdminLayout from './components/admin/AdminLayout';
+import AdminLogin from './components/admin/AdminLogin';
 import { CATEGORIES, FEATURED_PRODUCTS, CONCERNS, BESTSELLERS, TESTIMONIALS, STORES, OFFER_PRODUCTS, ALL_PRODUCTS, MOCK_ORDERS, NAV_ITEMS, INITIAL_SLIDES } from './constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Order, NavItem, Slide, Category } from './types';
@@ -43,6 +44,7 @@ function App() {
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   // Lifted State for Dynamic CMS with Persistence
   const [allProducts, setAllProducts] = useState<Product[]>(() => 
@@ -184,13 +186,30 @@ function App() {
     setHeroSlides(updatedSlides);
   };
 
-  // Filtered lists for Home Page sections based on dynamic state
-  const featuredProducts = allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id));
-  const bestsellerProducts = allProducts.filter(p => p.isBestSeller); // Now dynamic!
-  const offerProducts = allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id));
+  // Optimized Filtered lists for Home Page using useMemo
+  const featuredProducts = useMemo(() => 
+    allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id)),
+  [allProducts]);
+
+  const bestsellerProducts = useMemo(() => 
+    allProducts.filter(p => p.isBestSeller),
+  [allProducts]);
+
+  const offerProducts = useMemo(() => 
+    allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id)),
+  [allProducts]);
 
   // If Admin View
   if (currentView === 'ADMIN') {
+    if (!isAdminLoggedIn) {
+      return (
+        <AdminLogin 
+          onLogin={() => setIsAdminLoggedIn(true)} 
+          onCancel={() => handleNavigate('HOME')} 
+        />
+      );
+    }
+
     return (
       <AdminLayout 
         products={allProducts} 
@@ -202,7 +221,10 @@ function App() {
         onUpdateOrderStatus={handleUpdateOrderStatus}
         onUpdateNav={handleUpdateNav}
         onUpdateHero={handleUpdateHero}
-        onExitAdmin={() => handleNavigate('HOME')}
+        onExitAdmin={() => {
+          setIsAdminLoggedIn(false);
+          handleNavigate('HOME');
+        }}
       />
     );
   }

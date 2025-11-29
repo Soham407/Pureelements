@@ -52,6 +52,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   useEffect(() => {
     setActiveImage(product.image);
     setQuantity(1);
+    setOpenSection('description'); // Reset accordion
     setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
     window.scrollTo(0, 0);
 

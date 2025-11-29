@@ -36,8 +36,33 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
+      showToast('Please enter a valid 10-digit phone number', 'error');
+      return false;
+    }
+    
+    // Basic email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      showToast('Please enter a valid email address', 'error');
+      return false;
+    }
+
+    if (!formData.address || !formData.city || !formData.pincode || !formData.state) {
+        showToast('Please fill in all address details', 'error');
+        return false;
+    }
+
+    return true;
+  };
+
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+
     setLoading(true);
 
     // Simulate API call

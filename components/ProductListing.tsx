@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { ChevronRight, Filter, X, Search } from 'lucide-react';
+import { ChevronRight, Filter, X, Search, ChevronDown } from 'lucide-react';
 import { Product, NavItem } from '../types';
 
 interface Props {
@@ -19,6 +19,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
   const [activeSubCategory, setActiveSubCategory] = useState<string | undefined>(initialSubCategory);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
+  const [sortOrder, setSortOrder] = useState<'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW'>('RECOMMENDED');
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -58,6 +59,17 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
     return true;
   });
 
+  // Sorting Logic
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortOrder === 'LOW_HIGH') {
+      return a.price - b.price;
+    }
+    if (sortOrder === 'HIGH_LOW') {
+      return b.price - a.price;
+    }
+    return 0; // Recommended (Default order)
+  });
+
   const handleSidebarClick = (categoryName: string, subCategoryName?: string) => {
     setActiveCategory(categoryName);
     setActiveSubCategory(subCategoryName);
@@ -90,15 +102,30 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
           )}
         </div>
 
-        {!isSearchMode && (
-          <button 
-            className="md:hidden flex items-center gap-2 bg-gray-100 px-4 py-2 rounded text-sm font-bold text-gray-700 self-start"
-            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-          >
-            {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
-            {isMobileFilterOpen ? 'Close Filters' : 'Filter Categories'}
-          </button>
-        )}
+        <div className="flex gap-4 self-start md:self-auto">
+          {!isSearchMode && (
+            <button 
+              className="md:hidden flex items-center gap-2 bg-gray-100 px-4 py-2 rounded text-sm font-bold text-gray-700"
+              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+            >
+              {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
+              {isMobileFilterOpen ? 'Close' : 'Filter'}
+            </button>
+          )}
+          
+          {/* Sort Dropdown */}
+          <div className="relative group">
+            <button className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded text-sm font-medium text-gray-700 hover:border-[#8B7E66]">
+              Sort by: {sortOrder === 'RECOMMENDED' ? 'Recommended' : sortOrder === 'LOW_HIGH' ? 'Price: Low to High' : 'Price: High to Low'}
+              <ChevronDown size={14} />
+            </button>
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 shadow-lg rounded-sm overflow-hidden hidden group-hover:block z-20">
+              <button onClick={() => setSortOrder('RECOMMENDED')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recommended</button>
+              <button onClick={() => setSortOrder('LOW_HIGH')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: Low to High</button>
+              <button onClick={() => setSortOrder('HIGH_LOW')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: High to Low</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -165,15 +192,15 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                     }
                   </h1>
                   <p className="text-gray-500 text-sm mt-1 font-light tracking-wide">
-                    {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
+                    {sortedProducts.length} {sortedProducts.length === 1 ? 'Product' : 'Products'} Found
                   </p>
               </div>
            </div>
            
-           {filteredProducts.length > 0 ? (
+           {sortedProducts.length > 0 ? (
              <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
-               {filteredProducts.map((product, index) => (
-                 <div key={product.id} className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${index * 100}ms` }}>
+               {sortedProducts.map((product, index) => (
+                 <div key={product.id} className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${index * 50}ms` }}>
                     <ProductCard 
                         product={product} 
                         onClick={() => onProductClick(product)}
