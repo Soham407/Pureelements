@@ -11,7 +11,7 @@ interface Props {
 }
 
 const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
-  const { cart, cartCount } = useCart();
+  const { cart, cartCount, clearCart } = useCart();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
@@ -45,7 +45,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
       setLoading(false);
       setIsOrderPlaced(true);
       showToast('Order placed successfully!', 'success');
-      // In a real app, clear cart here
+      clearCart(); // Clear the cart after successful order
     }, 2000);
   };
 

@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Product } from '../types';
 import { Star, Eye, Heart } from 'lucide-react';
 import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
 import { useToast } from '../ToastContext';
+import ImageWithFallback from './ImageWithFallback';
 
 interface Props {
   product: Product;
@@ -89,9 +89,10 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
       
       {/* Image Container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-        <img 
+        <ImageWithFallback 
           src={product.image} 
           alt={product.name} 
+          fallbackText={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         

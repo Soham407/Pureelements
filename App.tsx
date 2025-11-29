@@ -27,6 +27,16 @@ import { useCart } from './CartContext';
 
 type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN' | 'PAYMENT' | 'REFUND';
 
+// Helper to load from storage or fallback to default
+const loadState = <T,>(key: string, fallback: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch (error) {
+    return fallback;
+  }
+};
+
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
   const [selectedCategory, setSelectedCategory] = useState<string>('SKIN CARE');
@@ -34,17 +44,30 @@ function App() {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Lifted State for Dynamic CMS
-  const [allProducts, setAllProducts] = useState<Product[]>(ALL_PRODUCTS);
-  const [allOrders, setAllOrders] = useState<Order[]>(MOCK_ORDERS);
-  const [navItems, setNavItems] = useState<NavItem[]>(NAV_ITEMS);
-  const [heroSlides, setHeroSlides] = useState<Slide[]>(INITIAL_SLIDES);
+  // Lifted State for Dynamic CMS with Persistence
+  const [allProducts, setAllProducts] = useState<Product[]>(() => 
+    loadState('pe_products', ALL_PRODUCTS)
+  );
+  const [navItems, setNavItems] = useState<NavItem[]>(() => 
+    loadState('pe_nav', NAV_ITEMS)
+  );
+  const [heroSlides, setHeroSlides] = useState<Slide[]>(() => 
+    loadState('pe_hero', INITIAL_SLIDES)
+  );
   
-  // Note: CATEGORIES circle list on home page could also be lifted if needed,
-  // but for now we are managing the main Navbar via Admin.
+  // Orders logic - typically from DB, here we stick to mock or can persist similarly
+  // For prototype, we keep mock + session changes, or you can persist if needed
+  const [allOrders, setAllOrders] = useState<Order[]>(MOCK_ORDERS);
+  
+  // Categories (circles) on home page
   const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   
   const { closeCart } = useCart();
+
+  // Persist changes whenever state updates (Simulates Backend Database)
+  useEffect(() => { localStorage.setItem('pe_products', JSON.stringify(allProducts)); }, [allProducts]);
+  useEffect(() => { localStorage.setItem('pe_nav', JSON.stringify(navItems)); }, [navItems]);
+  useEffect(() => { localStorage.setItem('pe_hero', JSON.stringify(heroSlides)); }, [heroSlides]);
 
   // Dynamic Best Seller Engine
   useEffect(() => {
@@ -63,13 +86,24 @@ function App() {
       .slice(0, 5);
 
     // 3. Update Product State
-    setAllProducts(prevProducts => prevProducts.map(p => ({
-      ...p,
-      isBestSeller: topSellingIds.includes(p.id) || (BESTSELLERS.some(bp => bp.id === p.id) && topSellingIds.length === 0) 
-      // Fallback to static bestsellers if no orders exist yet for demo purposes
-    })));
+    // Only update if changes are needed to avoid infinite loops with the persistence effect
+    setAllProducts(prevProducts => {
+       const hasChanges = prevProducts.some(p => {
+         const shouldBeBestSeller = topSellingIds.includes(p.id) || (BESTSELLERS.some(bp => bp.id === p.id) && topSellingIds.length === 0);
+         return p.isBestSeller !== shouldBeBestSeller;
+       });
 
-  }, [allOrders]); // Re-run whenever orders change (e.g. Purchase made or Admin update)
+       if (hasChanges) {
+         return prevProducts.map(p => ({
+            ...p,
+            isBestSeller: topSellingIds.includes(p.id) || (BESTSELLERS.some(bp => bp.id === p.id) && topSellingIds.length === 0) 
+            // Fallback to static bestsellers if no orders exist yet for demo purposes
+          }));
+       }
+       return prevProducts;
+    });
+
+  }, [allOrders]); 
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes

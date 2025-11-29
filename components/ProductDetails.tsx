@@ -33,6 +33,12 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>('description');
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+  
+  // Zoom Effect State
+  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({
+    transformOrigin: 'center center',
+    transform: 'scale(1)'
+  });
 
   const isWishlisted = isInWishlist(product.id);
 
@@ -46,6 +52,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   useEffect(() => {
     setActiveImage(product.image);
     setQuantity(1);
+    setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
     window.scrollTo(0, 0);
 
     // --- FEATURE: RECENTLY VIEWED ---
@@ -72,11 +79,27 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
 
   }, [product, allProducts]);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    
+    setZoomStyle({
+      transformOrigin: `${x}% ${y}%`,
+      transform: 'scale(2.5)'
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setZoomStyle({
+      transformOrigin: 'center center',
+      transform: 'scale(1)'
+    });
+  };
+
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-        addToCart(product);
-    }
-    showToast(`${product.name} added to cart!`);
+    addToCart(product, quantity);
+    showToast(`${quantity} x ${product.name} added to cart!`);
   };
 
   const handleBuyNow = () => {
@@ -134,20 +157,34 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                   ))}
                </div>
 
-               {/* Main Image */}
-               <div className="flex-1 aspect-[4/5] bg-gray-50 relative overflow-hidden group">
-                  <img src={activeImage} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-zoom-in" />
+               {/* Main Image with Zoom */}
+               <div 
+                  className="flex-1 aspect-[4/5] bg-gray-50 relative overflow-hidden cursor-crosshair group"
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+               >
+                  <img 
+                      src={activeImage} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-200 ease-out will-change-transform" 
+                      style={zoomStyle}
+                  />
                   
                   {product.isSoldOut && (
-                    <div className="absolute top-0 left-0 bg-[#5D6D55] text-white text-xs px-4 py-2 uppercase font-bold z-10">
+                    <div className="absolute top-0 left-0 bg-[#5D6D55] text-white text-xs px-4 py-2 uppercase font-bold z-10 pointer-events-none">
                       Sold Out
                     </div>
                   )}
                   {product.isBestSeller && !product.isSoldOut && (
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm border border-gray-100 flex items-center gap-1">
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm border border-gray-100 flex items-center gap-1 pointer-events-none">
                       <Sparkles size={10} className="text-[#F5A623]" /> Best Seller
                     </div>
                   )}
+                  
+                  {/* Hint overlay on mobile/tablet or when not hovering */}
+                  <div className="absolute bottom-4 right-4 bg-white/80 p-2 rounded-full pointer-events-none opacity-0 group-hover:opacity-100 md:group-hover:opacity-0 transition-opacity">
+                      <Sparkles size={16} className="text-gray-500" />
+                  </div>
                </div>
             </div>
           </div>

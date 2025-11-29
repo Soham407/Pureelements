@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product } from '../../types';
 import { Edit, Search, X, Save } from 'lucide-react';
@@ -39,6 +38,15 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
 
   const handleSave = () => {
     if (editingProduct) {
+      if (editingProduct.price < 0) {
+        showToast('Price cannot be negative', 'error');
+        return;
+      }
+      if (editingProduct.originalPrice && editingProduct.originalPrice < 0) {
+        showToast('Original price cannot be negative', 'error');
+        return;
+      }
+
       if (editingProduct.id === 0) {
         // Create new
         const newProduct = { ...editingProduct, id: Date.now() };
@@ -167,6 +175,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price (₹)</label>
                           <input 
                              type="number"
+                             min="0"
                              name="price" 
                              value={editingProduct.price} 
                              onChange={handleChange}
@@ -177,6 +186,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Original Price (₹)</label>
                           <input 
                              type="number"
+                             min="0"
                              name="originalPrice" 
                              value={editingProduct.originalPrice || ''} 
                              onChange={handleChange}
