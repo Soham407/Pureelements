@@ -173,7 +173,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               <li 
                 key={item.name} 
                 className="group relative"
-                onMouseEnter={() => setActiveDropdown(item.name)}
+                onMouseEnter={() => item.hasDropdown && setActiveDropdown(item.name)}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <div 
@@ -181,27 +181,32 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                   onClick={() => handleNavClick(item.name)}
                 >
                   {item.name}
-                  {item.hasDropdown && <ChevronDown size={14} className="mt-0.5 text-gray-400 group-hover:text-[#F5A623]" />}
+                  {item.hasDropdown && <ChevronDown size={14} className="mt-0.5 text-gray-400 group-hover:text-[#F5A623] transition-transform" />}
                 </div>
 
                 {/* Dropdown Menu */}
                 {item.hasDropdown && item.subItems && (
-                  <div className={`absolute left-0 top-full pt-1 w-56 z-50 transition-all duration-200 ${
-                    activeDropdown === item.name ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                  }`}>
-                    <div className="bg-white shadow-lg border-t-2 border-[#F5A623] flex flex-col py-2">
+                  <div 
+                    className={`absolute left-0 top-full pt-2 w-56 z-[100] transition-all duration-200 ease-in-out ${
+                      activeDropdown === item.name 
+                        ? 'opacity-100 visible translate-y-0 pointer-events-auto' 
+                        : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                    }`}
+                    onMouseEnter={() => setActiveDropdown(item.name)}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <div className="bg-white shadow-xl border-t-2 border-[#F5A623] rounded-b-sm flex flex-col py-2">
                       {item.subItems.map((subItem) => (
-                        <a 
+                        <button
                           key={subItem} 
-                          href="#"
                           onClick={(e) => {
                             e.preventDefault();
                             handleNavClick(item.name, subItem);
                           }}
-                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-[#F5A623] hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal"
+                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-[#F5A623] hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
                         >
                           {subItem}
-                        </a>
+                        </button>
                       ))}
                     </div>
                   </div>

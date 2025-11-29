@@ -270,16 +270,24 @@ export const navItemsService = {
       .order('order_index', { ascending: true });
     
     if (error) throw error;
-    return data || [];
+    
+    // Transform snake_case from Supabase to camelCase for TypeScript
+    return (data || []).map((item: any) => ({
+      name: item.name,
+      hasDropdown: item.has_dropdown || false,
+      subItems: item.sub_items || []
+    }));
   },
 
   async updateAll(items: NavItem[]): Promise<NavItem[]> {
     // Delete all existing
     await supabase.from('nav_items').delete().neq('id', 0);
     
-    // Insert new ones
+    // Transform camelCase to snake_case for Supabase
     const itemsWithOrder = items.map((item, index) => ({
-      ...item,
+      name: item.name,
+      has_dropdown: item.hasDropdown,
+      sub_items: item.subItems || [],
       order_index: index
     }));
     
@@ -289,7 +297,13 @@ export const navItemsService = {
       .select();
     
     if (error) throw error;
-    return data || [];
+    
+    // Transform back to camelCase
+    return (data || []).map((item: any) => ({
+      name: item.name,
+      hasDropdown: item.has_dropdown || false,
+      subItems: item.sub_items || []
+    }));
   }
 };
 
