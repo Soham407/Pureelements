@@ -25,7 +25,7 @@ import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './CartContext';
 
-type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN';
+type View = 'HOME' | 'LISTING' | 'PRODUCT' | 'PROFILE' | 'ABOUT' | 'STORES' | 'CHECKOUT' | 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'CONTACT' | 'ADMIN' | 'PAYMENT' | 'REFUND';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('HOME');
@@ -73,7 +73,7 @@ function App() {
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes
-    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG', 'CONTACT', 'ADMIN'].includes(category)) {
+    if (['PRIVACY', 'TERMS', 'SHIPPING', 'BLOG', 'CONTACT', 'ADMIN', 'PAYMENT', 'REFUND'].includes(category)) {
         setCurrentView(category as View);
         window.scrollTo(0, 0);
         return;
@@ -530,7 +530,7 @@ function App() {
         <ContactPage />
       )}
 
-      {(currentView === 'PRIVACY' || currentView === 'TERMS' || currentView === 'SHIPPING') && (
+      {(currentView === 'PRIVACY' || currentView === 'TERMS' || currentView === 'SHIPPING' || currentView === 'PAYMENT' || currentView === 'REFUND') && (
           <InfoPage type={currentView} />
       )}
 

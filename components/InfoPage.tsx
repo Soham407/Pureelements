@@ -3,7 +3,7 @@ import React from 'react';
 import SectionHeader from './SectionHeader';
 
 interface Props {
-  type: 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG';
+  type: 'PRIVACY' | 'TERMS' | 'SHIPPING' | 'BLOG' | 'PAYMENT' | 'REFUND';
 }
 
 const InfoPage: React.FC<Props> = ({ type }) => {
@@ -51,6 +51,37 @@ const InfoPage: React.FC<Props> = ({ type }) => {
                     <p>Free shipping on orders above ₹999.</p>
                 </div>
             )
+        };
+      case 'PAYMENT':
+        return {
+          title: "Payment Policy",
+          content: (
+            <div className="space-y-4">
+              <p>All prices on this web site are processed in Indian Rupees.</p>
+              <h3 className="font-bold text-lg mt-4">Payment Options</h3>
+              <ul className="list-disc pl-5 space-y-2">
+                  <li><strong>Credit/Debit Cards:</strong> Visa, MasterCard, and Rupay.</li>
+                  <li><strong>UPI:</strong> Google Pay, PhonePe, Paytm, and other BHIM UPI apps.</li>
+                  <li><strong>Net Banking:</strong> All major Indian banks.</li>
+                  <li><strong>Cash on Delivery (COD):</strong> Available for select pin codes.</li>
+              </ul>
+              <h3 className="font-bold text-lg mt-4">Security</h3>
+              <p>All transactions are protected by SSL (Secure Sockets Layer) and Secure Data Encryption.</p>
+            </div>
+          )
+        };
+      case 'REFUND':
+        return {
+          title: "Refund & Returns Policy",
+          content: (
+            <div className="space-y-4">
+              <p>It is our intention to satisfy our customers. For this reason, we will gladly issue a full refund for any full priced unopened merchandise that is returned within 7 days from the date of delivery.</p>
+              <h3 className="font-bold text-lg mt-4">Returns</h3>
+              <p>In case the product you have received is 'Damaged' or 'Defective', we will issue a refund after it is proved that the product is defective.</p>
+              <h3 className="font-bold text-lg mt-4">Cancellations</h3>
+              <p>If you want to cancel your order, you need to inform us by email at <strong>customercare@pureelements.in</strong> with your order number within 8 hours of placing the order.</p>
+            </div>
+          )
         };
       default:
         return { title: "Blog", content: <p>Coming Soon...</p> };

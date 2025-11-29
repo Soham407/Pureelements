@@ -31,6 +31,8 @@ const Footer: React.FC<Props> = ({ onNavigate }) => {
               <li><a onClick={() => onNavigate('TERMS')} className="hover:text-white transition-colors">Terms & Conditions</a></li>
               <li><a onClick={() => onNavigate('PRIVACY')} className="hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a onClick={() => onNavigate('SHIPPING')} className="hover:text-white transition-colors">Shipping & Delivery</a></li>
+              <li><a onClick={() => onNavigate('PAYMENT')} className="hover:text-white transition-colors">Payment Policy</a></li>
+              <li><a onClick={() => onNavigate('REFUND')} className="hover:text-white transition-colors">Refund & Returns</a></li>
             </ul>
           </div>
 
