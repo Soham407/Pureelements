@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { NavItem } from '../types';
 import { useCart } from '../CartContext';
@@ -13,7 +13,11 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Use useRef to track scroll position without triggering re-renders of the effect
+  const lastScrollY = useRef(0);
+  
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -27,19 +31,24 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
       const currentScrollY = window.scrollY;
 
-      // Logic: Hide if scrolling down more than 100px, show if scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      // Logic: Hide if scrolling down more than 100px
+      // Show if scrolling up (current < last) or at the very top
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
       }
+      
+      // Shadow Logic: Add shadow only when scrolled
+      setIsScrolled(currentScrollY > 10);
 
-      setLastScrollY(currentScrollY);
+      // Update ref
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', controlNavbar);
     return () => window.removeEventListener('scroll', controlNavbar);
-  }, [lastScrollY, isOpen]);
+  }, [isOpen]);
 
   const handleNavClick = (name: string, subItem?: string) => {
     setSearchTerm(''); // Clear search when navigating
@@ -71,12 +80,12 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
   return (
     <nav 
-      className={`bg-white sticky top-0 z-50 shadow-sm font-sans w-full transition-transform duration-300 ${
+      className={`bg-white sticky top-0 z-50 font-sans w-full transition-all duration-300 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+      } ${isScrolled ? 'shadow-md' : 'shadow-none'}`}
     >
       {/* Top Row: Search, Logo, Actions */}
-      <div className="container mx-auto px-4 pt-6 pb-4">
+      <div className="container mx-auto px-4 pt-4 pb-4 md:pt-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-0">
           
           {/* Left: Search Bar (Desktop) */}
@@ -88,7 +97,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyPress}
-                className="w-full border border-gray-200 border-r-0 px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-300 rounded-l-sm"
+                className="w-full border border-gray-200 border-r-0 px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-300 rounded-l-sm bg-white"
               />
               <button 
                 onClick={handleSearchSubmit}
@@ -101,11 +110,11 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
           {/* Center: Logo (Mobile & Desktop) */}
           <div className="flex w-full lg:w-auto items-center justify-between lg:justify-center lg:flex-grow">
-            <button className="lg:hidden p-2 -ml-2" onClick={() => setIsOpen(!isOpen)}>
+            <button className="lg:hidden p-2 -ml-2 text-gray-700" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             
-            <div className="flex items-center justify-center gap-3 cursor-pointer" onClick={() => handleNavClick('HOME')}>
+            <div className="flex items-center justify-center gap-3 cursor-pointer select-none" onClick={() => handleNavClick('HOME')}>
               {/* Logo Icon Placeholder */}
               <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full border-[3px] border-gray-500 p-0.5 flex-shrink-0 flex items-center justify-center">
                  <div className="w-full h-full rounded-full bg-[#F5A623] border-[2px] border-white"></div>
@@ -124,7 +133,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
             </div>
 
             {/* Mobile Cart Icon */}
-            <div className="lg:hidden relative mr-1" onClick={openCart}>
+            <div className="lg:hidden relative mr-1 cursor-pointer" onClick={openCart}>
               <ShoppingCart className="h-6 w-6 text-[#3A5A40]" />
               <span className="absolute -top-1.5 -right-1.5 bg-[#3A5A40] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {cartCount}
@@ -154,7 +163,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
       </div>
 
       {/* Divider Line */}
-      <div className="w-full h-[1px] bg-[#F2C94C] hidden lg:block"></div>
+      <div className={`w-full h-[1px] bg-[#F2C94C] hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-100'}`}></div>
 
       {/* Bottom Row: Navigation (Desktop) */}
       <div className="hidden lg:block py-3 bg-white relative">
@@ -203,8 +212,8 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
         </div>
       </div>
 
-      {/* Divider Line for Bottom of Nav */}
-      <div className="w-full h-[1px] bg-[#F2C94C] opacity-50 hidden lg:block"></div>
+      {/* Divider Line for Bottom of Nav (Only when not scrolled) */}
+      <div className={`w-full h-[1px] bg-[#F2C94C] opacity-50 hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-50'}`}></div>
 
       {/* Mobile Menu Content */}
       {isOpen && (
@@ -215,7 +224,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               placeholder="Search ..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 text-sm outline-none"
+              className="w-full border border-gray-300 px-3 py-2 text-sm outline-none bg-white"
             />
             <button onClick={handleSearchSubmit} className="bg-[#F2C94C] px-3 py-2">
               <Search className="h-4 w-4 text-gray-800" />

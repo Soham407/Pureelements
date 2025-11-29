@@ -124,6 +124,10 @@ const StoreItem: React.FC<{ store: StoreData, isLast: boolean }> = ({ store, isL
     const prevImage = () => {
         setCurrentImageIndex((prev) => (prev === 0 ? store.images.length - 1 : prev - 1));
     };
+    
+    // Generate functional Google Maps Link
+    const mapQuery = encodeURIComponent(`${store.name} ${store.address.join(' ')}`);
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
     return (
         <div className="flex flex-col items-center animate-fade-in">
@@ -186,7 +190,12 @@ const StoreItem: React.FC<{ store: StoreData, isLast: boolean }> = ({ store, isL
             </div>
 
             {/* Google Map Button */}
-            <button className="flex items-center gap-3 px-6 py-2.5 bg-white border border-[#5D6D55] rounded-sm hover:shadow-lg transition-all group">
+            <a 
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-6 py-2.5 bg-white border border-[#5D6D55] rounded-sm hover:shadow-lg transition-all group"
+            >
                  {/* Google Maps Icon Placeholder (SVG) */}
                  <div className="w-6 h-6">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -197,7 +206,7 @@ const StoreItem: React.FC<{ store: StoreData, isLast: boolean }> = ({ store, isL
                  <span className="text-[#5D6D55] text-xs font-bold uppercase tracking-widest group-hover:text-[#3A5A40]">
                     Get Store Location
                  </span>
-            </button>
+            </a>
 
             {/* Divider */}
             {!isLast && <LeafDivider />}

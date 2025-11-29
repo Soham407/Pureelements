@@ -105,46 +105,48 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
 
       {/* Table */}
       <div className="bg-white rounded-sm shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filteredProducts.map(product => (
-              <tr key={product.id} className="hover:bg-gray-50/50">
-                <td className="p-4 flex items-center gap-3">
-                   <div className="w-10 h-10 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
-                      <img src={product.image} alt="" className="w-full h-full object-cover" />
-                   </div>
-                   <span className="text-sm font-medium text-gray-800 line-clamp-1">{product.name}</span>
-                </td>
-                <td className="p-4 text-sm text-gray-600">{product.category}</td>
-                <td className="p-4 text-sm font-bold text-gray-800">₹{product.price}</td>
-                <td className="p-4">
-                    {product.isSoldOut ? (
-                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded">Sold Out</span>
-                    ) : (
-                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">In Stock</span>
-                    )}
-                </td>
-                <td className="p-4 text-right">
-                   <button 
-                     onClick={() => handleEditClick(product)}
-                     className="text-gray-400 hover:text-[#8B7E66] transition-colors p-1"
-                   >
-                     <Edit size={18} />
-                   </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left whitespace-nowrap">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filteredProducts.map(product => (
+                <tr key={product.id} className="hover:bg-gray-50/50">
+                  <td className="p-4 flex items-center gap-3">
+                     <div className="w-10 h-10 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
+                        <img src={product.image} alt="" className="w-full h-full object-cover" />
+                     </div>
+                     <span className="text-sm font-medium text-gray-800 line-clamp-1">{product.name}</span>
+                  </td>
+                  <td className="p-4 text-sm text-gray-600">{product.category}</td>
+                  <td className="p-4 text-sm font-bold text-gray-800">₹{product.price}</td>
+                  <td className="p-4">
+                      {product.isSoldOut ? (
+                          <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded">Sold Out</span>
+                      ) : (
+                          <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">In Stock</span>
+                      )}
+                  </td>
+                  <td className="p-4 text-right">
+                     <button 
+                       onClick={() => handleEditClick(product)}
+                       className="text-gray-400 hover:text-[#8B7E66] transition-colors p-1"
+                     >
+                       <Edit size={18} />
+                     </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Edit Modal */}

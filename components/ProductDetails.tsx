@@ -6,6 +6,7 @@ import { useCart } from '../CartContext';
 import ProductCard from './ProductCard';
 import { useToast } from '../ToastContext';
 import { useWishlist } from '../WishlistContext';
+import ImageWithFallback from './ImageWithFallback';
 
 interface Props {
   product: Product;
@@ -50,13 +51,16 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
 
   // Reset state when product changes & Handle History
   useEffect(() => {
+    // 1. Reset View State
     setActiveImage(product.image);
-    setQuantity(1);
+    setQuantity(1); // Ensure quantity resets to 1
     setOpenSection('description'); // Reset accordion
     setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
-    window.scrollTo(0, 0);
+    
+    // 2. Scroll to Top
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
-    // --- FEATURE: RECENTLY VIEWED ---
+    // 3. Update Recently Viewed History
     const storedHistory = localStorage.getItem('pure_elements_viewed');
     let historyIds: number[] = storedHistory ? JSON.parse(storedHistory) : [];
 
@@ -148,12 +152,16 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                   {images.map((img, idx) => (
                     <div 
                         key={idx} 
-                        className={`w-16 h-16 md:w-20 md:h-24 flex-shrink-0 cursor-pointer border-2 transition-all ${
+                        className={`w-16 h-16 md:w-20 md:h-24 flex-shrink-0 cursor-pointer border-2 transition-all bg-gray-50 ${
                             activeImage === img ? 'border-[#8B7E66]' : 'border-transparent hover:border-gray-200'
                         }`}
                         onClick={() => setActiveImage(img)}
                     >
-                        <img src={img} className="w-full h-full object-cover" alt={`View ${idx}`} />
+                        <ImageWithFallback 
+                            src={img} 
+                            className="w-full h-full object-cover" 
+                            alt={`View ${idx}`} 
+                        />
                     </div>
                   ))}
                </div>
@@ -164,7 +172,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                   onMouseMove={handleMouseMove}
                   onMouseLeave={handleMouseLeave}
                >
-                  <img 
+                  <ImageWithFallback 
                       src={activeImage} 
                       alt={product.name} 
                       className="w-full h-full object-cover transition-transform duration-200 ease-out will-change-transform" 

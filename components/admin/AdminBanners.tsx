@@ -81,7 +81,7 @@ const AdminBanners: React.FC<Props> = ({ slides, onUpdateHero }) => {
                         name="subtitle"
                         value={tempSlide.subtitle}
                         onChange={handleChange}
-                        className="w-full border border-gray-200 px-2 py-1 text-sm rounded-sm focus:border-[#8B7E66] outline-none"
+                        className="w-full border border-gray-200 px-2 py-1 text-sm rounded-sm focus:border-[#8B7E66] outline-none bg-white"
                       />
                    </div>
                    <div>
@@ -91,7 +91,7 @@ const AdminBanners: React.FC<Props> = ({ slides, onUpdateHero }) => {
                         rows={2}
                         value={tempSlide.title}
                         onChange={handleChange}
-                        className="w-full border border-gray-200 px-2 py-1 text-sm rounded-sm focus:border-[#8B7E66] outline-none"
+                        className="w-full border border-gray-200 px-2 py-1 text-sm rounded-sm focus:border-[#8B7E66] outline-none bg-white"
                       />
                    </div>
                    <div>
@@ -101,7 +101,7 @@ const AdminBanners: React.FC<Props> = ({ slides, onUpdateHero }) => {
                             name="image"
                             value={tempSlide.image}
                             onChange={handleChange}
-                            className="w-full border border-gray-200 px-2 py-1 text-xs font-mono rounded-sm focus:border-[#8B7E66] outline-none"
+                            className="w-full border border-gray-200 px-2 py-1 text-xs font-mono rounded-sm focus:border-[#8B7E66] outline-none bg-white"
                         />
                         <a href={tempSlide.image} target="_blank" rel="noreferrer" className="p-1 bg-gray-100 text-gray-500 rounded hover:bg-gray-200"><ImageIcon size={14} /></a>
                       </div>
