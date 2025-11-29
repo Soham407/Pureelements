@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Product } from '../../types';
 import { Edit, Search, X, Save } from 'lucide-react';
@@ -91,7 +92,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
               placeholder="Search products..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-[#8B7E66]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-[#8B7E66] bg-white"
             />
          </div>
          <button 
@@ -168,7 +169,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="name" 
                              value={editingProduct.name} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -179,7 +180,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="price" 
                              value={editingProduct.price} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -190,7 +191,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="originalPrice" 
                              value={editingProduct.originalPrice || ''} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -199,7 +200,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="category" 
                              value={editingProduct.category} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -208,7 +209,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="subCategory" 
                              value={editingProduct.subCategory || ''} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
                           />
                       </div>
                       <div className="col-span-2">
@@ -217,7 +218,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              name="image" 
                              value={editingProduct.image} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm font-mono text-gray-500" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm font-mono text-gray-500 bg-white" 
                           />
                       </div>
                       <div className="col-span-2">
@@ -227,7 +228,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              value={editingProduct.description || ''} 
                              onChange={handleChange}
                              rows={3}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm bg-white" 
                           />
                       </div>
                       <div className="col-span-2 flex gap-6 pt-2">

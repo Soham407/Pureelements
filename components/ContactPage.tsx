@@ -86,7 +86,7 @@ const ContactPage: React.FC = () => {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors"
+                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors bg-white"
                         placeholder="John Doe"
                       />
                    </div>
@@ -97,7 +97,7 @@ const ContactPage: React.FC = () => {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors"
+                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors bg-white"
                         placeholder="john@example.com"
                       />
                    </div>
@@ -110,7 +110,7 @@ const ContactPage: React.FC = () => {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => setFormData({...formData, message: e.target.value})}
-                      className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors resize-none"
+                      className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors resize-none bg-white"
                       placeholder="How can we help you?"
                    ></textarea>
                 </div>

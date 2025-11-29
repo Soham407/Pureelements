@@ -137,27 +137,27 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
-                      <input required name="fullName" value={formData.fullName} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="John Doe" />
+                      <input required name="fullName" value={formData.fullName} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="John Doe" />
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Phone Number</label>
-                      <input required name="phone" value={formData.phone} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="+91 98765 43210" />
+                      <input required name="phone" value={formData.phone} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="+91 98765 43210" />
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">Email Address</label>
-                      <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="john@example.com" />
+                      <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="john@example.com" />
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">Street Address</label>
-                      <input required name="address" value={formData.address} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="Flat No, Building, Street" />
+                      <input required name="address" value={formData.address} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Flat No, Building, Street" />
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">City</label>
-                      <input required name="city" value={formData.city} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="Pune" />
+                      <input required name="city" value={formData.city} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Pune" />
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Pincode</label>
-                      <input required name="pincode" value={formData.pincode} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none" placeholder="411001" />
+                      <input required name="pincode" value={formData.pincode} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="411001" />
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">State</label>

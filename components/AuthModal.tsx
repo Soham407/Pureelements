@@ -105,7 +105,7 @@ const AuthModal: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -121,7 +121,7 @@ const AuthModal: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="name@example.com"
                 />
               </div>
@@ -141,7 +141,7 @@ const AuthModal: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="••••••••"
                 />
               </div>
