@@ -1,18 +1,34 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ImageOff } from 'lucide-react';
 
 interface Props extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackText?: string;
+  width?: number; // Optional width for image optimization
 }
 
-const ImageWithFallback: React.FC<Props> = ({ fallbackText, className, ...props }) => {
+const ImageWithFallback: React.FC<Props> = ({ fallbackText, className, width, ...props }) => {
   const [error, setError] = useState(false);
 
   // Reset error state when the src changes (e.g. inside a carousel)
   useEffect(() => {
     setError(false);
   }, [props.src]);
+
+  // Transform Supabase Storage URLs to use image transformations
+  const optimizedSrc = useMemo(() => {
+    if (!props.src || !width) return props.src;
+    
+    // Check if the image is from Supabase Storage
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (supabaseUrl && props.src.includes(supabaseUrl)) {
+      // Add width parameter for Supabase image transformation
+      const separator = props.src.includes('?') ? '&' : '?';
+      return `${props.src}${separator}width=${width}`;
+    }
+    
+    return props.src;
+  }, [props.src, width]);
 
   if (error) {
     return (
@@ -25,7 +41,8 @@ const ImageWithFallback: React.FC<Props> = ({ fallbackText, className, ...props 
 
   return (
     <img 
-      {...props} 
+      {...props}
+      src={optimizedSrc}
       className={className} 
       onError={() => setError(true)} 
     />

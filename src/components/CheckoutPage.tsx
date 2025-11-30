@@ -1,11 +1,36 @@
 
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckoutDetails, Order } from '../types';
+import { Order } from '../types';
 import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { ordersService } from '../lib/database';
+
+// Zod schema for checkout form validation
+const checkoutSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z.string().regex(/^\d{10,12}$/, 'Phone number must be 10-12 digits').refine(
+    (val) => {
+      const digits = val.replace(/\D/g, '');
+      return digits.length >= 10 && digits.length <= 12;
+    },
+    { message: 'Phone number must be 10-12 digits' }
+  ),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  city: z.string().min(2, 'City must be at least 2 characters'),
+  state: z.string().min(2, 'Please select a state'),
+  pincode: z.string().regex(/^\d{6}$/, 'Pincode must be exactly 6 digits'),
+  paymentMethod: z.enum(['UPI', 'CARD', 'COD'], {
+    errorMap: () => ({ message: 'Please select a payment method' })
+  })
+});
+
+type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 interface Props {
   onNavigateHome: () => void;
@@ -24,51 +49,25 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
 
-  const [formData, setFormData] = useState<CheckoutDetails>({
-    fullName: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    paymentMethod: 'UPI'
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      fullName: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      address: '',
+      city: '',
+      state: '',
+      pincode: '',
+      paymentMethod: 'UPI'
+    }
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const validateForm = () => {
-    // Allow 10 to 12 digits to accommodate country codes (e.g. 919876543210)
-    const phoneDigits = formData.phone.replace(/\D/g, '');
-    const phoneRegex = /^\d{10,12}$/;
-    
-    if (!phoneRegex.test(phoneDigits)) {
-      showToast('Please enter a valid phone number (10-12 digits)', 'error');
-      return false;
-    }
-    
-    // Basic email regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      showToast('Please enter a valid email address', 'error');
-      return false;
-    }
-
-    if (!formData.address || !formData.city || !formData.pincode || !formData.state) {
-        showToast('Please fill in all address details', 'error');
-        return false;
-    }
-
-    return true;
-  };
-
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-
+  const onSubmit = async (data: CheckoutFormData) => {
     if (!user) {
       showToast('Please login to place an order', 'error');
       return;
@@ -91,11 +90,11 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
         total: total,
         status: 'Processing',
         items: orderItems,
-        shipping_address: formData.address,
-        shipping_city: formData.city,
-        shipping_state: formData.state,
-        shipping_pincode: formData.pincode,
-        payment_method: formData.paymentMethod
+        shipping_address: data.address,
+        shipping_city: data.city,
+        shipping_state: data.state,
+        shipping_pincode: data.pincode,
+        payment_method: data.paymentMethod
       });
 
       setPlacedOrderId(newOrder.id);
@@ -164,7 +163,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
           
           {/* Left Column: Form */}
           <div className="lg:w-2/3">
-            <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-8">
+            <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               
               {/* Shipping Address */}
               <div className="bg-white p-6 md:p-8 shadow-sm rounded-sm">
@@ -176,37 +175,44 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
-                      <input required name="fullName" value={formData.fullName} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="John Doe" />
+                      <input {...register('fullName')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="John Doe" />
+                      {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Phone Number</label>
-                      <input required name="phone" value={formData.phone} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="+91 98765 43210" />
+                      <input {...register('phone')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="+91 98765 43210" />
+                      {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">Email Address</label>
-                      <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="john@example.com" />
+                      <input type="email" {...register('email')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="john@example.com" />
+                      {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">Street Address</label>
-                      <input required name="address" value={formData.address} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Flat No, Building, Street" />
+                      <input {...register('address')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Flat No, Building, Street" />
+                      {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">City</label>
-                      <input required name="city" value={formData.city} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Pune" />
+                      <input {...register('city')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Pune" />
+                      {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
                    </div>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Pincode</label>
-                      <input required name="pincode" value={formData.pincode} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="411001" />
+                      <input {...register('pincode')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="411001" />
+                      {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode.message}</p>}
                    </div>
                    <div className="space-y-1 md:col-span-2">
                       <label className="text-xs font-bold text-gray-500 uppercase">State</label>
-                      <select required name="state" value={formData.state} onChange={handleChange} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white">
+                      <select {...register('state')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white">
                          <option value="">Select State</option>
                          <option value="Maharashtra">Maharashtra</option>
                          <option value="Delhi">Delhi</option>
                          <option value="Karnataka">Karnataka</option>
                          <option value="Gujarat">Gujarat</option>
                       </select>
+                      {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state.message}</p>}
                    </div>
                 </div>
               </div>
@@ -219,29 +225,30 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
                 </div>
                 
                 <div className="space-y-4">
-                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${formData.paymentMethod === 'UPI' ? 'border-[#8B7E66] bg-[#FFFBF2]' : 'border-gray-200'}`}>
-                      <input type="radio" name="paymentMethod" value="UPI" checked={formData.paymentMethod === 'UPI'} onChange={handleChange} className="accent-[#8B7E66] w-5 h-5" />
+                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${!errors.paymentMethod ? 'border-gray-200' : 'border-red-300'}`}>
+                      <input type="radio" value="UPI" {...register('paymentMethod')} className="accent-[#8B7E66] w-5 h-5" />
                       <div>
                          <span className="font-bold text-gray-800">UPI (Google Pay / PhonePe)</span>
                          <p className="text-xs text-gray-500">Instant payment via QR Code</p>
                       </div>
                    </label>
 
-                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${formData.paymentMethod === 'CARD' ? 'border-[#8B7E66] bg-[#FFFBF2]' : 'border-gray-200'}`}>
-                      <input type="radio" name="paymentMethod" value="CARD" checked={formData.paymentMethod === 'CARD'} onChange={handleChange} className="accent-[#8B7E66] w-5 h-5" />
+                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${!errors.paymentMethod ? 'border-gray-200' : 'border-red-300'}`}>
+                      <input type="radio" value="CARD" {...register('paymentMethod')} className="accent-[#8B7E66] w-5 h-5" />
                       <div>
                          <span className="font-bold text-gray-800">Credit / Debit Card</span>
                          <p className="text-xs text-gray-500">Visa, Mastercard, Rupay</p>
                       </div>
                    </label>
 
-                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${formData.paymentMethod === 'COD' ? 'border-[#8B7E66] bg-[#FFFBF2]' : 'border-gray-200'}`}>
-                      <input type="radio" name="paymentMethod" value="COD" checked={formData.paymentMethod === 'COD'} onChange={handleChange} className="accent-[#8B7E66] w-5 h-5" />
+                   <label className={`flex items-center gap-4 border p-4 rounded-sm cursor-pointer transition-colors ${!errors.paymentMethod ? 'border-gray-200' : 'border-red-300'}`}>
+                      <input type="radio" value="COD" {...register('paymentMethod')} className="accent-[#8B7E66] w-5 h-5" />
                       <div>
                          <span className="font-bold text-gray-800">Cash on Delivery</span>
                          <p className="text-xs text-gray-500">Pay when you receive the order</p>
                       </div>
                    </label>
+                   {errors.paymentMethod && <p className="text-red-500 text-xs mt-1">{errors.paymentMethod.message}</p>}
                 </div>
               </div>
 

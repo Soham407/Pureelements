@@ -58,15 +58,30 @@ const productFromDbFormat = (dbProduct: any): Product => {
 };
 
 export const productsService = {
-  async getAll(): Promise<Product[]> {
+  async getAll(page: number = 1, limit: number = 20): Promise<{ products: Product[]; total: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    // Get total count
+    const { count, error: countError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) throw countError;
+    
+    // Get paginated data
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
     
     if (error) throw error;
     // Transform from snake_case to camelCase
-    return (data || []).map(productFromDbFormat);
+    return {
+      products: (data || []).map(productFromDbFormat),
+      total: count || 0
+    };
   },
 
   async getById(id: number): Promise<Product | null> {
@@ -151,16 +166,48 @@ export const productsService = {
     return (data || []).map(productFromDbFormat);
   },
 
-  async search(query: string): Promise<Product[]> {
+  async search(query: string, page: number = 1, limit: number = 20): Promise<{ products: Product[]; total: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    
+    // Get total count
+    const { count, error: countError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`);
+    
+    if (countError) throw countError;
+    
+    // Get paginated search results
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(from, to);
     
     if (error) throw error;
     // Transform from snake_case to camelCase
-    return (data || []).map(productFromDbFormat);
+    return {
+      products: (data || []).map(productFromDbFormat),
+      total: count || 0
+    };
+  },
+
+  async getBestsellers(limit: number = 5): Promise<Product[]> {
+    // Call Supabase RPC function for bestsellers
+    // If the function doesn't exist yet, fall back to client-side calculation
+    const { data, error } = await supabase.rpc('get_bestsellers', { limit_count: limit });
+    
+    if (error) {
+      // If RPC function doesn't exist, return empty array (will be handled by fallback)
+      console.warn('get_bestsellers RPC function not found. Please create it in Supabase.', error);
+      return [];
+    }
+    
+    if (!data) return [];
+    // Transform from snake_case to camelCase
+    return data.map(productFromDbFormat);
   }
 };
 

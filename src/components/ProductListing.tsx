@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { ChevronRight, Filter, X, Search, ChevronDown } from 'lucide-react';
 import { Product, NavItem } from '../types';
+import { productsService } from '../lib/database';
 
 interface Props {
   products: Product[];
@@ -20,6 +21,8 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [sortOrder, setSortOrder] = useState<'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW'>('RECOMMENDED');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -27,37 +30,55 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
     setSearchQuery(initialSearchQuery || '');
   }, [initialCategory, initialSubCategory, initialSearchQuery]);
 
-  const filteredProducts = products.filter(product => {
-    // 1. Search Logic
+  // Backend search when in search mode
+  useEffect(() => {
+    const performSearch = async () => {
+      if (activeCategory === 'SEARCH' && searchQuery.trim()) {
+        setIsSearching(true);
+        try {
+          const { products: results } = await productsService.search(searchQuery.trim(), 1, 100);
+          setSearchResults(results);
+        } catch (error) {
+          console.error('Error searching products:', error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    performSearch();
+  }, [activeCategory, searchQuery]);
+
+  const filteredProducts = (() => {
+    // 1. Search Logic - Use backend search results
     if (activeCategory === 'SEARCH') {
-        if (!searchQuery) return true;
-        const query = searchQuery.toLowerCase();
-        return (
-            product.name.toLowerCase().includes(query) ||
-            product.category.toLowerCase().includes(query) ||
-            product.description?.toLowerCase().includes(query) ||
-            product.mainCategory?.toLowerCase().includes(query)
-        );
+      return searchResults;
     }
 
     // 2. Offer Logic
     if (activeCategory === 'OFFERS') {
-       return product.originalPrice && product.originalPrice > product.price;
+      return products.filter(product => product.originalPrice && product.originalPrice > product.price);
     }
 
     // 3. Category Logic
-    const productMain = product.mainCategory?.trim().toUpperCase();
-    const currentMain = activeCategory.trim().toUpperCase();
-
-    if (productMain !== currentMain) return false;
+    let filtered = products.filter(product => {
+      const productMain = product.mainCategory?.trim().toUpperCase();
+      const currentMain = activeCategory.trim().toUpperCase();
+      return productMain === currentMain;
+    });
 
     // 4. SubCategory Logic
     if (activeSubCategory) {
-       return product.subCategory?.trim().toUpperCase() === activeSubCategory.trim().toUpperCase();
+      filtered = filtered.filter(product => 
+        product.subCategory?.trim().toUpperCase() === activeSubCategory.trim().toUpperCase()
+      );
     }
     
-    return true;
-  });
+    return filtered;
+  })();
 
   // Sorting Logic
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -192,7 +213,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                     }
                   </h1>
                   <p className="text-gray-500 text-sm mt-1 font-light tracking-wide">
-                    {sortedProducts.length} {sortedProducts.length === 1 ? 'Product' : 'Products'} Found
+                    {isSearching ? 'Searching...' : `${sortedProducts.length} ${sortedProducts.length === 1 ? 'Product' : 'Products'} Found`}
                   </p>
               </div>
            </div>
