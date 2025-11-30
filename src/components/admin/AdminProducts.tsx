@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Product } from '../../types';
 import { Edit, Search, X, Save } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { NAV_ITEMS } from '../../constants';
 
 interface Props {
   products: Product[];
@@ -28,7 +29,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
     setEditingProduct({
         id: 0, // 0 indicates new
         name: '',
-        category: 'Skin Care',
+        mainCategory: 'SKIN CARE', // Required for filtering
         price: 0,
         image: 'https://picsum.photos/400/500', 
         description: '',
@@ -39,6 +40,10 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
 
   const handleSave = async () => {
     if (editingProduct) {
+      if (!editingProduct.mainCategory) {
+        showToast('Main Category is required', 'error');
+        return;
+      }
       if (editingProduct.price < 0) {
         showToast('Price cannot be negative', 'error');
         return;
@@ -59,11 +64,20 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
           showToast('Product updated successfully!', 'success');
         }
         setEditingProduct(null);
-      } catch (error) {
-        showToast('Failed to save product. Please try again.', 'error');
+      } catch (error: any) {
+        console.error('Error saving product:', error);
+        const errorMessage = error?.message || 'Failed to save product. Please try again.';
+        showToast(errorMessage, 'error');
       }
     }
   };
+
+  // Get available subcategories based on selected main category
+  const availableSubCategories = useMemo(() => {
+    if (!editingProduct?.mainCategory) return [];
+    const navItem = NAV_ITEMS.find(item => item.name === editingProduct.mainCategory);
+    return navItem?.subItems || [];
+  }, [editingProduct?.mainCategory]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     if (!editingProduct) return;
@@ -71,6 +85,23 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
     
     setEditingProduct(prev => {
         if (!prev) return null;
+        
+        // If main category changes, clear subcategory if it's not valid for the new category
+        if (name === 'mainCategory') {
+          const navItem = NAV_ITEMS.find(item => item.name === value);
+          const validSubCategories = navItem?.subItems || [];
+          const currentSubCategory = prev.subCategory;
+          
+          return {
+            ...prev,
+            mainCategory: value,
+            // Clear subcategory if it's not in the new category's subcategories
+            subCategory: currentSubCategory && validSubCategories.includes(currentSubCategory) 
+              ? currentSubCategory 
+              : undefined
+          };
+        }
+        
         return {
             ...prev,
             [name]: type === 'number' ? parseFloat(value) : value
@@ -200,22 +231,46 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                           />
                       </div>
                       <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-                          <input 
-                             name="category" 
-                             value={editingProduct.category} 
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Main Category *</label>
+                          <select 
+                             name="mainCategory" 
+                             value={editingProduct.mainCategory || ''} 
                              onChange={handleChange}
                              className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
-                          />
+                             required
+                          >
+                             <option value="">Select Main Category</option>
+                             {NAV_ITEMS.filter(item => item.name !== 'ABOUT US' && item.name !== 'OFFERS' && item.name !== 'GIFTING' && item.name !== 'REGIMES').map(item => (
+                               <option key={item.name} value={item.name}>{item.name}</option>
+                             ))}
+                          </select>
+                          <p className="text-xs text-gray-400 mt-1">Required: This determines where the product appears</p>
                       </div>
                       <div>
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Sub Category</label>
-                          <input 
-                             name="subCategory" 
-                             value={editingProduct.subCategory || ''} 
-                             onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
-                          />
+                          {editingProduct.mainCategory ? (
+                            <select 
+                               name="subCategory" 
+                               value={editingProduct.subCategory || ''} 
+                               onChange={handleChange}
+                               className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                            >
+                               <option value="">Select Sub Category (Optional)</option>
+                               {availableSubCategories.map(sub => (
+                                 <option key={sub} value={sub}>{sub}</option>
+                               ))}
+                            </select>
+                          ) : (
+                            <input 
+                               type="text"
+                               disabled
+                               placeholder="Select Main Category first"
+                               className="w-full border border-gray-200 p-2 rounded-sm bg-gray-50 text-gray-400 cursor-not-allowed" 
+                            />
+                          )}
+                          {availableSubCategories.length === 0 && editingProduct.mainCategory && (
+                            <p className="text-xs text-gray-400 mt-1">This category has no subcategories</p>
+                          )}
                       </div>
                       <div className="col-span-2">
                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>

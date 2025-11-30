@@ -197,11 +197,12 @@ function App() {
   // --- ACTIONS ---
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
-      await productsService.update(updatedProduct.id, updatedProduct);
-      setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
-    } catch (error) {
+      const updated = await productsService.update(updatedProduct.id, updatedProduct);
+      setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updated : p));
+    } catch (error: any) {
       console.error('Error updating product:', error);
-      throw error;
+      // Re-throw with more context if needed
+      throw new Error(error?.message || 'Failed to update product');
     }
   };
 

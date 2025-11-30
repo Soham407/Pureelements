@@ -2,6 +2,61 @@ import { supabase } from './supabase';
 import { Product, Order, User, NavItem, Slide, Category } from '../types';
 
 // ==================== PRODUCTS ====================
+// Helper function to convert Product from camelCase to snake_case for database
+const productToDbFormat = (product: Partial<Product>): any => {
+  const dbProduct: any = {};
+  
+  // Only include fields that are explicitly set (not undefined)
+  // Allow null and empty strings to be passed through for clearing values
+  if (product.name !== undefined) dbProduct.name = product.name;
+  if (product.category !== undefined) dbProduct.category = product.category;
+  if (product.price !== undefined) dbProduct.price = product.price;
+  if (product.originalPrice !== undefined) dbProduct.original_price = product.originalPrice;
+  if (product.image !== undefined) dbProduct.image = product.image;
+  if (product.images !== undefined) dbProduct.images = product.images;
+  if (product.description !== undefined) dbProduct.description = product.description;
+  if (product.ingredients !== undefined) dbProduct.ingredients = product.ingredients;
+  if (product.howToUse !== undefined) dbProduct.how_to_use = product.howToUse;
+  if (product.isNew !== undefined) dbProduct.is_new = product.isNew;
+  if (product.isBestSeller !== undefined) dbProduct.is_best_seller = product.isBestSeller;
+  if (product.isSoldOut !== undefined) dbProduct.is_sold_out = product.isSoldOut;
+  if (product.rating !== undefined) dbProduct.rating = product.rating;
+  if (product.mainCategory !== undefined) dbProduct.main_category = product.mainCategory;
+  if (product.subCategory !== undefined) dbProduct.sub_category = product.subCategory;
+  if (product.marketingImages !== undefined) dbProduct.marketing_images = product.marketingImages;
+  if (product.size !== undefined) dbProduct.size = product.size;
+  if (product.fullDescription !== undefined) dbProduct.full_description = product.fullDescription;
+  if (product.legalInfo !== undefined) dbProduct.legal_info = product.legalInfo;
+  
+  return dbProduct;
+};
+
+// Helper function to convert Product from snake_case (database) to camelCase (frontend)
+const productFromDbFormat = (dbProduct: any): Product => {
+  return {
+    id: dbProduct.id,
+    name: dbProduct.name,
+    category: dbProduct.category || '',
+    price: parseFloat(dbProduct.price) || 0,
+    originalPrice: dbProduct.original_price ? parseFloat(dbProduct.original_price) : undefined,
+    image: dbProduct.image || '',
+    images: dbProduct.images || undefined,
+    description: dbProduct.description || undefined,
+    ingredients: dbProduct.ingredients || undefined,
+    howToUse: dbProduct.how_to_use || undefined,
+    isNew: dbProduct.is_new || false,
+    isBestSeller: dbProduct.is_best_seller || false,
+    isSoldOut: dbProduct.is_sold_out || false,
+    rating: dbProduct.rating ? parseFloat(dbProduct.rating) : undefined,
+    mainCategory: dbProduct.main_category || undefined,
+    subCategory: dbProduct.sub_category || undefined,
+    marketingImages: dbProduct.marketing_images || undefined,
+    size: dbProduct.size || undefined,
+    fullDescription: dbProduct.full_description || undefined,
+    legalInfo: dbProduct.legal_info || undefined,
+  };
+};
+
 export const productsService = {
   async getAll(): Promise<Product[]> {
     const { data, error } = await supabase
@@ -10,7 +65,8 @@ export const productsService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    // Transform from snake_case to camelCase
+    return (data || []).map(productFromDbFormat);
   },
 
   async getById(id: number): Promise<Product | null> {
@@ -21,30 +77,53 @@ export const productsService = {
       .single();
     
     if (error) throw error;
-    return data;
+    if (!data) return null;
+    // Transform from snake_case to camelCase
+    return productFromDbFormat(data);
   },
 
   async create(product: Omit<Product, 'id'>): Promise<Product> {
+    const dbProduct = productToDbFormat(product);
     const { data, error } = await supabase
       .from('products')
-      .insert(product)
+      .insert(dbProduct)
       .select()
       .single();
     
     if (error) throw error;
-    return data;
+    // Transform from snake_case to camelCase
+    return productFromDbFormat(data);
   },
 
   async update(id: number, updates: Partial<Product>): Promise<Product> {
+    // Exclude id from updates and convert to snake_case
+    const { id: _, ...updatesWithoutId } = updates as any;
+    const dbUpdates = productToDbFormat(updatesWithoutId);
+    
+    // Check if we have any fields to update
+    if (Object.keys(dbUpdates).length === 0) {
+      throw new Error('No fields to update');
+    }
+    
+    // Perform the update and get the updated row
     const { data, error } = await supabase
       .from('products')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
     
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error('Database update error:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      throw new Error(`Product with id ${id} not found or update failed`);
+    }
+    
+    // Transform from snake_case to camelCase
+    return productFromDbFormat(data);
   },
 
   async delete(id: number): Promise<void> {
@@ -68,7 +147,8 @@ export const productsService = {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
-    return data || [];
+    // Transform from snake_case to camelCase
+    return (data || []).map(productFromDbFormat);
   },
 
   async search(query: string): Promise<Product[]> {
@@ -79,7 +159,8 @@ export const productsService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    // Transform from snake_case to camelCase
+    return (data || []).map(productFromDbFormat);
   }
 };
 
