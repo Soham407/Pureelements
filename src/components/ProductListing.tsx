@@ -6,6 +6,8 @@ import { ChevronRight, Filter, X, Search, ChevronDown } from 'lucide-react';
 import { Product, NavItem } from '../types';
 import { productsService } from '../lib/database';
 
+import { useOnClickOutside } from '../hooks/useOnClickOutside';
+
 interface Props {
   products: Product[];
   navItems: NavItem[];
@@ -22,8 +24,12 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const [sortOrder, setSortOrder] = useState<'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW'>('RECOMMENDED');
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = React.useRef<HTMLDivElement>(null);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  useOnClickOutside(sortRef, () => setIsSortOpen(false));
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -99,6 +105,11 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
     setIsMobileFilterOpen(false); // Close mobile menu after selection
   };
 
+  const handleSortChange = (order: 'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW') => {
+    setSortOrder(order);
+    setIsSortOpen(false);
+  };
+
   const formatTitle = (str: string) => {
     return str.split(/[- ]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
@@ -136,16 +147,22 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
           )}
           
           {/* Sort Dropdown */}
-          <div className="relative group">
-            <button className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded text-sm font-medium text-gray-700 hover:border-[#8B7E66]">
+          <div className="relative" ref={sortRef}>
+            <button 
+              className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded text-sm font-medium text-gray-700 hover:border-[#8B7E66]"
+              onClick={() => setIsSortOpen(!isSortOpen)}
+            >
               Sort by: {sortOrder === 'RECOMMENDED' ? 'Recommended' : sortOrder === 'LOW_HIGH' ? 'Price: Low to High' : 'Price: High to Low'}
-              <ChevronDown size={14} />
+              <ChevronDown size={14} className={`transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 shadow-lg rounded-sm overflow-hidden hidden group-hover:block z-20">
-              <button onClick={() => setSortOrder('RECOMMENDED')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recommended</button>
-              <button onClick={() => setSortOrder('LOW_HIGH')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: Low to High</button>
-              <button onClick={() => setSortOrder('HIGH_LOW')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: High to Low</button>
-            </div>
+            
+            {isSortOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 shadow-lg rounded-sm overflow-hidden z-20 animate-fade-in">
+                <button onClick={() => handleSortChange('RECOMMENDED')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recommended</button>
+                <button onClick={() => handleSortChange('LOW_HIGH')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: Low to High</button>
+                <button onClick={() => handleSortChange('HIGH_LOW')} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Price: High to Low</button>
+              </div>
+            )}
           </div>
         </div>
       </div>
