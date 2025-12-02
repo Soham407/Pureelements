@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProductListing from './components/ProductListing';
@@ -19,6 +19,7 @@ import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import { CATEGORIES, FEATURED_PRODUCTS, BESTSELLERS, NAV_ITEMS, INITIAL_SLIDES, ALL_PRODUCTS, OFFER_PRODUCTS } from './constants';
+import Loader from './components/Loader';
 import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './contexts/CartContext';
 import { productsService, navItemsService, heroSlidesService, categoriesService, ordersService } from './lib/database';
@@ -28,6 +29,8 @@ function AppContent() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   // State for Dynamic CMS
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -56,8 +59,8 @@ function AppContent() {
           return;
         }
 
-        // Load products (first page only for home page - we'll use pagination for listings)
-        const { products } = await productsService.getAll(1, 100);
+        // Load products (fetch more for admin dashboard - we'll implement server-side pagination later if needed)
+        const { products } = await productsService.getAll(1, 1000);
         setAllProducts(products);
 
         // Load bestsellers from backend
@@ -283,20 +286,13 @@ function AppContent() {
 
   // Show loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B7E66] mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
       return (
     <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden">
-      <Navbar onNavigate={handleNavigate} navItems={navItems} />
-      <CartDrawer onCheckout={handleCheckoutClick} />
+      {!isAdminRoute && <Navbar onNavigate={handleNavigate} navItems={navItems} />}
+      {!isAdminRoute && <CartDrawer onCheckout={handleCheckoutClick} />}
       <AuthModal />
       
       <Routes>
@@ -380,7 +376,7 @@ function AppContent() {
         } />
       </Routes>
 
-      <Footer onNavigate={handleNavigate} />
+      {!isAdminRoute && <Footer onNavigate={handleNavigate} />}
       
       {/* Floating Whatsapp Button */}
       <a href="#" className="fixed bottom-6 right-6 bg-[#25D366] text-white p-3 rounded-full shadow-lg z-50 hover:bg-[#128C7E] transition-colors group">

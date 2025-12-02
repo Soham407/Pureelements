@@ -234,9 +234,10 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                )}
             </div>
             
-            <p className="text-gray-600 leading-relaxed font-light mb-8 border-b border-gray-100 pb-8">
-                {product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment."}
-            </p>
+            <div 
+              className="text-gray-600 leading-relaxed font-light mb-8 border-b border-gray-100 pb-8"
+              dangerouslySetInnerHTML={{ __html: product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment." }}
+            />
 
             {/* Actions */}
             <div className="space-y-4 mb-10">
@@ -331,7 +332,9 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                             openSection === section.toLowerCase() ? 'max-h-96 pb-4 opacity-100' : 'max-h-0 opacity-0'
                         }`}>
                             <div className="text-sm text-gray-600 leading-relaxed font-light">
-                                {section === 'Description' && (product.fullDescription || product.description)}
+                                {section === 'Description' && (
+                                    <div dangerouslySetInnerHTML={{ __html: product.fullDescription || product.description || '' }} />
+                                )}
                                 {section === 'Ingredients' && (product.ingredients || "Full ingredient list not available.")}
                                 {section === 'How to Use' && (product.howToUse || "Apply gently on affected area.")}
                                 {section === 'Legal Info' && (

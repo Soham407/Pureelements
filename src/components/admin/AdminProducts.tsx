@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Product } from '../../types';
-import { Edit, Search, X, Save } from 'lucide-react';
+import { Edit, Search, X, Save, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { NAV_ITEMS } from '../../constants';
 
@@ -14,12 +14,54 @@ interface Props {
 const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduct }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Product; direction: 'asc' | 'desc' } | null>(null);
+  const itemsPerPage = 10;
   const { showToast } = useToast();
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    let result = products.filter(p => 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === undefined || bValue === undefined) return 0;
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [products, searchTerm, sortConfig]);
+
+  const handleSort = (key: keyof Product) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
 
   const handleEditClick = (product: Product) => {
     setEditingProduct({ ...product });
@@ -143,16 +185,73 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
           <table className="w-full text-left whitespace-nowrap">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-10">#</th>
+                
+                <th 
+                  className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center gap-1">
+                    Product
+                    {sortConfig?.key === 'name' ? (
+                      sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                    ) : (
+                      <ArrowUpDown size={14} className="text-gray-300 group-hover:text-gray-500" />
+                    )}
+                  </div>
+                </th>
+
+                <th 
+                  className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                  onClick={() => handleSort('category')}
+                >
+                  <div className="flex items-center gap-1">
+                    Category
+                    {sortConfig?.key === 'category' ? (
+                      sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                    ) : (
+                      <ArrowUpDown size={14} className="text-gray-300 group-hover:text-gray-500" />
+                    )}
+                  </div>
+                </th>
+
+                <th 
+                  className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                  onClick={() => handleSort('price')}
+                >
+                  <div className="flex items-center gap-1">
+                    Price
+                    {sortConfig?.key === 'price' ? (
+                      sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                    ) : (
+                      <ArrowUpDown size={14} className="text-gray-300 group-hover:text-gray-500" />
+                    )}
+                  </div>
+                </th>
+
+                <th 
+                  className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors group"
+                  onClick={() => handleSort('isSoldOut')}
+                >
+                  <div className="flex items-center gap-1">
+                    Status
+                    {sortConfig?.key === 'isSoldOut' ? (
+                      sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                    ) : (
+                      <ArrowUpDown size={14} className="text-gray-300 group-hover:text-gray-500" />
+                    )}
+                  </div>
+                </th>
+
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredProducts.map(product => (
+              {currentProducts.map((product, index) => (
                 <tr key={product.id} className="hover:bg-gray-50/50">
+                  <td className="p-4 text-sm text-gray-500 font-mono">
+                    {startIndex + index + 1}
+                  </td>
                   <td className="p-4 flex items-center gap-3">
                      <div className="w-10 h-10 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
                         <img src={product.image} alt="" className="w-full h-full object-cover" />
@@ -182,6 +281,57 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center bg-white p-4 rounded-sm shadow-sm border border-gray-100">
+          <div className="text-sm text-gray-500">
+            Showing <span className="font-bold">{startIndex + 1}</span> to <span className="font-bold">{Math.min(startIndex + itemsPerPage, filteredProducts.length)}</span> of <span className="font-bold">{filteredProducts.length}</span> products
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`p-2 border rounded-sm ${currentPage === 1 ? 'text-gray-300 border-gray-100' : 'text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              // Logic to show pages around current page
+              let pageNum = i + 1;
+              if (totalPages > 5) {
+                if (currentPage > 3) {
+                  pageNum = currentPage - 3 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-bold ${
+                    currentPage === pageNum 
+                      ? 'bg-[#8B7E66] text-white' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`p-2 border rounded-sm ${currentPage === totalPages ? 'text-gray-300 border-gray-100' : 'text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingProduct && (
