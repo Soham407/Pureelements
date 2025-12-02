@@ -27,6 +27,18 @@ export interface Product {
     mfgLicNo?: string;
     countryOfOrigin?: string;
   };
+  reviews?: Review[];
+}
+
+export interface Review {
+  id: string;
+  productId: number;
+  userId?: string;
+  rating: number;
+  comment: string;
+  authorName: string;
+  isVerified: boolean;
+  createdAt: string;
 }
 
 export interface Category {

@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Product, Order, User, NavItem, Slide, Category } from '../types';
+import { Product, Order, User, NavItem, Slide, Category, Review } from '../types';
 
 // ==================== PRODUCTS ====================
 // Helper function to convert Product from camelCase to snake_case for database
@@ -54,6 +54,16 @@ const productFromDbFormat = (dbProduct: any): Product => {
     size: dbProduct.size || undefined,
     fullDescription: dbProduct.full_description || undefined,
     legalInfo: dbProduct.legal_info || undefined,
+    reviews: dbProduct.reviews ? dbProduct.reviews.map((r: any) => ({
+      id: r.id,
+      productId: r.product_id,
+      userId: r.user_id,
+      rating: r.rating,
+      comment: r.comment,
+      authorName: r.author_name,
+      isVerified: r.is_verified,
+      createdAt: r.created_at
+    })) : undefined,
   };
 };
 
@@ -87,7 +97,10 @@ export const productsService = {
   async getById(id: number): Promise<Product | null> {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select(`
+        *,
+        reviews (*)
+      `)
       .eq('id', id)
       .single();
     

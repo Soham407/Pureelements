@@ -27,3 +27,7 @@ dist-ssr
 
 # Large database backup files
 *backup*.sql
+
+Demo_Data
+scripts
+

@@ -209,7 +209,17 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                       <Star key={star} size={16} fill={star <= (product.rating || 5) ? "currentColor" : "none"} className={star <= (product.rating || 5) ? "" : "text-gray-300"} />
                   ))}
                </div>
-               <span className="text-xs text-gray-500 underline cursor-pointer">Read Reviews</span>
+               <span 
+                 className="text-xs text-gray-500 underline cursor-pointer"
+                 onClick={() => {
+                   const reviewsSection = document.getElementById('reviews-section');
+                   if (reviewsSection) {
+                     reviewsSection.scrollIntoView({ behavior: 'smooth' });
+                   }
+                 }}
+               >
+                 Read Reviews ({product.reviews?.length || 0})
+               </span>
             </div>
 
             <div className="flex items-center gap-4 mb-8">
@@ -335,6 +345,52 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Reviews Section */}
+            <div id="reviews-section" className="mt-12 border-t border-gray-200 pt-10">
+                <h3 className="font-serif text-2xl text-gray-800 mb-6">Customer Reviews</h3>
+                
+                {product.reviews && product.reviews.length > 0 ? (
+                    <div className="space-y-6">
+                        {product.reviews.map((review) => (
+                            <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-gray-800">{review.authorName}</span>
+                                        {review.isVerified && (
+                                            <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <CheckCircle2 size={10} /> Verified Buyer
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-gray-400">
+                                        {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                                <div className="flex items-center text-[#F5A623] mb-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                            key={star}
+                                            size={14}
+                                            fill={star <= review.rating ? "currentColor" : "none"}
+                                            className={star <= review.rating ? "" : "text-gray-300"}
+                                        />
+                                    ))}
+                                </div>
+                                <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 bg-gray-50 rounded-sm">
+                        <p className="text-gray-500 text-sm">No reviews yet. Be the first to review this product!</p>
+                    </div>
+                )}
             </div>
 
             {/* USPs */}
