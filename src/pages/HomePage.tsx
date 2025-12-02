@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
+import SEO from '../components/SEO';
 import SectionHeader from '../components/SectionHeader';
 import CategoryCircle from '../components/CategoryCircle';
 import ProductCarousel from '../components/ProductCarousel';
@@ -36,6 +37,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <>
+      <SEO />
       <Hero slides={heroSlides} />
 
       {/* Shop by Category */}

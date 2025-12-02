@@ -109,3 +109,16 @@ export interface CheckoutDetails {
   pincode: string;
   paymentMethod: 'UPI' | 'CARD' | 'COD';
 }
+
+export interface Address {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}

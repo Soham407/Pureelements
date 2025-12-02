@@ -5,10 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Order } from '../types';
-import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight } from 'lucide-react';
+import { Order, Address } from '../types';
+import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight, MapPin, Plus } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
-import { ordersService } from '../lib/database';
+import { ordersService, addressesService } from '../lib/database';
 
 // Zod schema for checkout form validation
 const checkoutSchema = z.object({
@@ -25,9 +25,7 @@ const checkoutSchema = z.object({
   city: z.string().min(2, 'City must be at least 2 characters'),
   state: z.string().min(2, 'Please select a state'),
   pincode: z.string().regex(/^\d{6}$/, 'Pincode must be exactly 6 digits'),
-  paymentMethod: z.enum(['UPI', 'CARD', 'COD'], {
-    errorMap: () => ({ message: 'Please select a payment method' })
-  })
+  paymentMethod: z.enum(['UPI', 'CARD', 'COD'] as [string, ...string[]]),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -44,6 +42,50 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState('');
+  
+  // Address Selection State
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+
+  React.useEffect(() => {
+    if (user) {
+      addressesService.getAll(user.id).then(addresses => {
+        setSavedAddresses(addresses);
+        // Auto-select default address if available
+        const defaultAddr = addresses.find(a => a.isDefault);
+        if (defaultAddr) {
+          handleSelectAddress(defaultAddr);
+        } else if (addresses.length > 0) {
+           // If no default, but addresses exist, maybe select first? Or let user choose.
+           // Let's not auto-select non-default to avoid confusion, or select first one.
+           // handleSelectAddress(addresses[0]); 
+        }
+      });
+    }
+  }, [user]);
+
+  const handleSelectAddress = (address: Address) => {
+    setSelectedAddressId(address.id);
+    setShowAddressForm(false);
+    // Fill form
+    setValue('fullName', address.fullName);
+    setValue('phone', address.phone);
+    setValue('address', address.addressLine1 + (address.addressLine2 ? ', ' + address.addressLine2 : ''));
+    setValue('city', address.city);
+    setValue('state', address.state);
+    setValue('pincode', address.pincode);
+  };
+
+  const handleAddNewAddress = () => {
+    setSelectedAddressId(null);
+    setShowAddressForm(true);
+    // Clear form except email/name from profile if needed, but maybe better to keep blank or current
+    setValue('address', '');
+    setValue('city', '');
+    setValue('state', '');
+    setValue('pincode', '');
+  };
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const shipping = 0; // Free shipping
@@ -52,6 +94,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors }
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -171,8 +214,39 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
                    <Truck className="text-[#8B7E66]" />
                    <h2 className="font-serif text-xl font-bold text-gray-800">Shipping Details</h2>
                 </div>
+
+                {/* Saved Addresses Selection */}
+                {savedAddresses.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-sm font-bold text-gray-700 uppercase mb-3">Select Delivery Address</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {savedAddresses.map(addr => (
+                        <div 
+                          key={addr.id}
+                          onClick={() => handleSelectAddress(addr)}
+                          className={`border p-4 rounded-sm cursor-pointer transition-all relative ${selectedAddressId === addr.id ? 'border-[#8B7E66] bg-[#FFFBF2] ring-1 ring-[#8B7E66]' : 'border-gray-200 hover:border-gray-300'}`}
+                        >
+                          {addr.isDefault && <span className="absolute top-2 right-2 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase font-bold">Default</span>}
+                          <p className="font-bold text-gray-800 text-sm">{addr.fullName}</p>
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                            {addr.addressLine1}, {addr.city}
+                          </p>
+                          <p className="text-xs text-gray-600">{addr.pincode}</p>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={handleAddNewAddress}
+                        className={`border border-dashed p-4 rounded-sm flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#8B7E66] hover:border-[#8B7E66] transition-colors ${showAddressForm ? 'border-[#8B7E66] text-[#8B7E66] bg-gray-50' : 'border-gray-300'}`}
+                      >
+                        <Plus size={20} />
+                        <span className="text-xs font-bold uppercase">Add New Address</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${(savedAddresses.length > 0 && !showAddressForm && selectedAddressId) ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
                    <div className="space-y-1">
                       <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
                       <input {...register('fullName')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="John Doe" />

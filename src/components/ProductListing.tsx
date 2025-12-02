@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
+import { ProductCardSkeleton } from './SkeletonLoader';
 import { ChevronRight, Filter, X, Search, ChevronDown } from 'lucide-react';
 import { Product, NavItem } from '../types';
 import { productsService } from '../lib/database';
@@ -126,7 +127,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
         <div className="flex gap-4 self-start md:self-auto">
           {!isSearchMode && (
             <button 
-              className="md:hidden flex items-center gap-2 bg-gray-100 px-4 py-2 rounded text-sm font-bold text-gray-700"
+              className="md:hidden flex items-center gap-2 bg-[#2C2C2C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hover:bg-black transition-colors"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
             >
               {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
@@ -229,12 +230,19 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                  </div>
                ))}
              </div>
+           ) : isSearching ? (
+             <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
+               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                 <div key={i} className="h-full">
+                   <ProductCardSkeleton />
+                 </div>
+               ))}
+             </div>
            ) : (
              <div className="py-24 text-center bg-[#F9F9F9] rounded-lg border border-dashed border-gray-300">
                 <p className="text-gray-500 font-serif text-lg mb-2">
                     {isSearchMode ? `No products matching "${searchQuery}"` : "No products found in this category."}
                 </p>
-                <p className="text-gray-400 text-sm">Try using different keywords or selecting a different category.</p>
                 {!isSearchMode && (
                     <button 
                     onClick={() => handleSidebarClick(activeCategory, undefined)} 

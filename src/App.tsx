@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProductListing from './components/ProductListing';
@@ -18,6 +19,7 @@ import AdminLogin from './components/admin/AdminLogin';
 import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
+import NotFoundPage from './pages/NotFoundPage';
 import { CATEGORIES, FEATURED_PRODUCTS, BESTSELLERS, NAV_ITEMS, INITIAL_SLIDES, ALL_PRODUCTS, OFFER_PRODUCTS } from './constants';
 import Loader from './components/Loader';
 import { Product, Order, NavItem, Slide, Category } from './types';
@@ -374,6 +376,9 @@ function AppContent() {
       />
           )
         } />
+
+        {/* 404 Route */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       {!isAdminRoute && <Footer onNavigate={handleNavigate} />}
@@ -394,7 +399,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <HelmetProvider>
+        <AppContent />
+      </HelmetProvider>
     </BrowserRouter>
   );
 }

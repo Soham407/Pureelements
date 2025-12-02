@@ -1,5 +1,7 @@
-import { supabase } from './supabase';
-import { Product, Order, User, NavItem, Slide, Category, Review } from '../types';
+import { supabase as supabaseClient } from './supabase';
+// Casting to any to resolve persistent type errors with Supabase client
+const supabase = supabaseClient as any;
+import { Product, Order, User, NavItem, Slide, Category, Review, Address } from '../types';
 
 // ==================== PRODUCTS ====================
 // Helper function to convert Product from camelCase to snake_case for database
@@ -614,3 +616,141 @@ export const wishlistService = {
   }
 };
 
+
+// ==================== ADDRESSES ====================
+export const addressesService = {
+  async getAll(userId: string): Promise<Address[]> {
+    const { data, error } = await supabase
+      .from('addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false }) // Default first
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    return (data || []).map((addr: any) => ({
+      id: addr.id,
+      userId: addr.user_id,
+      fullName: addr.full_name,
+      phone: addr.phone,
+      addressLine1: addr.address_line1,
+      addressLine2: addr.address_line2,
+      city: addr.city,
+      state: addr.state,
+      pincode: addr.pincode,
+      isDefault: addr.is_default
+    }));
+  },
+
+  async create(address: Omit<Address, 'id'>): Promise<Address> {
+    // If setting as default, unset others first
+    if (address.isDefault) {
+      await this.unsetDefault(address.userId);
+    }
+
+    const { data, error } = await supabase
+      .from('addresses')
+      .insert({
+        user_id: address.userId,
+        full_name: address.fullName,
+        phone: address.phone,
+        address_line1: address.addressLine1,
+        address_line2: address.addressLine2,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        is_default: address.isDefault
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      userId: data.user_id,
+      fullName: data.full_name,
+      phone: data.phone,
+      addressLine1: data.address_line1,
+      addressLine2: data.address_line2,
+      city: data.city,
+      state: data.state,
+      pincode: data.pincode,
+      isDefault: data.is_default
+    };
+  },
+
+  async update(id: string, updates: Partial<Address>): Promise<Address> {
+    // If setting as default, unset others first
+    if (updates.isDefault && updates.userId) {
+      await this.unsetDefault(updates.userId);
+    }
+
+    const dbUpdates: any = {};
+    if (updates.fullName !== undefined) dbUpdates.full_name = updates.fullName;
+    if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+    if (updates.addressLine1 !== undefined) dbUpdates.address_line1 = updates.addressLine1;
+    if (updates.addressLine2 !== undefined) dbUpdates.address_line2 = updates.addressLine2;
+    if (updates.city !== undefined) dbUpdates.city = updates.city;
+    if (updates.state !== undefined) dbUpdates.state = updates.state;
+    if (updates.pincode !== undefined) dbUpdates.pincode = updates.pincode;
+    if (updates.isDefault !== undefined) dbUpdates.is_default = updates.isDefault;
+
+    const { data, error } = await supabase
+      .from('addresses')
+      .update(dbUpdates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+
+    return {
+      id: data.id,
+      userId: data.user_id,
+      fullName: data.full_name,
+      phone: data.phone,
+      addressLine1: data.address_line1,
+      addressLine2: data.address_line2,
+      city: data.city,
+      state: data.state,
+      pincode: data.pincode,
+      isDefault: data.is_default
+    };
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('addresses')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  },
+
+  async unsetDefault(userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('addresses')
+      .update({ is_default: false })
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+  }
+};
+
+// ==================== NEWSLETTER ====================
+export const newsletterService = {
+  async subscribe(email: string): Promise<void> {
+    const { error } = await supabase
+      .from('subscribers')
+      .insert({ email });
+    
+    if (error) {
+      if (error.code === '23505') { // Unique violation
+        throw new Error('You are already subscribed!');
+      }
+      throw error;
+    }
+  }
+};

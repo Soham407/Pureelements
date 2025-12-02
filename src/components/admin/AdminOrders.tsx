@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Order } from '../../types';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Eye } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import AdminOrderDetails from './AdminOrderDetails';
 
 interface Props {
   orders: Order[];
@@ -11,6 +11,7 @@ interface Props {
 
 const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
   const { showToast } = useToast();
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
     onUpdateStatus(orderId, newStatus as Order['status']);
@@ -29,7 +30,9 @@ const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Items</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -65,6 +68,15 @@ const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
                           <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
                       </div>
                   </td>
+                  <td className="p-4">
+                    <button 
+                      onClick={() => setSelectedOrder(order)}
+                      className="p-2 text-gray-400 hover:text-[#8B7E66] hover:bg-[#FFFBF2] rounded-full transition-colors"
+                      title="View Details"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -74,6 +86,12 @@ const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
           )}
         </div>
       </div>
+
+      <AdminOrderDetails 
+        order={selectedOrder} 
+        isOpen={!!selectedOrder} 
+        onClose={() => setSelectedOrder(null)} 
+      />
     </div>
   );
 };

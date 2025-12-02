@@ -26,23 +26,27 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
   useEffect(() => {
     const controlNavbar = () => {
-      // Don't hide navbar if mobile menu is open
       if (isOpen) return;
 
       const currentScrollY = window.scrollY;
 
-      // Logic: Hide if scrolling down more than 100px
-      // Show if scrolling up (current < last) or at the very top
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+      // Always show if at the top
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+        setIsScrolled(false);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      setIsScrolled(true);
+
+      // Logic: Hide if scrolling down, Show if scrolling up
+      if (currentScrollY > lastScrollY.current) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
       }
-      
-      // Shadow Logic: Add shadow only when scrolled
-      setIsScrolled(currentScrollY > 10);
 
-      // Update ref
       lastScrollY.current = currentScrollY;
     };
 
@@ -80,7 +84,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
   return (
     <nav 
-      className={`bg-white sticky top-0 z-50 font-sans w-full transition-all duration-300 ${
+      className={`bg-white sticky top-0 z-50 font-sans w-full transition-transform duration-300 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       } ${isScrolled ? 'shadow-md' : 'shadow-none'}`}
     >

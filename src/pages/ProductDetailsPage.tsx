@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProductDetails from '../components/ProductDetails';
-import Loader from '../components/Loader';
+import SEO from '../components/SEO';
+import { ProductDetailsSkeleton } from '../components/SkeletonLoader';
 import { Product } from '../types';
 import { productsService } from '../lib/database';
 
@@ -62,7 +63,7 @@ const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   };
 
   if (loading) {
-    return <Loader />;
+    return <ProductDetailsSkeleton />;
   }
 
   if (!product) {
@@ -70,12 +71,19 @@ const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   }
 
   return (
-    <ProductDetails
-      product={product}
-      allProducts={allProducts}
-      onNavigate={handleNavigate}
-      onProductClick={onProductClick}
-    />
+    <>
+      <SEO 
+        title={product.name} 
+        description={product.description} 
+        image={product.image}
+      />
+      <ProductDetails
+        product={product}
+        allProducts={allProducts}
+        onNavigate={handleNavigate}
+        onProductClick={onProductClick}
+      />
+    </>
   );
 };
 

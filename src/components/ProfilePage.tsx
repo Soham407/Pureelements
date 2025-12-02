@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { User, Package, MapPin, LogOut, ChevronRight, Edit2, Heart, ShoppingBag } from 'lucide-react';
-import { Order, Product } from '../types';
+import { Order, Product, Address } from '../types';
 import ProductCard from './ProductCard';
 import OrderDetailsModal from './OrderDetailsModal';
-import { ordersService } from '../lib/database';
+import AddressForm from './AddressForm';
+import { ordersService, addressesService } from '../lib/database';
 
 interface Props {
   onProductClick?: (product: Product) => void;
@@ -19,10 +20,18 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  
+  // Address State
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
 
   useEffect(() => {
-    const loadOrders = async () => {
+    const loadData = async () => {
       if (!user) return;
+      
+      // Load Orders
       setIsLoadingOrders(true);
       try {
         const userOrders = await ordersService.getAll(user.id);
@@ -32,10 +41,57 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
       } finally {
         setIsLoadingOrders(false);
       }
+
+      // Load Addresses
+      loadAddresses();
     };
 
-    loadOrders();
+    loadData();
   }, [user]);
+
+  const loadAddresses = async () => {
+    if (!user) return;
+    setIsLoadingAddresses(true);
+    try {
+      const userAddresses = await addressesService.getAll(user.id);
+      setAddresses(userAddresses);
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  };
+
+  const handleAddAddress = () => {
+    setEditingAddress(null);
+    setIsAddressFormOpen(true);
+  };
+
+  const handleEditAddress = (address: Address) => {
+    setEditingAddress(address);
+    setIsAddressFormOpen(true);
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this address?')) {
+      try {
+        await addressesService.delete(id);
+        loadAddresses();
+      } catch (error) {
+        console.error('Error deleting address:', error);
+      }
+    }
+  };
+
+  const handleSetDefaultAddress = async (address: Address) => {
+    if (address.isDefault) return;
+    try {
+      await addressesService.update(address.id, { isDefault: true, userId: user!.id });
+      loadAddresses();
+    } catch (error) {
+      console.error('Error setting default address:', error);
+    }
+  };
 
   if (!user) return null;
 
@@ -230,27 +286,62 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                  <div className="bg-white p-6 md:p-8 shadow-sm rounded-sm animate-fade-in">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="font-serif text-2xl text-gray-800">Saved Addresses</h2>
-                        <button className="bg-[#8B7E66] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#5D6D55] transition-colors rounded-sm">
+                        <button 
+                            onClick={handleAddAddress}
+                            className="bg-[#8B7E66] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#5D6D55] transition-colors rounded-sm"
+                        >
                              + Add New
                         </button>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="border border-[#8B7E66] bg-[#FFFBF2] p-5 rounded-sm relative">
-                            <div className="absolute top-4 right-4 bg-[#8B7E66] text-white text-[10px] px-2 py-0.5 uppercase font-bold tracking-wider">Default</div>
-                            <h4 className="font-bold text-gray-800 mb-2">{user.name}</h4>
-                            <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                                402, Green Valley Apartments,<br/>
-                                Baner Road, Near High Street,<br/>
-                                Pune - 411045, Maharashtra.
-                            </p>
-                            <p className="text-sm text-gray-600 font-medium mb-4">Phone: {user.phone}</p>
-                            <div className="flex gap-4 text-xs font-bold uppercase tracking-wide">
-                                <button className="text-[#8B7E66] hover:underline">Edit</button>
-                                <button className="text-red-500 hover:underline">Remove</button>
-                            </div>
+                    {isLoadingAddresses ? (
+                        <div className="text-center py-8 text-gray-500">Loading addresses...</div>
+                    ) : addresses.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {addresses.map(address => (
+                                <div key={address.id} className={`border p-5 rounded-sm relative ${address.isDefault ? 'border-[#8B7E66] bg-[#FFFBF2]' : 'border-gray-200'}`}>
+                                    {address.isDefault && (
+                                        <div className="absolute top-4 right-4 bg-[#8B7E66] text-white text-[10px] px-2 py-0.5 uppercase font-bold tracking-wider">Default</div>
+                                    )}
+                                    {!address.isDefault && (
+                                        <button 
+                                            onClick={() => handleSetDefaultAddress(address)}
+                                            className="absolute top-4 right-4 text-gray-400 hover:text-[#8B7E66] text-[10px] uppercase font-bold tracking-wider"
+                                        >
+                                            Set Default
+                                        </button>
+                                    )}
+                                    
+                                    <h4 className="font-bold text-gray-800 mb-2">{address.fullName}</h4>
+                                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                                        {address.addressLine1},<br/>
+                                        {address.addressLine2 && <>{address.addressLine2},<br/></>}
+                                        {address.city}, {address.state} - {address.pincode}
+                                    </p>
+                                    <p className="text-sm text-gray-600 font-medium mb-4">Phone: {address.phone}</p>
+                                    <div className="flex gap-4 text-xs font-bold uppercase tracking-wide">
+                                        <button 
+                                            onClick={() => handleEditAddress(address)}
+                                            className="text-[#8B7E66] hover:underline"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeleteAddress(address.id)}
+                                            className="text-red-500 hover:underline"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    </div>
+                    ) : (
+                        <div className="text-center py-12 bg-gray-50 rounded-sm border border-dashed border-gray-200">
+                            <MapPin size={32} className="mx-auto text-gray-300 mb-3" />
+                            <p className="text-gray-500 text-sm">No addresses saved yet.</p>
+                        </div>
+                    )}
                  </div>
              )}
 
@@ -264,6 +355,16 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
         order={selectedOrder} 
         onClose={() => setSelectedOrder(null)} 
       />
+
+      {/* Address Form Modal */}
+      {isAddressFormOpen && user && (
+        <AddressForm 
+          userId={user.id}
+          address={editingAddress}
+          onClose={() => setIsAddressFormOpen(false)}
+          onSuccess={loadAddresses}
+        />
+      )}
     </div>
   );
 };
