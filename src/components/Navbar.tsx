@@ -84,7 +84,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
   return (
     <nav 
-      className={`bg-white sticky top-0 z-50 font-sans w-full transition-transform duration-300 ${
+      className={`bg-white fixed top-0 z-50 font-sans w-full transition-transform duration-300 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       } ${isScrolled ? 'shadow-md' : 'shadow-none'}`}
     >

@@ -292,7 +292,7 @@ function AppContent() {
   }
 
       return (
-    <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden pt-[100px] lg:pt-[160px]">
       {!isAdminRoute && <Navbar onNavigate={handleNavigate} navItems={navItems} />}
       {!isAdminRoute && <CartDrawer onCheckout={handleCheckoutClick} />}
       <AuthModal />
