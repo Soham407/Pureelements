@@ -42,7 +42,7 @@ const AdminLayout: React.FC<Props> = ({
       case 'DASHBOARD':
         return <AdminDashboard products={products} orders={orders} />;
       case 'PRODUCTS':
-        return <AdminProducts products={products} onUpdateProduct={onUpdateProduct} onAddProduct={onAddProduct} />;
+        return <AdminProducts products={products} navItems={navItems} onUpdateProduct={onUpdateProduct} onAddProduct={onAddProduct} />;
       case 'ORDERS':
         return <AdminOrders orders={orders} onUpdateStatus={onUpdateOrderStatus} />;
       case 'CONTENT':

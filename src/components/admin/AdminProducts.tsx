@@ -1,17 +1,17 @@
 
 import React, { useState, useMemo } from 'react';
-import { Product } from '../../types';
+import { Product, NavItem } from '../../types';
 import { Edit, Search, X, Save, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import { NAV_ITEMS } from '../../constants';
 
 interface Props {
   products: Product[];
+  navItems: NavItem[];
   onUpdateProduct: (product: Product) => void;
   onAddProduct: (product: Product) => void;
 }
 
-const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduct }) => {
+const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, onAddProduct }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,9 +117,9 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
   // Get available subcategories based on selected main category
   const availableSubCategories = useMemo(() => {
     if (!editingProduct?.mainCategory) return [];
-    const navItem = NAV_ITEMS.find(item => item.name === editingProduct.mainCategory);
+    const navItem = navItems.find(item => item.name === editingProduct.mainCategory);
     return navItem?.subItems || [];
-  }, [editingProduct?.mainCategory]);
+  }, [editingProduct?.mainCategory, navItems]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     if (!editingProduct) return;
@@ -130,7 +130,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
         
         // If main category changes, clear subcategory if it's not valid for the new category
         if (name === 'mainCategory') {
-          const navItem = NAV_ITEMS.find(item => item.name === value);
+          const navItem = navItems.find(item => item.name === value);
           const validSubCategories = navItem?.subItems || [];
           const currentSubCategory = prev.subCategory;
           
@@ -390,7 +390,7 @@ const AdminProducts: React.FC<Props> = ({ products, onUpdateProduct, onAddProduc
                              required
                           >
                              <option value="">Select Main Category</option>
-                             {NAV_ITEMS.filter(item => item.name !== 'ABOUT US' && item.name !== 'OFFERS' && item.name !== 'GIFTING' && item.name !== 'REGIMES').map(item => (
+                             {navItems.filter(item => item.name !== 'ABOUT US' && item.name !== 'OFFERS' && item.name !== 'GIFTING' && item.name !== 'REGIMES').map(item => (
                                <option key={item.name} value={item.name}>{item.name}</option>
                              ))}
                           </select>

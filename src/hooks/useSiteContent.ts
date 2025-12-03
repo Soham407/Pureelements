@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NavItem, Slide, Category } from '../types';
 import { navItemsService, heroSlidesService, categoriesService } from '../lib/database';
-import { NAV_ITEMS, INITIAL_SLIDES, CATEGORIES } from '../constants'; // Fallback for initial render if needed, or remove if strict
+// import { NAV_ITEMS, INITIAL_SLIDES, CATEGORIES } from '../constants'; // Removed constants
 
 interface UseSiteContentResult {
   navItems: NavItem[];
