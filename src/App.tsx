@@ -20,11 +20,12 @@ import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import NotFoundPage from './pages/NotFoundPage';
-import { CATEGORIES, FEATURED_PRODUCTS, BESTSELLERS, NAV_ITEMS, INITIAL_SLIDES, ALL_PRODUCTS, OFFER_PRODUCTS } from './constants';
+import { ordersService } from './lib/database';
+import { useProducts } from './hooks/useProducts';
+import { useSiteContent } from './hooks/useSiteContent';
 import Loader from './components/Loader';
 import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './contexts/CartContext';
-import { productsService, navItemsService, heroSlidesService, categoriesService, ordersService } from './lib/database';
 
 // AppContent component that uses Routes
 function AppContent() {
@@ -35,83 +36,45 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   // State for Dynamic CMS
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [navItems, setNavItems] = useState<NavItem[]>(NAV_ITEMS);
-  const [heroSlides, setHeroSlides] = useState<Slide[]>(INITIAL_SLIDES);
+  const { 
+    products: allProducts, 
+    bestsellers: bestsellerProducts, 
+    loading: productsLoading, 
+    updateProduct, 
+    addProduct 
+  } = useProducts();
+
+  const { 
+    navItems, 
+    heroSlides, 
+    categories, 
+    loading: contentLoading, 
+    updateNav, 
+    updateHero 
+  } = useSiteContent();
+
   const [allOrders, setAllOrders] = useState<Order[]>([]);
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   
   const { closeCart } = useCart();
 
-  const [bestsellerProducts, setBestsellerProducts] = useState<Product[]>([]);
-
-  // Load data from Supabase on mount
+  // Load orders (for admin only) - kept separate as it's sensitive data
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
+    const loadOrders = async () => {
       try {
-        // Check if Supabase is configured
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        if (!supabaseUrl) {
-          console.warn('Supabase not configured. Using fallback data.');
-          // Use fallback data from constants
-          setAllProducts(ALL_PRODUCTS);
-          setBestsellerProducts(BESTSELLERS);
-          setIsLoading(false);
-          return;
-        }
-
-        // Load products (fetch more for admin dashboard - we'll implement server-side pagination later if needed)
-        const { products } = await productsService.getAll(1, 1000);
-        setAllProducts(products);
-
-        // Load bestsellers from backend
-        try {
-          const bestsellers = await productsService.getBestsellers(5);
-          if (bestsellers.length > 0) {
-            setBestsellerProducts(bestsellers);
-          } else {
-            // Fallback to static bestsellers if no orders exist yet
-            setBestsellerProducts(BESTSELLERS);
-          }
-        } catch (error) {
-          console.warn('Error loading bestsellers, using fallback:', error);
-          setBestsellerProducts(BESTSELLERS);
-        }
-
-        // Load nav items
-        const nav = await navItemsService.getAll();
-        if (nav.length > 0) {
-          setNavItems(nav);
-        }
-
-        // Load hero slides
-        const slides = await heroSlidesService.getAll();
-        if (slides.length > 0) {
-          setHeroSlides(slides);
-        }
-
-        // Load categories
-        const cats = await categoriesService.getAll();
-        if (cats.length > 0) {
-          setCategories(cats);
-        }
-
-        // Load orders (for admin only)
         const orders = await ordersService.getAll();
         setAllOrders(orders);
       } catch (error) {
-        console.error('Error loading data from Supabase:', error);
-        // Fallback to constants if Supabase fails
-        setAllProducts(ALL_PRODUCTS);
-        setBestsellerProducts(BESTSELLERS);
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading orders:', error);
       }
     };
-
-    loadData();
+    loadOrders();
   }, []);
+
+  useEffect(() => {
+    if (!productsLoading && !contentLoading) {
+      setIsLoading(false);
+    }
+  }, [productsLoading, contentLoading]);
 
   const handleNavigate = (category: string, subCategory?: string, search?: string) => {
     // Handle specific static routes
@@ -222,11 +185,9 @@ function AppContent() {
   // --- ACTIONS ---
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
-      const updated = await productsService.update(updatedProduct.id, updatedProduct);
-      setAllProducts(prev => prev.map(p => p.id === updatedProduct.id ? updated : p));
+      await updateProduct(updatedProduct);
     } catch (error: any) {
       console.error('Error updating product:', error);
-      // Re-throw with more context if needed
       throw new Error(error?.message || 'Failed to update product');
     }
   };
@@ -234,8 +195,7 @@ function AppContent() {
   const handleAddProduct = async (newProduct: Product) => {
     try {
       const { id, ...productData } = newProduct;
-      const created = await productsService.create(productData);
-      setAllProducts(prev => [created, ...prev]);
+      await addProduct(productData);
     } catch (error) {
       console.error('Error adding product:', error);
       throw error;
@@ -259,8 +219,7 @@ function AppContent() {
 
   const handleUpdateNav = async (updatedNavItems: NavItem[]) => {
     try {
-      const updated = await navItemsService.updateAll(updatedNavItems);
-      setNavItems(updated);
+      await updateNav(updatedNavItems);
     } catch (error) {
       console.error('Error updating nav items:', error);
       throw error;
@@ -269,8 +228,7 @@ function AppContent() {
 
   const handleUpdateHero = async (updatedSlides: Slide[]) => {
     try {
-      const updated = await heroSlidesService.updateAll(updatedSlides);
-      setHeroSlides(updated);
+      await updateHero(updatedSlides);
     } catch (error) {
       console.error('Error updating hero slides:', error);
       throw error;
@@ -278,12 +236,16 @@ function AppContent() {
   };
 
   // Optimized Filtered lists for Home Page using useMemo
+  // TODO: Move these IDs to database flags (is_featured, is_offer)
+  const FEATURED_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
+  const OFFER_IDS = [201, 202, 203, 204, 205, 206, 207, 208];
+
   const featuredProducts = useMemo(() => 
-    allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id)),
+    allProducts.filter(p => FEATURED_IDS.includes(p.id)),
   [allProducts]);
 
   const offerProducts = useMemo(() => 
-    allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id)),
+    allProducts.filter(p => OFFER_IDS.includes(p.id)),
   [allProducts]);
 
   // Show loading state
@@ -304,6 +266,8 @@ function AppContent() {
             categories={categories}
             allProducts={allProducts}
             bestsellerProducts={bestsellerProducts}
+            featuredProducts={featuredProducts}
+            offerProducts={offerProducts}
             onProductClick={handleProductClick}
           />
         } />

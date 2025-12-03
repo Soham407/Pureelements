@@ -6,7 +6,7 @@ import SectionHeader from '../components/SectionHeader';
 import CategoryCircle from '../components/CategoryCircle';
 import ProductCarousel from '../components/ProductCarousel';
 import RevealOnScroll from '../components/RevealOnScroll';
-import { FEATURED_PRODUCTS, CONCERNS, TESTIMONIALS, STORES, OFFER_PRODUCTS } from '../constants';
+import { CONCERNS, TESTIMONIALS, STORES } from '../constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Slide, Category } from '../types';
 
@@ -15,6 +15,8 @@ interface HomePageProps {
   categories: Category[];
   allProducts: Product[];
   bestsellerProducts: Product[];
+  featuredProducts: Product[];
+  offerProducts: Product[];
   onProductClick: (product: Product) => void;
 }
 
@@ -23,17 +25,11 @@ const HomePage: React.FC<HomePageProps> = ({
   categories, 
   allProducts, 
   bestsellerProducts,
+  featuredProducts,
+  offerProducts,
   onProductClick 
 }) => {
   const navigate = useNavigate();
-
-  const featuredProducts = useMemo(() => 
-    allProducts.filter(p => FEATURED_PRODUCTS.some(fp => fp.id === p.id)),
-  [allProducts]);
-
-  const offerProducts = useMemo(() => 
-    allProducts.filter(p => OFFER_PRODUCTS.some(op => op.id === p.id)),
-  [allProducts]);
 
   return (
     <>
