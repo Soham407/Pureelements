@@ -150,14 +150,23 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
   );
 };
 
-// Hook to handle resize re-renders
+// Hook to handle resize re-renders with debounce
 const useWindowSize = () => {
   const [size, setSize] = useState([0, 0]);
   useEffect(() => {
-    const updateSize = () => setSize([window.innerWidth, window.innerHeight]);
+    let timeoutId: NodeJS.Timeout;
+    const updateSize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setSize([window.innerWidth, window.innerHeight]);
+      }, 200);
+    };
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener('resize', updateSize);
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      clearTimeout(timeoutId);
+    };
   }, []);
   return size;
 }

@@ -10,6 +10,15 @@ interface AddressFormProps {
   onSuccess: () => void;
 }
 
+const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 
+  'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 
+  'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 
+  'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
+
 const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -39,8 +48,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
     }
   }, [address]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -104,6 +115,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 value={formData.phone}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+                placeholder="10-digit mobile number"
               />
             </div>
           </div>
@@ -147,23 +159,29 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">State</label>
-              <input
-                type="text"
+              <select
                 name="state"
                 required
                 value={formData.state}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
-              />
+                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm bg-white"
+              >
+                <option value="">Select State</option>
+                {INDIAN_STATES.map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1 col-span-2 md:col-span-1">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">Pincode</label>
               <input
-                type="text"
+                type="tel"
+                pattern="[0-9]*"
                 name="pincode"
                 required
                 value={formData.pincode}
                 onChange={handleChange}
+                maxLength={6}
                 className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
               />
             </div>

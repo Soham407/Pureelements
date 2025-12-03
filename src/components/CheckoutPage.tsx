@@ -9,6 +9,7 @@ import { Order, Address } from '../types';
 import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight, MapPin, Plus } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { ordersService, addressesService } from '../lib/database';
+import useRazorpay from '../hooks/useRazorpay';
 
 // Zod schema for checkout form validation
 const checkoutSchema = z.object({
@@ -42,6 +43,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState('');
+  const isRazorpayLoaded = useRazorpay();
   
   // Address Selection State
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -119,7 +121,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
     setLoading(true);
 
     try {
-      // Create order in Supabase
+      // Create order items
       const orderItems = cart.map(item => ({
         productId: item.id,
         productName: item.name,
@@ -128,10 +130,15 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
         image: item.image
       }));
 
+      // Create order in Supabase
+      // For online payments, we create as 'Pending' first
+      // For COD, we can set as 'Processing'
+      const initialStatus = data.paymentMethod === 'COD' ? 'Processing' : 'Pending';
+
       const newOrder = await ordersService.create({
         user_id: user.id,
         total: total,
-        status: 'Processing',
+        status: initialStatus as any, // Cast to any if 'Pending' is not in strict type yet
         items: orderItems,
         shipping_address: data.address,
         shipping_city: data.city,
@@ -140,21 +147,80 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
         payment_method: data.paymentMethod
       });
 
-      setPlacedOrderId(newOrder.id);
-      
-      // Notify parent component
-      if (onPlaceOrder) {
-        onPlaceOrder(newOrder);
-      }
+      const handleSuccess = async () => {
+        setPlacedOrderId(newOrder.id);
+        if (onPlaceOrder) {
+          onPlaceOrder(newOrder);
+        }
+        setIsOrderPlaced(true);
+        showToast('Order placed successfully!', 'success');
+        await clearCart();
+      };
 
-      setIsOrderPlaced(true);
-      showToast('Order placed successfully!', 'success');
-      await clearCart(); // Clear the cart after successful order
+      if (data.paymentMethod === 'COD') {
+        await handleSuccess();
+      } else {
+        // Online Payment (UPI/CARD)
+        if (!isRazorpayLoaded) {
+          showToast('Razorpay SDK not loaded. Please check your internet connection.', 'error');
+          setLoading(false);
+          return;
+        }
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: total * 100, // Amount in paise
+          currency: "INR",
+          name: "Pure Elements",
+          description: "Order Payment",
+          image: "https://via.placeholder.com/150", // Placeholder logo
+          order_id: "", // In a real app, generate Razorpay Order ID on backend
+          handler: async function (response: any) {
+            // Payment Success
+            try {
+              // Update order status to Processing
+              await ordersService.updateStatus(newOrder.id, 'Processing' as any);
+              await handleSuccess();
+            } catch (err) {
+              console.error('Error updating order status:', err);
+              showToast('Payment successful but failed to update order. Please contact support.', 'error');
+            }
+          },
+          prefill: {
+            name: data.fullName,
+            email: data.email,
+            contact: data.phone
+          },
+          notes: {
+            address: data.address
+          },
+          theme: {
+            color: "#8B7E66"
+          },
+          modal: {
+            ondismiss: function() {
+              setLoading(false);
+              showToast('Payment cancelled', 'info');
+            }
+          }
+        };
+        
+        const rzp1 = new (window as any).Razorpay(options);
+        rzp1.on('payment.failed', function (response: any){
+          showToast(response.error.description || 'Payment failed', 'error');
+          setLoading(false);
+        });
+        rzp1.open();
+        // Don't set loading false here, wait for handler or dismiss
+        return; 
+      }
     } catch (error: any) {
       console.error('Error placing order:', error);
       showToast(error.message || 'Failed to place order. Please try again.', 'error');
     } finally {
-      setLoading(false);
+      if (data.paymentMethod === 'COD') {
+        setLoading(false);
+      }
     }
   };
 

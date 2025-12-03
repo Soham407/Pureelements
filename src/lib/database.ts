@@ -1,7 +1,20 @@
-import { supabase as supabaseClient } from './supabase';
-// Casting to any to resolve persistent type errors with Supabase client
-const supabase = supabaseClient as any;
+import { supabase } from './supabase';
+import { Database } from '../types/supabase';
 import { Product, Order, User, NavItem, Slide, Category, Review, Address } from '../types';
+
+type ProductRow = Database['public']['Tables']['products']['Row'];
+type ProductInsert = Database['public']['Tables']['products']['Insert'];
+type ProductUpdate = Database['public']['Tables']['products']['Update'];
+type ReviewRow = Database['public']['Tables']['reviews']['Row'];
+type OrderRow = Database['public']['Tables']['orders']['Row'];
+type OrderItemRow = Database['public']['Tables']['order_items']['Row'];
+type CartItemRow = Database['public']['Tables']['cart_items']['Row'];
+type WishlistItemRow = Database['public']['Tables']['wishlist_items']['Row'];
+
+type ProductWithReviews = ProductRow & { reviews: ReviewRow[] };
+type OrderWithItems = OrderRow & { order_items: OrderItemRow[] };
+type CartItemWithProduct = CartItemRow & { products: ProductRow };
+type WishlistItemWithProduct = WishlistItemRow & { products: ProductRow };
 
 // ==================== PRODUCTS ====================
 // Helper function to convert Product from camelCase to snake_case for database
@@ -39,8 +52,8 @@ const productFromDbFormat = (dbProduct: any): Product => {
     id: dbProduct.id,
     name: dbProduct.name,
     category: dbProduct.category || '',
-    price: parseFloat(dbProduct.price) || 0,
-    originalPrice: dbProduct.original_price ? parseFloat(dbProduct.original_price) : undefined,
+    price: dbProduct.price || 0,
+    originalPrice: dbProduct.original_price ? dbProduct.original_price : undefined,
     image: dbProduct.image || '',
     images: dbProduct.images || undefined,
     description: dbProduct.description || undefined,
@@ -49,7 +62,7 @@ const productFromDbFormat = (dbProduct: any): Product => {
     isNew: dbProduct.is_new || false,
     isBestSeller: dbProduct.is_best_seller || false,
     isSoldOut: dbProduct.is_sold_out || false,
-    rating: dbProduct.rating ? parseFloat(dbProduct.rating) : undefined,
+    rating: dbProduct.rating ? dbProduct.rating : undefined,
     mainCategory: dbProduct.main_category || undefined,
     subCategory: dbProduct.sub_category || undefined,
     marketingImages: dbProduct.marketing_images || undefined,
@@ -62,8 +75,7 @@ const productFromDbFormat = (dbProduct: any): Product => {
       userId: r.user_id,
       rating: r.rating,
       comment: r.comment,
-      authorName: r.author_name,
-      isVerified: r.is_verified,
+      authorName: r.user_name,
       createdAt: r.created_at
     })) : undefined,
   };
@@ -91,7 +103,7 @@ export const productsService = {
     if (error) throw error;
     // Transform from snake_case to camelCase
     return {
-      products: (data || []).map(productFromDbFormat),
+      products: ((data as any) || []).map(productFromDbFormat),
       total: count || 0
     };
   },
@@ -116,7 +128,7 @@ export const productsService = {
     const dbProduct = productToDbFormat(product);
     const { data, error } = await supabase
       .from('products')
-      .insert(dbProduct)
+      .insert(dbProduct as any)
       .select()
       .single();
     
@@ -127,7 +139,7 @@ export const productsService = {
 
   async update(id: number, updates: Partial<Product>): Promise<Product> {
     // Exclude id from updates and convert to snake_case
-    const { id: _, ...updatesWithoutId } = updates as any;
+    const { id: _, ...updatesWithoutId } = updates;
     const dbUpdates = productToDbFormat(updatesWithoutId);
     
     // Check if we have any fields to update
@@ -138,7 +150,7 @@ export const productsService = {
     // Perform the update and get the updated row
     const { data, error } = await supabase
       .from('products')
-      .update(dbUpdates)
+      .update(dbUpdates as any)
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -178,7 +190,7 @@ export const productsService = {
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
     // Transform from snake_case to camelCase
-    return (data || []).map(productFromDbFormat);
+    return ((data as any) || []).map(productFromDbFormat);
   },
 
   async search(query: string, page: number = 1, limit: number = 20): Promise<{ products: Product[]; total: number }> {
@@ -204,7 +216,7 @@ export const productsService = {
     if (error) throw error;
     // Transform from snake_case to camelCase
     return {
-      products: (data || []).map(productFromDbFormat),
+      products: ((data as any) || []).map(productFromDbFormat),
       total: count || 0
     };
   },
@@ -212,7 +224,7 @@ export const productsService = {
   async getBestsellers(limit: number = 5): Promise<Product[]> {
     // Call Supabase RPC function for bestsellers
     // If the function doesn't exist yet, fall back to client-side calculation
-    const { data, error } = await supabase.rpc('get_bestsellers', { limit_count: limit });
+    const { data, error } = await supabase.rpc('get_bestsellers', { limit_count: limit } as any);
     
     if (error) {
       // If RPC function doesn't exist, return empty array (will be handled by fallback)
@@ -222,7 +234,7 @@ export const productsService = {
     
     if (!data) return [];
     // Transform from snake_case to camelCase
-    return data.map(productFromDbFormat);
+    return (data as any).map(productFromDbFormat);
   }
 };
 
@@ -250,21 +262,23 @@ export const ordersService = {
     const { data, error } = await query;
     if (error) throw error;
     
+    const orders = (data || []) as any[];
+    
     // Transform the data to match Order type
-    return (data || []).map(order => ({
+    return orders.map(order => ({
       id: order.id,
       date: new Date(order.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric', 
         year: 'numeric' 
       }),
-      status: order.status,
-      total: parseFloat(order.total),
+      status: order.status as Order['status'],
+      total: order.total,
       items: (order.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name,
         quantity: item.quantity,
-        price: parseFloat(item.price),
+        price: item.price,
         image: item.image
       }))
     }));
@@ -288,20 +302,22 @@ export const ordersService = {
     
     if (error) throw error;
     
+    const orderData = data as any;
+    
     return {
-      id: data.id,
-      date: new Date(data.created_at).toLocaleDateString('en-US', { 
+      id: orderData.id,
+      date: new Date(orderData.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric', 
         year: 'numeric' 
       }),
-      status: data.status,
-      total: parseFloat(data.total),
-      items: (data.order_items || []).map((item: any) => ({
+      status: orderData.status as Order['status'],
+      total: orderData.total,
+      items: (orderData.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name,
         quantity: item.quantity,
-        price: parseFloat(item.price),
+        price: item.price,
         image: item.image
       }))
     };
@@ -330,7 +346,7 @@ export const ordersService = {
         shipping_state: order.shipping_state,
         shipping_pincode: order.shipping_pincode,
         payment_method: order.payment_method
-      })
+      } as any)
       .select()
       .single();
     
@@ -348,7 +364,7 @@ export const ordersService = {
     
     const { error: itemsError } = await supabase
       .from('order_items')
-      .insert(orderItems);
+      .insert(orderItems as any);
     
     if (itemsError) throw itemsError;
     
@@ -359,8 +375,8 @@ export const ordersService = {
         day: 'numeric', 
         year: 'numeric' 
       }),
-      status: orderData.status,
-      total: parseFloat(orderData.total),
+      status: orderData.status as Order['status'],
+      total: orderData.total,
       items: order.items
     };
   },
@@ -368,7 +384,7 @@ export const ordersService = {
   async updateStatus(id: string, status: Order['status']): Promise<Order> {
     const { data, error } = await supabase
       .from('orders')
-      .update({ status })
+      .update({ status } as any)
       .eq('id', id)
       .select(`
         *,
@@ -384,20 +400,22 @@ export const ordersService = {
     
     if (error) throw error;
     
+    const orderData = data as any;
+    
     return {
-      id: data.id,
-      date: new Date(data.created_at).toLocaleDateString('en-US', { 
+      id: orderData.id,
+      date: new Date(orderData.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric', 
         year: 'numeric' 
       }),
-      status: data.status,
-      total: parseFloat(data.total),
-      items: (data.order_items || []).map((item: any) => ({
+      status: orderData.status as Order['status'],
+      total: orderData.total,
+      items: (orderData.order_items || []).map((item: any) => ({
         productId: item.product_id,
         productName: item.product_name,
         quantity: item.quantity,
-        price: parseFloat(item.price),
+        price: item.price,
         image: item.image
       }))
     };
@@ -415,7 +433,7 @@ export const navItemsService = {
     if (error) throw error;
     
     // Transform snake_case from Supabase to camelCase for TypeScript
-    return (data || []).map((item: any) => ({
+    return ((data as any) || []).map((item: any) => ({
       name: item.name,
       hasDropdown: item.has_dropdown || false,
       subItems: item.sub_items || []
@@ -436,13 +454,13 @@ export const navItemsService = {
     
     const { data, error } = await supabase
       .from('nav_items')
-      .insert(itemsWithOrder)
+      .insert(itemsWithOrder as any)
       .select();
     
     if (error) throw error;
     
     // Transform back to camelCase
-    return (data || []).map((item: any) => ({
+    return ((data as any) || []).map((item: any) => ({
       name: item.name,
       hasDropdown: item.has_dropdown || false,
       subItems: item.sub_items || []
@@ -474,7 +492,7 @@ export const heroSlidesService = {
     
     const { data, error } = await supabase
       .from('hero_slides')
-      .insert(slidesWithOrder)
+      .insert(slidesWithOrder as any)
       .select();
     
     if (error) throw error;
@@ -508,8 +526,10 @@ export const cartService = {
     
     if (error) throw error;
     
-    return (data || []).map(item => ({
-      product: item.products as Product,
+    const cartItems = (data || []) as any[];
+
+    return cartItems.map(item => ({
+      product: productFromDbFormat(item.products),
       quantity: item.quantity
     }));
   },
@@ -527,7 +547,7 @@ export const cartService = {
       // Update quantity
       const { error } = await supabase
         .from('cart_items')
-        .update({ quantity: existing.quantity + quantity })
+        .update({ quantity: existing.quantity + quantity } as any)
         .eq('id', existing.id);
       
       if (error) throw error;
@@ -539,7 +559,7 @@ export const cartService = {
           user_id: userId,
           product_id: productId,
           quantity
-        });
+        } as any);
       
       if (error) throw error;
     }
@@ -553,7 +573,7 @@ export const cartService = {
     
     const { error } = await supabase
       .from('cart_items')
-      .update({ quantity })
+      .update({ quantity } as any)
       .eq('user_id', userId)
       .eq('product_id', productId);
     
@@ -591,7 +611,8 @@ export const wishlistService = {
       .eq('user_id', userId);
     
     if (error) throw error;
-    return (data || []).map(item => item.products as Product);
+    const wishlistItems = (data || []) as any[];
+    return wishlistItems.map(item => productFromDbFormat(item.products));
   },
 
   async addToWishlist(userId: string, productId: number): Promise<void> {
@@ -600,7 +621,7 @@ export const wishlistService = {
       .insert({
         user_id: userId,
         product_id: productId
-      });
+      } as any);
     
     if (error) throw error;
   },
@@ -629,7 +650,7 @@ export const addressesService = {
     
     if (error) throw error;
     
-    return (data || []).map((addr: any) => ({
+    return ((data as any) || []).map((addr: any) => ({
       id: addr.id,
       userId: addr.user_id,
       fullName: addr.full_name,
@@ -661,7 +682,7 @@ export const addressesService = {
         state: address.state,
         pincode: address.pincode,
         is_default: address.isDefault
-      })
+      } as any)
       .select()
       .single();
     
@@ -699,7 +720,7 @@ export const addressesService = {
 
     const { data, error } = await supabase
       .from('addresses')
-      .update(dbUpdates)
+      .update(dbUpdates as any)
       .eq('id', id)
       .select()
       .single();
@@ -732,7 +753,7 @@ export const addressesService = {
   async unsetDefault(userId: string): Promise<void> {
     const { error } = await supabase
       .from('addresses')
-      .update({ is_default: false })
+      .update({ is_default: false } as any)
       .eq('user_id', userId);
     
     if (error) throw error;
@@ -744,7 +765,7 @@ export const newsletterService = {
   async subscribe(email: string): Promise<void> {
     const { error } = await supabase
       .from('subscribers')
-      .insert({ email });
+      .insert({ email } as any);
     
     if (error) {
       if (error.code === '23505') { // Unique violation

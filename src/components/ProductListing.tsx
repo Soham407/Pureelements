@@ -118,7 +118,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
   const isSearchMode = activeCategory === 'SEARCH';
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in min-h-screen">
+    <div className="container mx-auto px-4 py-8 animate-fade-in min-h-screen pb-24">
       {/* Breadcrumb & Mobile Filter Toggle */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
         <div className="text-xs text-gray-500 uppercase tracking-widest flex items-center flex-wrap">
@@ -138,7 +138,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
         <div className="flex gap-4 self-start md:self-auto">
           {!isSearchMode && (
             <button 
-              className="md:hidden flex items-center gap-2 bg-[#2C2C2C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hover:bg-black transition-colors"
+              className="md:hidden flex items-center gap-2 bg-[#2C2C2C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hover:bg-black transition-colors"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
             >
               {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
