@@ -7,6 +7,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
@@ -22,9 +23,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authView, setAuthView] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check if user is admin
+  const checkAdminStatus = async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+      
+      return !!data && !error;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  };
 
   // Fetch user profile from Supabase
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
@@ -34,26 +52,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       .eq('id', supabaseUser.id)
       .single();
 
-    if (error) {
+    if (error || !profile) {
       console.error('Error fetching user profile:', error);
       return null;
     }
 
     return {
       id: supabaseUser.id,
-      name: profile.name,
+      name: (profile as any).name,
       email: supabaseUser.email || '',
-      phone: profile.phone || undefined,
-      joinedDate: new Date(profile.created_at).toLocaleDateString()
+      phone: (profile as any).phone || undefined,
+      joinedDate: new Date((profile as any).created_at).toLocaleDateString()
     };
   };
 
   // Check session on mount and listen for auth changes
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        fetchUserProfile(session.user).then(setUser);
+        const userProfile = await fetchUserProfile(session.user);
+        setUser(userProfile);
+        const adminStatus = await checkAdminStatus(session.user.id);
+        setIsAdmin(adminStatus);
       }
       setIsLoading(false);
     });
@@ -65,8 +86,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (session?.user) {
         const userProfile = await fetchUserProfile(session.user);
         setUser(userProfile);
+        const adminStatus = await checkAdminStatus(session.user.id);
+        setIsAdmin(adminStatus);
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
       setIsLoading(false);
     });
@@ -87,6 +111,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (data.user) {
         const userProfile = await fetchUserProfile(data.user);
         setUser(userProfile);
+        const adminStatus = await checkAdminStatus(data.user.id);
+        setIsAdmin(adminStatus);
         setIsAuthModalOpen(false);
       }
     } catch (error: any) {
@@ -113,13 +139,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (data.user) {
         // Update profile with name (trigger should create profile, but update name just in case)
-        await supabase
-          .from('user_profiles')
+        await (supabase
+          .from('user_profiles') as any)
           .update({ name })
           .eq('id', data.user.id);
 
         const userProfile = await fetchUserProfile(data.user);
         setUser(userProfile);
+        setIsAdmin(false); // New users are never admins by default
         setIsAuthModalOpen(false);
       }
     } catch (error: any) {
@@ -134,6 +161,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await supabase.auth.signOut();
       setUser(null);
+      setIsAdmin(false);
       window.location.reload(); // Simple reload to clear view state
     } catch (error: any) {
       console.error('Error logging out:', error);
@@ -153,6 +181,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider value={{
       user,
       isAuthenticated: !!user,
+      isAdmin,
       isLoading,
       login,
       signup,

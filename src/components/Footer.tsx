@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Facebook, Instagram, Youtube, Phone, Mail, MapPin, Lock, Loader2, Send } from 'lucide-react';
 import { newsletterService } from '../lib/database';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
   onNavigate: (category: string) => void;
@@ -136,18 +137,51 @@ const Footer: React.FC<Props> = ({ onNavigate }) => {
                  </div>
                  
                  {/* Admin Login Link */}
-                 <button 
-                    onClick={() => onNavigate('ADMIN')}
-                    className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors ml-4 border border-white/20 px-2 py-1 rounded-sm hover:bg-white/10"
-                    title="Admin Login"
-                 >
-                    <Lock size={12} />
-                    <span className="text-[10px] font-bold uppercase">Admin</span>
-                 </button>
+                 {/* Admin Login Link - Only visible to admins */}
+                 {/* Note: In a real app, you might want a hidden way to access admin login if not logged in, 
+                     or just rely on the /admin route. For now, we show it only if isAdmin is true, 
+                     OR if we want to allow login, we might keep it but maybe less visible?
+                     User asked: "only then show the button". So we hide it if not admin.
+                     BUT: If I am not logged in, how do I become admin?
+                     I need to login first.
+                     If I am logged in as user, and I am admin, I see the button.
+                     If I am not logged in, I don't see the button? Then how do I login as admin?
+                     The user said: "check if the user is an admin, and only then show the button".
+                     This implies the user is ALREADY logged in.
+                     If they are not logged in, they can't be verified as admin.
+                     So we hide it.
+                     To access admin login initially, they might need to go to /admin directly or login as user first.
+                     Let's assume they login as user first.
+                  */}
+                 {/* Actually, if I am not logged in, I can't be checked. 
+                     So I will hide it. To login as admin, one must login as user first?
+                     Or maybe the /admin route handles the login.
+                     But the button is "Admin".
+                     Let's follow instruction: "only then show the button".
+                 */}
+                 {/* We need to import useAuth first */}
+                 <AdminButton onNavigate={onNavigate} />
             </div>
         </div>
       </div>
     </footer>
+  );
+};
+
+const AdminButton: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
+  const { isAdmin } = useAuth(); // We need to import useAuth in the file
+  
+  if (!isAdmin) return null;
+
+  return (
+    <button 
+      onClick={() => onNavigate('ADMIN')}
+      className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors ml-4 border border-white/20 px-2 py-1 rounded-sm hover:bg-white/10"
+      title="Admin Dashboard"
+    >
+      <Lock size={12} />
+      <span className="text-[10px] font-bold uppercase">Admin</span>
+    </button>
   );
 };
 

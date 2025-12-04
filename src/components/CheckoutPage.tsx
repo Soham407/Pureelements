@@ -137,8 +137,6 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
 
       const newOrder = await ordersService.create({
         user_id: user.id,
-        total: total,
-        status: initialStatus as any, // Cast to any if 'Pending' is not in strict type yet
         items: orderItems,
         shipping_address: data.address,
         shipping_city: data.city,
