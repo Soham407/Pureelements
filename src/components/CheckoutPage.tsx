@@ -131,25 +131,20 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
         image: item.image
       }));
 
-      // Create order in Supabase
-      // For online payments, we create as 'Pending' first
-      // For COD, we can set as 'Processing'
-      const initialStatus = data.paymentMethod === 'COD' ? 'Processing' : 'Pending';
-
-      const newOrder = await ordersService.create({
-        user_id: user.id,
-        items: orderItems,
-        shipping_address: data.address,
-        shipping_city: data.city,
-        shipping_state: data.state,
-        shipping_pincode: data.pincode,
-        payment_method: data.paymentMethod
-      });
-
-      const handleSuccess = async () => {
-        setPlacedOrderId(newOrder.id);
+      const handleSuccess = async (orderId: string) => {
+        setPlacedOrderId(orderId);
         if (onPlaceOrder) {
-          onPlaceOrder(newOrder);
+          // We need to construct a partial order object here since we might not have the full object from Edge Function
+          // But for now, we just pass what we have or fetch it? 
+          // Actually onPlaceOrder just updates the local state in App.tsx, it's fine to mock it or fetch it.
+          // Let's just pass a basic object.
+          onPlaceOrder({
+              id: orderId,
+              date: new Date().toLocaleDateString(),
+              status: data.paymentMethod === 'COD' ? 'Processing' : 'Pending',
+              total: total,
+              items: []
+          } as Order);
         }
         setIsOrderPlaced(true);
         showToast('Order placed successfully!', 'success');
@@ -157,20 +152,33 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
       };
 
       if (data.paymentMethod === 'COD') {
-        await handleSuccess();
+        // COD: Create Order directly via RPC
+        const newOrder = await ordersService.create({
+            user_id: user.id,
+            items: orderItems,
+            shipping_address: data.address,
+            shipping_city: data.city,
+            shipping_state: data.state,
+            shipping_pincode: data.pincode,
+            payment_method: 'COD'
+        });
+        await handleSuccess(newOrder.id);
       } else {
-        // Online Payment (UPI/CARD)
+        // Online Payment (UPI/CARD): Call Edge Function
         if (!isRazorpayLoaded) {
           showToast('Razorpay SDK not loaded. Please check your internet connection.', 'error');
           setLoading(false);
           return;
         }
 
-        // Call Edge Function to create Razorpay Order
+        // Call Edge Function to create Order (DB + Razorpay)
         const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
           body: { 
             items: orderItems, 
-            shipping_address: data.address + ', ' + data.city + ', ' + data.state + ' - ' + data.pincode 
+            shipping_address: data.address,
+            shipping_city: data.city,
+            shipping_state: data.state,
+            shipping_pincode: data.pincode
           }
         });
 
@@ -182,23 +190,17 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
         }
 
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: orderData.amount, // Amount from backend
+          key: orderData.key_id, // Use key from backend
+          amount: orderData.amount,
           currency: orderData.currency,
           name: "Pure Elements",
           description: "Order Payment",
-          image: "https://via.placeholder.com/150", // Placeholder logo
-          order_id: orderData.order_id, // Order ID from backend
+          image: "https://via.placeholder.com/150",
+          order_id: orderData.razorpay_order_id, // Razorpay Order ID
           handler: async function (response: any) {
             // Payment Success
-            try {
-              // Update order status to Processing
-              await ordersService.updateStatus(newOrder.id, 'Processing' as any);
-              await handleSuccess();
-            } catch (err) {
-              console.error('Error updating order status:', err);
-              showToast('Payment successful but failed to update order. Please contact support.', 'error');
-            }
+            // Webhook handles status update.
+            await handleSuccess(orderData.order_id);
           },
           prefill: {
             name: data.fullName,
@@ -225,7 +227,6 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
           setLoading(false);
         });
         rzp1.open();
-        // Don't set loading false here, wait for handler or dismiss
         return; 
       }
     } catch (error: any) {
