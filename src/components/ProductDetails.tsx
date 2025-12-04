@@ -234,11 +234,6 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                )}
             </div>
             
-            <div 
-              className="text-gray-600 leading-relaxed font-light mb-8 border-b border-gray-100 pb-8"
-              dangerouslySetInnerHTML={{ __html: product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment." }}
-            />
-
             {/* Actions */}
             <div className="space-y-4 mb-10">
                {!product.isSoldOut ? (
@@ -260,10 +255,10 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                                </button>
                            </div>
                            <button 
-                              onClick={handleAddToCart}
-                              className="flex-1 bg-white border border-[#2C2C2C] text-[#2C2C2C] uppercase font-bold tracking-widest text-xs hover:bg-gray-50 transition-colors"
+                               onClick={handleAddToCart}
+                               className="flex-1 bg-white border border-[#2C2C2C] text-[#2C2C2C] uppercase font-bold tracking-widest text-xs hover:bg-gray-50 transition-colors"
                            >
-                              Add to Cart
+                               Add to Cart
                            </button>
                            <button
                              onClick={() => toggleWishlist(product)}
@@ -288,6 +283,11 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                    </div>
                )}
             </div>
+
+            <div 
+              className="text-gray-600 leading-relaxed font-light mb-8 border-b border-gray-100 pb-8"
+              dangerouslySetInnerHTML={{ __html: product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment." }}
+            />
             
             {/* --- FEATURE: FREQUENTLY BOUGHT TOGETHER --- */}
             {complementaryProduct && !complementaryProduct.isSoldOut && (
