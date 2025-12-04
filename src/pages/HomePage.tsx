@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
 import SEO from '../components/SEO';
@@ -9,27 +9,47 @@ import RevealOnScroll from '../components/RevealOnScroll';
 import { CONCERNS, TESTIMONIALS, STORES } from '../constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Slide, Category } from '../types';
+import { productsService } from '../lib/database';
 
 interface HomePageProps {
   heroSlides: Slide[];
   categories: Category[];
-  allProducts: Product[];
-  bestsellerProducts: Product[];
-  featuredProducts: Product[];
-  offerProducts: Product[];
   onProductClick: (product: Product) => void;
 }
+
+
+const OFFER_IDS = [201, 202, 203, 204, 205, 206, 207, 208];
 
 const HomePage: React.FC<HomePageProps> = ({ 
   heroSlides, 
   categories, 
-  allProducts, 
-  bestsellerProducts,
-  featuredProducts,
-  offerProducts,
   onProductClick 
 }) => {
   const navigate = useNavigate();
+  const [bestsellerProducts, setBestsellerProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [offerProducts, setOfferProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            // Fetch Bestsellers
+            const bestsellers = await productsService.getBestsellers(5);
+            setBestsellerProducts(bestsellers);
+
+            // Fetch Featured
+            const featured = await productsService.getFeatured();
+            setFeaturedProducts(featured);
+
+            // Fetch Offers
+            const offers = await productsService.getByIds(OFFER_IDS);
+            setOfferProducts(offers);
+        } catch (error) {
+            console.error("Error fetching homepage products:", error);
+        }
+    };
+    fetchData();
+  }, []);
 
   return (
     <>

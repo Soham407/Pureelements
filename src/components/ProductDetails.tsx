@@ -7,10 +7,11 @@ import { useToast } from '../contexts/ToastContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import ImageWithFallback from './ImageWithFallback';
 import DOMPurify from 'dompurify';
+import { productsService } from '../lib/database';
 
 interface Props {
   product: Product;
-  allProducts: Product[];
+  // allProducts prop removed
   onNavigate: (category: string, subCategory?: string) => void;
   onProductClick: (product: Product) => void;
 }
@@ -25,7 +26,7 @@ const CROSS_SELL_RULES: Record<number, number> = {
   102: 302, // Face Oil -> Night Cream
 };
 
-const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onProductClick }) => {
+const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }) => {
   const { addToCart, openCart } = useCart();
   const { showToast } = useToast();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -34,6 +35,8 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>('description');
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+  const [complementaryProduct, setComplementaryProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   
   // Zoom Effect State
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({
@@ -43,13 +46,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
 
   const isWishlisted = isInWishlist(product.id);
 
-  // Cross Sell Product Logic
-  const complementaryProductId = CROSS_SELL_RULES[product.id];
-  const complementaryProduct = complementaryProductId 
-    ? allProducts.find(p => p.id === complementaryProductId) 
-    : null;
-
-  // Reset state when product changes & Handle History
+  // Reset state when product changes & Handle History & Fetch Related
   useEffect(() => {
     // 1. Reset View State
     setActiveImage(product.image);
@@ -75,14 +72,42 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
 
     localStorage.setItem('pure_elements_viewed', JSON.stringify(historyIds));
 
-    // Resolve products for UI (excluding current)
-    const historyProducts = historyIds
-        .map(id => allProducts.find(p => p.id === id))
-        .filter((p): p is Product => p !== undefined && p.id !== product.id); // Type guard & exclude current
-    
-    setRecentlyViewed(historyProducts);
+    // 4. Fetch Related Data
+    const fetchRelatedData = async () => {
+        try {
+            // Fetch Recently Viewed (excluding current)
+            const viewIds = historyIds.filter(id => id !== product.id);
+            if (viewIds.length > 0) {
+                const viewed = await productsService.getByIds(viewIds);
+                setRecentlyViewed(viewed);
+            } else {
+                setRecentlyViewed([]);
+            }
 
-  }, [product, allProducts]);
+            // Fetch Complementary Product
+            const compId = CROSS_SELL_RULES[product.id];
+            if (compId) {
+                const comp = await productsService.getById(compId);
+                setComplementaryProduct(comp);
+            } else {
+                setComplementaryProduct(null);
+            }
+
+            // Fetch Related Products (Same Category)
+            if (product.mainCategory) {
+                // Fetch a few more to filter out current product if needed, though getByCategory doesn't exclude ID.
+                // We'll fetch 5 and slice 4 excluding current.
+                const { products: related } = await productsService.getByCategory(product.mainCategory, undefined, 1, 5);
+                setRelatedProducts(related.filter(p => p.id !== product.id).slice(0, 4));
+            }
+        } catch (error) {
+            console.error("Error fetching related products:", error);
+        }
+    };
+
+    fetchRelatedData();
+
+  }, [product]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -115,11 +140,6 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
   };
-
-  // Get related products (same category, excluding current)
-  const relatedProducts = allProducts
-    .filter(p => p.mainCategory === product.mainCategory && p.id !== product.id)
-    .slice(0, 4);
 
   const images = product.images && product.images.length > 0 ? product.images : [product.image];
 

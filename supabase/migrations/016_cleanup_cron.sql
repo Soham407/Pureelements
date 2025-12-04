@@ -21,4 +21,4 @@ SELECT cron.schedule(
         'cleanup_stale_orders',
         '*/10 * * * *',
         $$SELECT public.cleanup_stale_orders() $$
-    );
+);

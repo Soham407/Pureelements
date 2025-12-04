@@ -1,34 +1,52 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, Order } from '../../types';
 import { DollarSign, ShoppingBag, Package, TrendingUp } from 'lucide-react';
+import { ordersService } from '../../lib/database';
 
 interface Props {
   products: Product[];
-  orders: Order[];
 }
 
-const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
-  const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0);
-  const activeOrders = orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
+const AdminDashboard: React.FC<Props> = ({ products }) => {
+  const [stats, setStats] = useState({ totalOrders: 0, activeOrders: 0, totalRevenue: 0 });
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const statsData = await ordersService.getStats();
+        setStats(statsData);
+        const { orders } = await ordersService.getAll(undefined, 1, 5);
+        setRecentOrders(orders);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
   const lowStockProducts = products.filter(p => p.isSoldOut).length;
 
-  const stats = [
+  const statItems = [
     {
       title: 'Total Revenue',
-      value: `₹${totalRevenue.toLocaleString()}`,
+      value: `₹${stats.totalRevenue.toLocaleString()}`,
       icon: <DollarSign className="text-green-600" size={24} />,
       bg: 'bg-green-50'
     },
     {
       title: 'Total Orders',
-      value: orders.length,
+      value: stats.totalOrders,
       icon: <ShoppingBag className="text-blue-600" size={24} />,
       bg: 'bg-blue-50'
     },
     {
       title: 'Active Orders',
-      value: activeOrders,
+      value: stats.activeOrders,
       icon: <TrendingUp className="text-purple-600" size={24} />,
       bg: 'bg-purple-50'
     },
@@ -44,11 +62,11 @@ const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
     <div className="space-y-8 animate-fade-in">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => (
+        {statItems.map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-sm shadow-sm border border-gray-100 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">{stat.title}</p>
-              <h3 className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</h3>
+              <h3 className="text-2xl font-bold text-gray-800 mt-1">{loading ? '...' : stat.value}</h3>
             </div>
             <div className={`p-3 rounded-full ${stat.bg}`}>
               {stat.icon}
@@ -61,7 +79,9 @@ const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
       <div className="bg-white p-6 rounded-sm shadow-sm border border-gray-100">
         <h3 className="font-serif text-xl font-bold text-gray-800 mb-6">Recent Activity</h3>
         <div className="space-y-4">
-          {orders.slice(0, 5).map(order => (
+          {loading ? (
+            <div className="text-center text-gray-500 py-4">Loading recent activity...</div>
+          ) : recentOrders.slice(0, 5).map(order => (
              <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-4">
                    <div className={`w-2 h-2 rounded-full ${order.status === 'Delivered' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
@@ -73,6 +93,9 @@ const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
                 <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-600">{order.status}</span>
              </div>
           ))}
+          {!loading && recentOrders.length === 0 && (
+             <div className="text-center text-gray-500 py-4">No recent activity</div>
+          )}
         </div>
       </div>
       

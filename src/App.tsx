@@ -38,11 +38,10 @@ function AppContent() {
   // State for Dynamic CMS
   const { 
     products: allProducts, 
-    bestsellers: bestsellerProducts, 
     loading: productsLoading, 
     updateProduct, 
     addProduct 
-  } = useProducts();
+  } = useProducts(isAdminRoute);
 
   const { 
     navItems, 
@@ -53,22 +52,7 @@ function AppContent() {
     updateHero 
   } = useSiteContent();
 
-  const [allOrders, setAllOrders] = useState<Order[]>([]);
-  
   const { closeCart } = useCart();
-
-  // Load orders (for admin only) - kept separate as it's sensitive data
-  useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        const orders = await ordersService.getAll();
-        setAllOrders(orders);
-      } catch (error) {
-        console.error('Error loading orders:', error);
-      }
-    };
-    loadOrders();
-  }, []);
 
   useEffect(() => {
     if (!productsLoading && !contentLoading) {
@@ -202,21 +186,6 @@ function AppContent() {
     }
   };
 
-  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
-    try {
-      const updated = await ordersService.updateStatus(orderId, status);
-      setAllOrders(prev => prev.map(o => o.id === orderId ? updated : o));
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      throw error;
-    }
-  };
-
-  const handleAddOrder = async (newOrder: Order) => {
-    // This will be handled by CheckoutPage with proper user_id
-    setAllOrders(prev => [newOrder, ...prev]);
-  };
-
   const handleUpdateNav = async (updatedNavItems: NavItem[]) => {
     try {
       await updateNav(updatedNavItems);
@@ -235,19 +204,6 @@ function AppContent() {
     }
   };
 
-  // Optimized Filtered lists for Home Page using useMemo
-  // TODO: Move these IDs to database flags (is_featured, is_offer)
-  const FEATURED_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
-  const OFFER_IDS = [201, 202, 203, 204, 205, 206, 207, 208];
-
-  const featuredProducts = useMemo(() => 
-    allProducts.filter(p => FEATURED_IDS.includes(p.id)),
-  [allProducts]);
-
-  const offerProducts = useMemo(() => 
-    allProducts.filter(p => OFFER_IDS.includes(p.id)),
-  [allProducts]);
-
   // Show loading state
   if (isLoading) {
     return <Loader />;
@@ -264,17 +220,12 @@ function AppContent() {
           <HomePage
             heroSlides={heroSlides}
             categories={categories}
-            allProducts={allProducts}
-            bestsellerProducts={bestsellerProducts}
-            featuredProducts={featuredProducts}
-            offerProducts={offerProducts}
             onProductClick={handleProductClick}
           />
         } />
         
         <Route path="/shop/:category" element={
           <ProductListingPage
-            allProducts={allProducts}
             navItems={navItems}
             onProductClick={handleProductClick}
           />
@@ -282,7 +233,6 @@ function AppContent() {
         
         <Route path="/product/:id" element={
           <ProductDetailsPage
-            allProducts={allProducts}
             onProductClick={handleProductClick}
           />
         } />
@@ -290,7 +240,6 @@ function AppContent() {
         <Route path="/cart" element={
           <CheckoutPage
             onNavigateHome={() => handleNavigate('HOME')}
-            onPlaceOrder={handleAddOrder}
           />
         } />
         
@@ -325,12 +274,10 @@ function AppContent() {
           ) : (
       <AdminLayout 
         products={allProducts} 
-        orders={allOrders}
         navItems={navItems}
         slides={heroSlides}
         onUpdateProduct={handleUpdateProduct}
         onAddProduct={handleAddProduct}
-        onUpdateOrderStatus={handleUpdateOrderStatus}
         onUpdateNav={handleUpdateNav}
         onUpdateHero={handleUpdateHero}
         onExitAdmin={() => {

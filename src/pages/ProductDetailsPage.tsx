@@ -7,12 +7,10 @@ import { Product } from '../types';
 import { productsService } from '../lib/database';
 
 interface ProductDetailsPageProps {
-  allProducts: Product[];
   onProductClick: (product: Product) => void;
 }
 
 const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({ 
-  allProducts, 
   onProductClick 
 }) => {
   const { id } = useParams<{ id: string }>();
@@ -26,15 +24,8 @@ const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
       
       try {
         const productId = parseInt(id);
-        // First try to find in allProducts
-        const foundProduct = allProducts.find(p => p.id === productId);
-        if (foundProduct) {
-          setProduct(foundProduct);
-          setLoading(false);
-          return;
-        }
-
-        // If not found, fetch from database
+        
+        // Fetch from database
         const fetchedProduct = await productsService.getById(productId);
         if (fetchedProduct) {
           setProduct(fetchedProduct);
@@ -50,7 +41,7 @@ const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
     };
 
     loadProduct();
-  }, [id, allProducts, navigate]);
+  }, [id, navigate]);
 
   const handleNavigate = (category: string, subCategory?: string) => {
     if (category === 'HOME') {
@@ -79,7 +70,6 @@ const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
       />
       <ProductDetails
         product={product}
-        allProducts={allProducts}
         onNavigate={handleNavigate}
         onProductClick={onProductClick}
       />

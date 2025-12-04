@@ -21,6 +21,7 @@ export const productToDbFormat = (product: Partial<Product>): any => {
   if (product.howToUse !== undefined) dbProduct.how_to_use = product.howToUse;
   if (product.isNew !== undefined) dbProduct.is_new = product.isNew;
   if (product.isBestSeller !== undefined) dbProduct.is_best_seller = product.isBestSeller;
+  if (product.isFeatured !== undefined) dbProduct.is_featured = product.isFeatured;
   if (product.isSoldOut !== undefined) dbProduct.is_sold_out = product.isSoldOut;
   if (product.rating !== undefined) dbProduct.rating = product.rating;
   if (product.mainCategory !== undefined) dbProduct.main_category = product.mainCategory;
@@ -48,6 +49,7 @@ export const productFromDbFormat = (dbProduct: any): Product => {
     howToUse: dbProduct.how_to_use || undefined,
     isNew: dbProduct.is_new || false,
     isBestSeller: dbProduct.is_best_seller || false,
+    isFeatured: dbProduct.is_featured || false,
     isSoldOut: dbProduct.is_sold_out || false,
     rating: dbProduct.rating ? dbProduct.rating : undefined,
     mainCategory: dbProduct.main_category || undefined,
@@ -111,6 +113,18 @@ export const productsService = {
     return productFromDbFormat(data);
   },
 
+  async getByIds(ids: number[]): Promise<Product[]> {
+    if (ids.length === 0) return [];
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .in('id', ids);
+    
+    if (error) throw error;
+    return ((data as any) || []).map(productFromDbFormat);
+  },
+
   async create(product: Omit<Product, 'id'>): Promise<Product> {
     const dbProduct = productToDbFormat(product);
     const { data, error } = await supabase
@@ -164,20 +178,45 @@ export const productsService = {
     if (error) throw error;
   },
 
-  async getByCategory(category: string, subCategory?: string): Promise<Product[]> {
+  async getByCategory(category: string, subCategory?: string, page: number = 1, limit: number = 20, sort?: string): Promise<{ products: Product[]; total: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
     let query = supabase
       .from('products')
-      .select('*')
-      .eq('main_category', category);
+      .select('*', { count: 'exact' });
+
+    if (category === 'OFFERS') {
+       query = query.not('original_price', 'is', null);
+    } else if (category !== 'All') {
+       query = query.eq('main_category', category);
+    }
     
     if (subCategory) {
       query = query.eq('sub_category', subCategory);
     }
     
-    const { data, error } = await query.order('created_at', { ascending: false });
+    // Sorting
+    if (sort === 'price_asc') {
+      query = query.order('price', { ascending: true });
+    } else if (sort === 'price_desc') {
+      query = query.order('price', { ascending: false });
+    } else if (sort === 'newest') {
+      query = query.order('created_at', { ascending: false });
+    } else if (sort === 'rating') {
+      query = query.order('rating', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+    
+    const { data, error, count } = await query.range(from, to);
+
     if (error) throw error;
     // Transform from snake_case to camelCase
-    return ((data as any) || []).map(productFromDbFormat);
+    return {
+      products: ((data as any) || []).map(productFromDbFormat),
+      total: count || 0
+    };
   },
 
   async search(query: string, page: number = 1, limit: number = 20): Promise<{ products: Product[]; total: number }> {
@@ -230,5 +269,20 @@ export const productsService = {
     
     if (!data) return [];
     return (data as any).map(productFromDbFormat);
+  },
+
+  async getFeatured(limit: number = 4): Promise<Product[]> {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_featured', true)
+      .limit(limit);
+    
+    if (error) {
+      console.error('Error fetching featured products:', error);
+      return [];
+    }
+    
+    return (data || []).map(productFromDbFormat);
   }
 };

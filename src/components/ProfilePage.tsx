@@ -34,7 +34,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
       // Load Orders
       setIsLoadingOrders(true);
       try {
-        const userOrders = await ordersService.getAll(user.id);
+        const { orders: userOrders } = await ordersService.getAll(user.id, 1, 50);
         setOrders(userOrders);
       } catch (error) {
         console.error('Error loading orders:', error);

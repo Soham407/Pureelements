@@ -2,7 +2,10 @@ import { supabase } from '../lib/supabase';
 import { Order } from '../types';
 
 export const ordersService = {
-  async getAll(userId?: string): Promise<Order[]> {
+  async getAll(userId?: string, page: number = 1, limit: number = 20): Promise<{ orders: Order[], total: number }> {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
     let query = supabase
       .from('orders')
       .select(`
@@ -14,20 +17,21 @@ export const ordersService = {
           price,
           image
         )
-      `)
-      .order('created_at', { ascending: false });
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
     
     if (userId) {
       query = query.eq('user_id', userId);
     }
     
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     if (error) throw error;
     
     const orders = (data || []) as any[];
     
     // Transform the data to match Order type
-    return orders.map(order => ({
+    const formattedOrders = orders.map(order => ({
       id: order.id,
       date: new Date(order.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
@@ -44,6 +48,8 @@ export const ordersService = {
         image: item.image
       }))
     }));
+
+    return { orders: formattedOrders, total: count || 0 };
   },
 
   async getById(id: string): Promise<Order | null> {
@@ -168,5 +174,15 @@ export const ordersService = {
         image: item.image
       }))
     };
+  },
+
+  async getStats(): Promise<{ totalOrders: number; activeOrders: number; totalRevenue: number }> {
+    const { count: totalOrders } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+    const { count: activeOrders } = await supabase.from('orders').select('*', { count: 'exact', head: true }).neq('status', 'Delivered').neq('status', 'Cancelled');
+    
+    const { data: revenueData } = await supabase.from('orders').select('total');
+    const totalRevenue = revenueData?.reduce((sum, o: any) => sum + (o.total || 0), 0) || 0;
+
+    return { totalOrders: totalOrders || 0, activeOrders: activeOrders || 0, totalRevenue };
   }
 };

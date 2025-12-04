@@ -1,22 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Order } from '../../types';
-import { ChevronDown, Eye } from 'lucide-react';
+import { ChevronDown, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import AdminOrderDetails from './AdminOrderDetails';
+import { ordersService } from '../../lib/database';
 
-interface Props {
-  orders: Order[];
-  onUpdateStatus: (orderId: string, status: Order['status']) => void;
-}
-
-const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
+const AdminOrders: React.FC = () => {
   const { showToast } = useToast();
-  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const limit = 20;
 
-  const handleStatusChange = (orderId: string, newStatus: string) => {
-    onUpdateStatus(orderId, newStatus as Order['status']);
-    showToast(`Order ${orderId} updated to ${newStatus}`, 'info');
+  useEffect(() => {
+    loadOrders();
+  }, [page]);
+
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const { orders: data, total: count } = await ordersService.getAll(undefined, page, limit);
+      setOrders(data);
+      setTotal(count);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      showToast('Failed to load orders', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+        const status = newStatus as Order['status'];
+        await ordersService.updateStatus(orderId, status);
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+        showToast(`Order ${orderId} updated to ${newStatus}`, 'info');
+    } catch (error) {
+        console.error('Error updating status:', error);
+        showToast('Failed to update status', 'error');
+    }
+  };
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -30,13 +58,16 @@ const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Items</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {orders.map(order => (
+              {loading ? (
+                  <tr>
+                      <td colSpan={6} className="p-8 text-center text-gray-500">Loading orders...</td>
+                  </tr>
+              ) : orders.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50/50">
                   <td className="p-4 text-sm font-bold text-gray-800">{order.id}</td>
                   <td className="p-4 text-sm text-gray-600">{order.date}</td>
@@ -81,10 +112,31 @@ const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
               ))}
             </tbody>
           </table>
-          {orders.length === 0 && (
+          {!loading && orders.length === 0 && (
               <div className="p-8 text-center text-gray-500">No orders found.</div>
           )}
         </div>
+        
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+            <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
+                <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="p-2 border border-gray-300 rounded-sm hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <ChevronLeft size={16} />
+                </button>
+                <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
+                <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="p-2 border border-gray-300 rounded-sm hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <ChevronRight size={16} />
+                </button>
+            </div>
+        )}
       </div>
 
       <AdminOrderDetails 

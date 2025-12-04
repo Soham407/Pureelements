@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { ProductCardSkeleton } from './SkeletonLoader';
-import { ChevronRight, Filter, X, Search, ChevronDown } from 'lucide-react';
+import { ChevronRight, Filter, X, Search, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Product, NavItem } from '../types';
 import { productsService } from '../lib/database';
 
 import { useOnClickOutside } from '../hooks/useOnClickOutside';
 
 interface Props {
-  products: Product[];
+  // products prop removed as we fetch internally
   navItems: NavItem[];
   initialCategory: string;
   initialSubCategory?: string;
@@ -18,7 +17,7 @@ interface Props {
   onProductClick: (product: Product) => void;
 }
 
-const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
+const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSubCategory, initialSearchQuery, onNavigate, onProductClick }) => {
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeSubCategory, setActiveSubCategory] = useState<string | undefined>(initialSubCategory);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -26,8 +25,13 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
   const [sortOrder, setSortOrder] = useState<'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW'>('RECOMMENDED');
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = React.useRef<HTMLDivElement>(null);
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  
+  // Data Fetching State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const LIMIT = 12;
 
   useOnClickOutside(sortRef, () => setIsSortOpen(false));
 
@@ -35,74 +39,52 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
     setActiveCategory(initialCategory);
     setActiveSubCategory(initialSubCategory);
     setSearchQuery(initialSearchQuery || '');
+    setPage(1); // Reset page on category change
   }, [initialCategory, initialSubCategory, initialSearchQuery]);
 
-  // Backend search when in search mode
+  // Fetch Products
   useEffect(() => {
-    const performSearch = async () => {
-      if (activeCategory === 'SEARCH' && searchQuery.trim()) {
-        setIsSearching(true);
-        try {
-          const { products: results } = await productsService.search(searchQuery.trim(), 1, 100);
-          setSearchResults(results);
-        } catch (error) {
-          console.error('Error searching products:', error);
-          setSearchResults([]);
-        } finally {
-          setIsSearching(false);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        let fetchedProducts: Product[] = [];
+        let fetchedTotal = 0;
+
+        // Map sortOrder to API expected values
+        let apiSort = 'newest';
+        if (sortOrder === 'LOW_HIGH') apiSort = 'price_asc';
+        else if (sortOrder === 'HIGH_LOW') apiSort = 'price_desc';
+        else if (sortOrder === 'RECOMMENDED') apiSort = 'newest'; // Default to newest for now
+
+        if (activeCategory === 'SEARCH' && searchQuery.trim()) {
+           const result = await productsService.search(searchQuery.trim(), page, LIMIT);
+           fetchedProducts = result.products;
+           fetchedTotal = result.total;
+        } else {
+           // Standard Category Fetch (handles OFFERS too now)
+           const result = await productsService.getByCategory(activeCategory, activeSubCategory, page, LIMIT, apiSort);
+           fetchedProducts = result.products;
+           fetchedTotal = result.total;
         }
-      } else {
-        setSearchResults([]);
+
+        setProducts(fetchedProducts);
+        setTotal(fetchedTotal);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    performSearch();
-  }, [activeCategory, searchQuery]);
-
-  const filteredProducts = (() => {
-    // 1. Search Logic - Use backend search results
-    if (activeCategory === 'SEARCH') {
-      return searchResults;
-    }
-
-    // 2. Offer Logic
-    if (activeCategory === 'OFFERS') {
-      return products.filter(product => product.originalPrice && product.originalPrice > product.price);
-    }
-
-    // 3. Category Logic
-    let filtered = products.filter(product => {
-      const productMain = product.mainCategory?.trim().toUpperCase();
-      const currentMain = activeCategory.trim().toUpperCase();
-      return productMain === currentMain;
-    });
-
-    // 4. SubCategory Logic
-    if (activeSubCategory) {
-      filtered = filtered.filter(product => 
-        product.subCategory?.trim().toUpperCase() === activeSubCategory.trim().toUpperCase()
-      );
-    }
-    
-    return filtered;
-  })();
-
-  // Sorting Logic
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortOrder === 'LOW_HIGH') {
-      return a.price - b.price;
-    }
-    if (sortOrder === 'HIGH_LOW') {
-      return b.price - a.price;
-    }
-    return 0; // Recommended (Default order)
-  });
+    fetchProducts();
+  }, [activeCategory, activeSubCategory, searchQuery, page, sortOrder]); // Re-fetch on sort change is inefficient if client-side, but if we move to server-side sort it's needed.
 
   const handleSidebarClick = (categoryName: string, subCategoryName?: string) => {
     setActiveCategory(categoryName);
     setActiveSubCategory(subCategoryName);
     onNavigate(categoryName, subCategoryName);
-    setIsMobileFilterOpen(false); // Close mobile menu after selection
+    setIsMobileFilterOpen(false);
   };
 
   const handleSortChange = (order: 'RECOMMENDED' | 'LOW_HIGH' | 'HIGH_LOW') => {
@@ -116,6 +98,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
 
   const currentNav = navItems.find(item => item.name === activeCategory);
   const isSearchMode = activeCategory === 'SEARCH';
+  const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in min-h-screen pb-24">
@@ -168,7 +151,7 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar - Context Specific (Hidden in Search Mode) */}
+        {/* Sidebar */}
         {!isSearchMode && (
             <div className={`lg:w-1/4 flex-shrink-0 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-white border border-gray-100 p-6 sticky top-24 shadow-sm rounded-sm">
@@ -177,7 +160,6 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                 </h3>
                 
                 <ul className="space-y-1">
-                    {/* 'All' Option */}
                     <li>
                         <button 
                             className={`w-full text-left py-2 px-3 text-sm transition-all duration-200 rounded-sm flex items-center justify-between group ${
@@ -192,7 +174,6 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                         </button>
                     </li>
 
-                    {/* Sub Categories */}
                     {currentNav?.subItems?.map(sub => (
                         <li key={sub}>
                             <button 
@@ -209,12 +190,6 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                         </li>
                     ))}
                 </ul>
-
-                {(!currentNav?.subItems || currentNav.subItems.length === 0) && (
-                    <div className="mt-4 text-xs text-gray-400 italic px-2">
-                        Viewing all items in {formatTitle(activeCategory)}
-                    </div>
-                )}
             </div>
             </div>
         )}
@@ -231,30 +206,65 @@ const ProductListing: React.FC<Props> = ({ products, navItems, initialCategory, 
                     }
                   </h1>
                   <p className="text-gray-500 text-sm mt-1 font-light tracking-wide">
-                    {isSearching ? 'Searching...' : `${sortedProducts.length} ${sortedProducts.length === 1 ? 'Product' : 'Products'} Found`}
+                    {loading ? 'Loading...' : `${total} ${total === 1 ? 'Product' : 'Products'} Found`}
                   </p>
               </div>
            </div>
            
-           {sortedProducts.length > 0 ? (
+           {loading ? (
              <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
-               {sortedProducts.map((product, index) => (
-                 <div key={product.id} className="animate-fade-in-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${index * 50}ms` }}>
-                    <ProductCard 
-                        product={product} 
-                        onClick={() => onProductClick(product)}
-                    />
-                 </div>
-               ))}
-             </div>
-           ) : isSearching ? (
-             <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
-               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+               {[1, 2, 3, 4, 5, 6].map((i) => (
                  <div key={i} className="h-full">
                    <ProductCardSkeleton />
                  </div>
                ))}
              </div>
+           ) : products.length > 0 ? (
+             <>
+                <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
+                {products.map((product, index) => (
+                    <div key={product.id} className="animate-fade-in-up">
+                        <ProductCard 
+                            product={product} 
+                            onClick={() => onProductClick(product)}
+                        />
+                    </div>
+                ))}
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-12 gap-2">
+                        <button 
+                            disabled={page === 1}
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            className="p-2 border border-gray-200 rounded-sm hover:border-[#8B7E66] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className={`w-10 h-10 flex items-center justify-center border rounded-sm transition-colors ${
+                                    page === p 
+                                    ? 'bg-[#8B7E66] text-white border-[#8B7E66]' 
+                                    : 'border-gray-200 hover:border-[#8B7E66] text-gray-600'
+                                }`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                        <button 
+                            disabled={page === totalPages}
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            className="p-2 border border-gray-200 rounded-sm hover:border-[#8B7E66] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
+                )}
+             </>
            ) : (
              <div className="py-24 text-center bg-[#F9F9F9] rounded-lg border border-dashed border-gray-300">
                 <p className="text-gray-500 font-serif text-lg mb-2">

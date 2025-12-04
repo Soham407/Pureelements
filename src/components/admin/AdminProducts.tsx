@@ -71,12 +71,14 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
     setEditingProduct({
         id: 0, // 0 indicates new
         name: '',
+        category: '',
         mainCategory: 'SKIN CARE', // Required for filtering
         price: 0,
         image: 'https://picsum.photos/400/500', 
         description: '',
         isSoldOut: false,
-        isBestSeller: false
+        isBestSeller: false,
+        isFeatured: false
     } as Product);
   };
 
@@ -461,6 +463,16 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                                 className="w-4 h-4 accent-[#8B7E66]"
                               />
                               <span className="text-sm font-medium text-gray-700">Mark as Best Seller</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                name="isFeatured" 
+                                checked={editingProduct.isFeatured || false} 
+                                onChange={handleCheckboxChange}
+                                className="w-4 h-4 accent-[#8B7E66]"
+                              />
+                              <span className="text-sm font-medium text-gray-700">Mark as Featured</span>
                           </label>
                       </div>
                   </div>

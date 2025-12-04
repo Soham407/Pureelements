@@ -1,12 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product } from '../types';
+import { Product, CartItem } from '../types';
 import { useAuth } from './AuthContext';
 import { cartService } from '../lib/database';
-
-interface CartItem extends Product {
-  quantity: number;
-}
 
 interface CartContextType {
   cart: CartItem[];

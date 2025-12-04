@@ -12,6 +12,7 @@ export interface Product {
   howToUse?: string;
   isNew?: boolean;
   isBestSeller?: boolean;
+  isFeatured?: boolean;
   isSoldOut?: boolean;
   rating?: number;
   mainCategory?: string;
@@ -121,4 +122,8 @@ export interface Address {
   state: string;
   pincode: string;
   isDefault: boolean;
+}
+
+export interface CartItem extends Product {
+  quantity: number;
 }

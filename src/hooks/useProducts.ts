@@ -12,13 +12,15 @@ interface UseProductsResult {
   addProduct: (product: Omit<Product, 'id'>) => Promise<Product>;
 }
 
-export const useProducts = (): UseProductsResult => {
+export const useProducts = (enabled: boolean = true): UseProductsResult => {
   const [products, setProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
+    if (!enabled) return;
+    
     setLoading(true);
     setError(null);
     try {
@@ -42,11 +44,15 @@ export const useProducts = (): UseProductsResult => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (enabled) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [fetchData, enabled]);
 
   const updateProduct = async (updatedProduct: Product) => {
     try {

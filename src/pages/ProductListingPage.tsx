@@ -4,13 +4,11 @@ import ProductListing from '../components/ProductListing';
 import { NavItem, Product } from '../types';
 
 interface ProductListingPageProps {
-  allProducts: Product[];
   navItems: NavItem[];
   onProductClick: (product: Product) => void;
 }
 
 const ProductListingPage: React.FC<ProductListingPageProps> = ({ 
-  allProducts, 
   navItems, 
   onProductClick 
 }) => {
@@ -36,7 +34,6 @@ const ProductListingPage: React.FC<ProductListingPageProps> = ({
 
   return (
     <ProductListing
-      products={allProducts}
       navItems={navItems}
       initialCategory={category || 'SKIN CARE'}
       initialSubCategory={subCategory}
