@@ -6,28 +6,25 @@ import { ordersService } from '../../lib/database';
 
 interface Props {
   products: Product[];
+  orders: Order[];
 }
 
-const AdminDashboard: React.FC<Props> = ({ products }) => {
+const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
   const [stats, setStats] = useState({ totalOrders: 0, activeOrders: 0, totalRevenue: 0 });
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const statsData = await ordersService.getStats();
-        setStats(statsData);
-        const { orders } = await ordersService.getAll(undefined, 1, 5);
-        setRecentOrders(orders);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
+    const calculateStats = () => {
+      const totalOrders = orders.length;
+      const activeOrders = orders.filter(o => o.status === 'Processing' || o.status === 'Shipped').length;
+      const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+      
+      setStats({ totalOrders, activeOrders, totalRevenue });
+      setLoading(false);
     };
-    loadData();
-  }, []);
+    
+    calculateStats();
+  }, [orders]);
 
   const lowStockProducts = products.filter(p => p.isSoldOut).length;
 
@@ -81,7 +78,7 @@ const AdminDashboard: React.FC<Props> = ({ products }) => {
         <div className="space-y-4">
           {loading ? (
             <div className="text-center text-gray-500 py-4">Loading recent activity...</div>
-          ) : recentOrders.slice(0, 5).map(order => (
+          ) : orders.slice(0, 5).map(order => (
              <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-4">
                    <div className={`w-2 h-2 rounded-full ${order.status === 'Delivered' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
@@ -93,7 +90,7 @@ const AdminDashboard: React.FC<Props> = ({ products }) => {
                 <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-600">{order.status}</span>
              </div>
           ))}
-          {!loading && recentOrders.length === 0 && (
+          {!loading && orders.length === 0 && (
              <div className="text-center text-gray-500 py-4">No recent activity</div>
           )}
         </div>

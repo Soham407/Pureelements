@@ -52,6 +52,38 @@ function AppContent() {
     updateHero 
   } = useSiteContent();
 
+  // State for Orders
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  useEffect(() => {
+    if (isAdminRoute && isAdminLoggedIn) {
+      const fetchOrders = async () => {
+        try {
+          const { orders: data } = await ordersService.getAll();
+          setOrders(data);
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+        } finally {
+          setOrdersLoading(false);
+        }
+      };
+      fetchOrders();
+    } else {
+      setOrdersLoading(false);
+    }
+  }, [isAdminRoute, isAdminLoggedIn]);
+
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      await ordersService.updateStatus(orderId, status);
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  };
+
   const { closeCart } = useCart();
 
   useEffect(() => {
@@ -274,10 +306,12 @@ function AppContent() {
           ) : (
       <AdminLayout 
         products={allProducts} 
+        orders={orders}
         navItems={navItems}
         slides={heroSlides}
         onUpdateProduct={handleUpdateProduct}
         onAddProduct={handleAddProduct}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
         onUpdateNav={handleUpdateNav}
         onUpdateHero={handleUpdateHero}
         onExitAdmin={() => {

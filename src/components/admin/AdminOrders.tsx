@@ -5,38 +5,21 @@ import { useToast } from '../../contexts/ToastContext';
 import AdminOrderDetails from './AdminOrderDetails';
 import { ordersService } from '../../lib/database';
 
-const AdminOrders: React.FC = () => {
+interface Props {
+  orders: Order[];
+  onUpdateStatus: (orderId: string, status: Order['status']) => void;
+}
+
+const AdminOrders: React.FC<Props> = ({ orders, onUpdateStatus }) => {
   const { showToast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const limit = 20;
-
-  useEffect(() => {
-    loadOrders();
-  }, [page]);
-
-  const loadOrders = async () => {
-    setLoading(true);
-    try {
-      const { orders: data, total: count } = await ordersService.getAll(undefined, page, limit);
-      setOrders(data);
-      setTotal(count);
-    } catch (error) {
-      console.error('Error loading orders:', error);
-      showToast('Failed to load orders', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
         const status = newStatus as Order['status'];
-        await ordersService.updateStatus(orderId, status);
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+        await onUpdateStatus(orderId, status);
         showToast(`Order ${orderId} updated to ${newStatus}`, 'info');
     } catch (error) {
         console.error('Error updating status:', error);
@@ -44,7 +27,8 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(orders.length / limit);
+  const currentOrders = orders.slice((page - 1) * limit, page * limit);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -63,11 +47,7 @@ const AdminOrders: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                  <tr>
-                      <td colSpan={6} className="p-8 text-center text-gray-500">Loading orders...</td>
-                  </tr>
-              ) : orders.map(order => (
+              {currentOrders.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50/50">
                   <td className="p-4 text-sm font-bold text-gray-800">{order.id}</td>
                   <td className="p-4 text-sm text-gray-600">{order.date}</td>
@@ -112,13 +92,13 @@ const AdminOrders: React.FC = () => {
               ))}
             </tbody>
           </table>
-          {!loading && orders.length === 0 && (
+          {orders.length === 0 && (
               <div className="p-8 text-center text-gray-500">No orders found.</div>
           )}
         </div>
         
         {/* Pagination */}
-        {!loading && totalPages > 1 && (
+        {totalPages > 1 && (
             <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
                 <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
