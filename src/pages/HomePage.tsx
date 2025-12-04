@@ -131,10 +131,12 @@ const HomePage: React.FC<HomePageProps> = ({
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left Static Banner */}
                     <div className="w-full lg:w-1/3 relative overflow-hidden h-[300px] lg:h-auto group rounded-sm shadow-md">
-                       <img src="https://picsum.photos/id/201/600/800" className="w-full h-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-1000" alt="Bestsellers" />
-                       <div className="absolute inset-0 flex items-center justify-center p-8 bg-black/10">
-                          <h2 className="text-white font-serif text-4xl md:text-5xl drop-shadow-lg text-center leading-tight">Our<br/>Bestsellers</h2>
-                          <p className="absolute bottom-8 text-white/80 text-sm uppercase tracking-widest">Trending Now</p>
+                       <img src="/src/assets/bestsellers-bg.png" className="w-full h-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-1000" alt="Bestsellers" />
+                       <div className="absolute inset-0 flex flex-col items-start justify-center p-8 bg-black/10">
+                          <h2 className="text-white font-serif text-4xl md:text-5xl drop-shadow-lg text-left leading-tight mb-4">Our<br/>Bestsellers</h2>
+                          <button onClick={() => navigate('/shop/BESTSELLERS')} className="bg-white text-black px-6 py-2 text-sm uppercase tracking-widest hover:bg-[#C19A6B] hover:text-white transition-colors">
+                            View All
+                          </button>
                        </div>
                     </div>
 

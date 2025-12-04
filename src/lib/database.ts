@@ -148,9 +148,9 @@ export const productsService = {
     }
     
     // Perform the update and get the updated row
-    const { data, error } = await supabase
-      .from('products')
-      .update(dbUpdates as any)
+    const { data, error } = await (supabase
+      .from('products') as any)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -222,18 +222,26 @@ export const productsService = {
   },
 
   async getBestsellers(limit: number = 5): Promise<Product[]> {
-    // Call Supabase RPC function for bestsellers
-    // If the function doesn't exist yet, fall back to client-side calculation
-    const { data, error } = await supabase.rpc('get_bestsellers', { limit_count: limit } as any);
+    // 1. Try to get manually marked bestsellers first
+    const { data: manualBestsellers, error: manualError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_best_seller', true)
+      .limit(limit);
+
+    if (!manualError && manualBestsellers && manualBestsellers.length > 0) {
+      return manualBestsellers.map(productFromDbFormat);
+    }
+
+    // 2. Fallback to sales-based bestsellers if no manual ones found
+    const { data, error } = await (supabase as any).rpc('get_bestsellers', { limit_count: limit });
     
     if (error) {
-      // If RPC function doesn't exist, return empty array (will be handled by fallback)
-      console.warn('get_bestsellers RPC function not found. Please create it in Supabase.', error);
+      console.warn('get_bestsellers RPC function error or not found:', error);
       return [];
     }
     
     if (!data) return [];
-    // Transform from snake_case to camelCase
     return (data as any).map(productFromDbFormat);
   }
 };
@@ -351,10 +359,13 @@ export const ordersService = {
       .single();
     
     if (orderError) throw orderError;
+    if (!orderData) throw new Error('Failed to create order');
     
+    const safeOrderData = orderData as any;
+
     // Create order items
     const orderItems = order.items.map(item => ({
-      order_id: orderData.id,
+      order_id: safeOrderData.id,
       product_id: item.productId,
       product_name: item.productName,
       quantity: item.quantity,
@@ -369,22 +380,22 @@ export const ordersService = {
     if (itemsError) throw itemsError;
     
     return {
-      id: orderData.id,
-      date: new Date(orderData.created_at).toLocaleDateString('en-US', { 
+      id: safeOrderData.id,
+      date: new Date(safeOrderData.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric', 
         year: 'numeric' 
       }),
-      status: orderData.status as Order['status'],
-      total: orderData.total,
+      status: safeOrderData.status as Order['status'],
+      total: safeOrderData.total,
       items: order.items
     };
   },
 
   async updateStatus(id: string, status: Order['status']): Promise<Order> {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status } as any)
+    const { data, error } = await (supabase
+      .from('orders') as any)
+      .update({ status })
       .eq('id', id)
       .select(`
         *,
@@ -545,10 +556,10 @@ export const cartService = {
     
     if (existing) {
       // Update quantity
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity: existing.quantity + quantity } as any)
-        .eq('id', existing.id);
+      const { error } = await (supabase
+        .from('cart_items') as any)
+        .update({ quantity: (existing as any).quantity + quantity })
+        .eq('id', (existing as any).id);
       
       if (error) throw error;
     } else {
@@ -571,9 +582,9 @@ export const cartService = {
       return;
     }
     
-    const { error } = await supabase
-      .from('cart_items')
-      .update({ quantity } as any)
+    const { error } = await (supabase
+      .from('cart_items') as any)
+      .update({ quantity })
       .eq('user_id', userId)
       .eq('product_id', productId);
     
@@ -687,18 +698,21 @@ export const addressesService = {
       .single();
     
     if (error) throw error;
+    if (!data) throw new Error('Failed to create address');
+
+    const safeData = data as any;
 
     return {
-      id: data.id,
-      userId: data.user_id,
-      fullName: data.full_name,
-      phone: data.phone,
-      addressLine1: data.address_line1,
-      addressLine2: data.address_line2,
-      city: data.city,
-      state: data.state,
-      pincode: data.pincode,
-      isDefault: data.is_default
+      id: safeData.id,
+      userId: safeData.user_id,
+      fullName: safeData.full_name,
+      phone: safeData.phone,
+      addressLine1: safeData.address_line1,
+      addressLine2: safeData.address_line2,
+      city: safeData.city,
+      state: safeData.state,
+      pincode: safeData.pincode,
+      isDefault: safeData.is_default
     };
   },
 
@@ -718,26 +732,29 @@ export const addressesService = {
     if (updates.pincode !== undefined) dbUpdates.pincode = updates.pincode;
     if (updates.isDefault !== undefined) dbUpdates.is_default = updates.isDefault;
 
-    const { data, error } = await supabase
-      .from('addresses')
-      .update(dbUpdates as any)
+    const { data, error } = await (supabase
+      .from('addresses') as any)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
     
     if (error) throw error;
+    if (!data) throw new Error('Failed to update address');
+
+    const safeData = data as any;
 
     return {
-      id: data.id,
-      userId: data.user_id,
-      fullName: data.full_name,
-      phone: data.phone,
-      addressLine1: data.address_line1,
-      addressLine2: data.address_line2,
-      city: data.city,
-      state: data.state,
-      pincode: data.pincode,
-      isDefault: data.is_default
+      id: safeData.id,
+      userId: safeData.user_id,
+      fullName: safeData.full_name,
+      phone: safeData.phone,
+      addressLine1: safeData.address_line1,
+      addressLine2: safeData.address_line2,
+      city: safeData.city,
+      state: safeData.state,
+      pincode: safeData.pincode,
+      isDefault: safeData.is_default
     };
   },
 
@@ -751,9 +768,9 @@ export const addressesService = {
   },
 
   async unsetDefault(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from('addresses')
-      .update({ is_default: false } as any)
+    const { error } = await (supabase
+      .from('addresses') as any)
+      .update({ is_default: false })
       .eq('user_id', userId);
     
     if (error) throw error;
