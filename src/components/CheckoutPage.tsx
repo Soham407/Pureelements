@@ -9,6 +9,7 @@ import { Order, Address } from '../types';
 import { ChevronRight, CreditCard, Truck, CheckCircle, ArrowRight, MapPin, Plus } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { ordersService, addressesService } from '../lib/database';
+import { supabase } from '../lib/supabase';
 import useRazorpay from '../hooks/useRazorpay';
 
 // Zod schema for checkout form validation
@@ -165,14 +166,29 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome, onPlaceOrder }) => {
           return;
         }
 
+        // Call Edge Function to create Razorpay Order
+        const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
+          body: { 
+            items: orderItems, 
+            shipping_address: data.address + ', ' + data.city + ', ' + data.state + ' - ' + data.pincode 
+          }
+        });
+
+        if (orderError) {
+          console.error('Error creating Razorpay order:', orderError);
+          showToast('Failed to initiate payment. Please try again.', 'error');
+          setLoading(false);
+          return;
+        }
+
         const options = {
           key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: total * 100, // Amount in paise
-          currency: "INR",
+          amount: orderData.amount, // Amount from backend
+          currency: orderData.currency,
           name: "Pure Elements",
           description: "Order Payment",
           image: "https://via.placeholder.com/150", // Placeholder logo
-          order_id: "", // In a real app, generate Razorpay Order ID on backend
+          order_id: orderData.order_id, // Order ID from backend
           handler: async function (response: any) {
             // Payment Success
             try {

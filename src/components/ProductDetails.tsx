@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { Star, Minus, Plus, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, Heart, Sparkles, Clock } from 'lucide-react';
@@ -7,6 +6,7 @@ import ProductCard from './ProductCard';
 import { useToast } from '../contexts/ToastContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import ImageWithFallback from './ImageWithFallback';
+import DOMPurify from 'dompurify';
 
 interface Props {
   product: Product;
@@ -286,7 +286,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
 
             <div 
               className="text-gray-600 leading-relaxed font-light mb-8 border-b border-gray-100 pb-8"
-              dangerouslySetInnerHTML={{ __html: product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment." }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description || "Experience the purity of nature with this meticulously crafted Ayurvedic formulation. Enriched with potent herbs and natural extracts, it provides deep nourishment.") }}
             />
             
             {/* --- FEATURE: FREQUENTLY BOUGHT TOGETHER --- */}
@@ -333,7 +333,7 @@ const ProductDetails: React.FC<Props> = ({ product, allProducts, onNavigate, onP
                         }`}>
                             <div className="text-sm text-gray-600 leading-relaxed font-light">
                                 {section === 'Description' && (
-                                    <div dangerouslySetInnerHTML={{ __html: product.fullDescription || product.description || '' }} />
+                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.fullDescription || product.description || '') }} />
                                 )}
                                 {section === 'Ingredients' && (product.ingredients || "Full ingredient list not available.")}
                                 {section === 'How to Use' && (product.howToUse || "Apply gently on affected area.")}
