@@ -76,6 +76,7 @@ export interface Slide {
   title: string;
   description: string;
   buttonText: string;
+  link?: string;
 }
 
 export interface User {
@@ -126,4 +127,43 @@ export interface Address {
 
 export interface CartItem extends Product {
   quantity: number;
+}
+
+export interface ContentBlock {
+  id: string;
+  section_name: string;
+  content: any;
+}
+
+export interface ConcernsContent {
+  title: string;
+  image: string;
+  link: string;
+}
+
+export interface GiftingContent {
+  title: string;
+  subtitle: string;
+  image: string;
+  link: string;
+}
+
+export interface BestsellersConfig {
+  backgroundImage: string;
+  title: string;
+  buttonText: string;
+}
+
+export interface VideoContent {
+  thumbnail: string;
+  videoUrl: string;
+  title: string;
+  subtitle: string;
+}
+
+export interface StoreContent {
+  id: number;
+  name: string;
+  image: string;
+  location: string;
 }

@@ -5,19 +5,29 @@ import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
 import AdminCategories from './AdminCategories';
-import AdminBanners from './AdminBanners';
-import { Product, Order, NavItem, Slide } from '../../types';
+import AdminContent from './AdminContent';
+import { Product, Order, NavItem, Slide, ConcernsContent, BestsellersConfig, VideoContent, StoreContent, Testimonial, Category } from '../../types';
 
 interface Props {
   products: Product[];
   orders: Order[];
   navItems: NavItem[];
   slides: Slide[];
+  // Dynamic Content Props
+  concerns: ConcernsContent[];
+  categories: Category[];
+  bestsellersConfig: BestsellersConfig | null;
+  videoSection: VideoContent | null;
+  testimonials: Testimonial[];
+  stores: StoreContent[];
+  
   onUpdateProduct: (product: Product) => void;
   onAddProduct: (product: Product) => void;
   onUpdateOrderStatus: (orderId: string, status: Order['status']) => void;
   onUpdateNav: (items: NavItem[]) => void;
   onUpdateHero: (slides: Slide[]) => void;
+  onUpdateContent: (section: string, content: any) => Promise<void>;
+  onUpdateCategories: (categories: Category[]) => Promise<void>;
   onExitAdmin: () => void;
 }
 
@@ -28,11 +38,19 @@ const AdminLayout: React.FC<Props> = ({
   orders, 
   navItems,
   slides,
+  concerns,
+  categories,
+  bestsellersConfig,
+  videoSection,
+  testimonials,
+  stores,
   onUpdateProduct, 
   onAddProduct, 
   onUpdateOrderStatus, 
   onUpdateNav,
   onUpdateHero,
+  onUpdateContent,
+  onUpdateCategories,
   onExitAdmin 
 }) => {
   const [currentView, setCurrentView] = useState<AdminView>('DASHBOARD');
@@ -46,7 +64,20 @@ const AdminLayout: React.FC<Props> = ({
       case 'ORDERS':
         return <AdminOrders orders={orders} onUpdateStatus={onUpdateOrderStatus} />;
       case 'CONTENT':
-        return <AdminBanners slides={slides} onUpdateHero={onUpdateHero} />;
+        return (
+          <AdminContent 
+            slides={slides}
+            concerns={concerns}
+            categories={categories}
+            bestsellersConfig={bestsellersConfig}
+            videoSection={videoSection}
+            testimonials={testimonials}
+            stores={stores}
+            onUpdateHero={onUpdateHero}
+            onUpdateContent={onUpdateContent}
+            onUpdateCategories={onUpdateCategories}
+          />
+        );
       case 'SETTINGS':
         return <AdminCategories navItems={navItems} onUpdateNav={onUpdateNav} />;
       default:

@@ -1,26 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
-import { NavItem, Slide, Category } from '../types';
-import { navItemsService, heroSlidesService, categoriesService } from '../lib/database';
-// import { NAV_ITEMS, INITIAL_SLIDES, CATEGORIES } from '../constants'; // Removed constants
+import { NavItem, Slide, Category, ContentBlock, ConcernsContent, GiftingContent, BestsellersConfig, VideoContent, StoreContent, Testimonial } from '../types';
+import { navItemsService, heroSlidesService, categoriesService, contentService } from '../lib/database';
+import { CONCERNS, TESTIMONIALS, STORES } from '../constants'; // Fallback constants
 
 interface UseSiteContentResult {
   navItems: NavItem[];
   heroSlides: Slide[];
   categories: Category[];
+  
+  // Dynamic Sections
+  concerns: ConcernsContent[];
+  gifting: GiftingContent[];
+  bestsellersConfig: BestsellersConfig | null;
+  videoSection: VideoContent | null;
+  testimonials: Testimonial[];
+  stores: StoreContent[];
+  
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
   updateNav: (navItems: NavItem[]) => Promise<NavItem[]>;
   updateHero: (slides: Slide[]) => Promise<Slide[]>;
+  updateContentBlock: (sectionName: string, content: any) => Promise<void>;
 }
 
 export const useSiteContent = (): UseSiteContentResult => {
-  // Initialize with empty arrays to avoid flash of content if we want strict loading state
-  // Or initialize with constants if we want optimistic UI (but goal is to remove constants)
-  // Let's start empty and rely on loading state
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [heroSlides, setHeroSlides] = useState<Slide[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Dynamic Content State
+  const [concerns, setConcerns] = useState<ConcernsContent[]>(CONCERNS as any);
+  const [gifting, setGifting] = useState<GiftingContent[]>([]);
+  const [bestsellersConfig, setBestsellersConfig] = useState<BestsellersConfig | null>(null);
+  const [videoSection, setVideoSection] = useState<VideoContent | null>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(TESTIMONIALS);
+  const [stores, setStores] = useState<StoreContent[]>(STORES);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -31,15 +47,34 @@ export const useSiteContent = (): UseSiteContentResult => {
          throw new Error('Supabase URL is missing');
        }
 
-      const [navData, slidesData, catsData] = await Promise.all([
+      const [navData, slidesData, catsData, contentBlocks] = await Promise.all([
         navItemsService.getAll(),
         heroSlidesService.getAll(),
-        categoriesService.getAll()
+        categoriesService.getAll(),
+        contentService.getAllBlocks().catch(err => {
+            console.warn("Failed to fetch content blocks, using defaults", err);
+            return [];
+        })
       ]);
 
       setNavItems(navData.length > 0 ? navData : []);
       setHeroSlides(slidesData.length > 0 ? slidesData : []);
       setCategories(catsData.length > 0 ? catsData : []);
+
+      // Parse Content Blocks
+      if (contentBlocks.length > 0) {
+          const blocksMap = contentBlocks.reduce<Record<string, any>>((acc, block) => {
+              acc[block.section_name] = block.content;
+              return acc;
+          }, {});
+
+          if (blocksMap['shop_by_concerns']) setConcerns(blocksMap['shop_by_concerns']);
+          if (blocksMap['gifting_collection']) setGifting(blocksMap['gifting_collection']);
+          if (blocksMap['bestsellers_config']) setBestsellersConfig(blocksMap['bestsellers_config']);
+          if (blocksMap['video_section']) setVideoSection(blocksMap['video_section']);
+          if (blocksMap['testimonials']) setTestimonials(blocksMap['testimonials']);
+          if (blocksMap['stores']) setStores(blocksMap['stores']);
+      }
 
     } catch (err: any) {
       console.error('Error fetching site content:', err);
@@ -73,5 +108,14 @@ export const useSiteContent = (): UseSiteContentResult => {
     }
   };
 
-  return { navItems, heroSlides, categories, loading, error, refresh: fetchData, updateNav, updateHero };
+  const updateContentBlock = async (sectionName: string, content: any) => {
+      await contentService.updateBlock(sectionName, content);
+      await fetchData(); // Refresh all to be safe or update local state optimistically
+  };
+
+  return { 
+      navItems, heroSlides, categories, 
+      concerns, gifting, bestsellersConfig, videoSection, testimonials, stores,
+      loading, error, refresh: fetchData, updateNav, updateHero, updateContentBlock 
+  };
 };

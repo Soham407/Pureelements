@@ -20,7 +20,7 @@ import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import NotFoundPage from './pages/NotFoundPage';
-import { ordersService } from './lib/database';
+import { ordersService, categoriesService } from './lib/database';
 import { useProducts } from './hooks/useProducts';
 import { useSiteContent } from './hooks/useSiteContent';
 import Loader from './components/Loader';
@@ -47,10 +47,18 @@ function AppContent() {
   const { 
     navItems, 
     heroSlides, 
-    categories, 
+    categories,
+    concerns,
+    gifting,
+    bestsellersConfig,
+    videoSection,
+    testimonials,
+    stores,
     loading: contentLoading, 
+    refresh: refreshContent,
     updateNav, 
-    updateHero 
+    updateHero,
+    updateContentBlock
   } = useSiteContent();
 
   // State for Orders
@@ -237,6 +245,26 @@ function AppContent() {
     }
   };
 
+  const handleUpdateContent = async (section: string, content: any) => {
+    try {
+      await updateContentBlock(section, content);
+    } catch (error) {
+       console.error(`Error updating content for ${section}:`, error);
+       throw error;
+    }
+  };
+
+  const handleUpdateCategories = async (updatedCategories: Category[]) => {
+    try {
+      await categoriesService.updateAll(updatedCategories);
+      // Refresh content to get updated categories
+      await refreshContent();
+    } catch (error) {
+      console.error('Error updating categories:', error);
+      throw error;
+    }
+  };
+
       return (
     <div className={`min-h-screen bg-brand-surface font-sans relative overflow-x-hidden ${!isAdminRoute ? 'pt-[100px] lg:pt-[160px]' : ''}`}>
       {!isAdminRoute && <Navbar onNavigate={handleNavigate} navItems={navItems} />}
@@ -248,6 +276,12 @@ function AppContent() {
           <HomePage
             heroSlides={heroSlides}
             categories={categories}
+            concerns={concerns}
+            gifting={gifting}
+            bestsellersConfig={bestsellersConfig}
+            videoSection={videoSection}
+            testimonials={testimonials}
+            stores={stores}
             onProductClick={handleProductClick}
           />
         } />
@@ -305,11 +339,21 @@ function AppContent() {
         orders={orders}
         navItems={navItems}
         slides={heroSlides}
+        // New Props
+        concerns={concerns}
+        categories={categories}
+        bestsellersConfig={bestsellersConfig}
+        videoSection={videoSection}
+        testimonials={testimonials}
+        stores={stores}
+        // Actions
         onUpdateProduct={handleUpdateProduct}
         onAddProduct={handleAddProduct}
         onUpdateOrderStatus={handleUpdateOrderStatus}
         onUpdateNav={handleUpdateNav}
         onUpdateHero={handleUpdateHero}
+        onUpdateContent={handleUpdateContent}
+        onUpdateCategories={handleUpdateCategories}
         onExitAdmin={() => {
           setIsAdminLoggedIn(false);
           handleNavigate('HOME');

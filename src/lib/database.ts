@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Database } from '../types/supabase';
-import { Product, Order, User, NavItem, Slide, Category, Review, Address } from '../types';
+import { Product, Order, User, NavItem, Slide, Category, Review, Address, ContentBlock } from '../types';
 import { productsService, productFromDbFormat, productToDbFormat } from '../services/products.service';
 import { ordersService } from '../services/orders.service';
 
@@ -52,6 +52,10 @@ export const navItemsService = {
   }
 };
 
+// ... (existing code for other services) ...
+
+
+
 // ==================== HERO SLIDES ====================
 export const heroSlidesService = {
   async getAll(): Promise<Slide[]> {
@@ -94,6 +98,31 @@ export const categoriesService = {
     
     if (error) throw error;
     return data || [];
+  },
+
+  async update(id: number, updates: Partial<Category>): Promise<Category> {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateAll(categories: Category[]): Promise<Category[]> {
+    // Update each category individually
+    const updatedCategories: Category[] = [];
+    for (const category of categories) {
+      const { id, ...updates } = category;
+      if (id) {
+        const updated = await this.update(id, updates);
+        updatedCategories.push(updated);
+      }
+    }
+    return updatedCategories;
   }
 };
 
@@ -362,6 +391,56 @@ export const newsletterService = {
         throw new Error('You are already subscribed!');
       }
       throw error;
+    }
+  }
+};
+
+// ==================== CONTENT MANAGEMENT ====================
+export const contentService = {
+  async getBlock(sectionName: string): Promise<any> {
+    const { data, error } = await (supabase
+      .from('content_blocks' as any) as any)
+      .select('content')
+      .eq('section_name', sectionName)
+      .single();
+    
+    if (error) {
+      // Return null instead of throwing if block doesn't exist yet
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    
+    return data?.content;
+  },
+
+  async getAllBlocks(): Promise<ContentBlock[]> {
+    const { data, error } = await (supabase
+      .from('content_blocks' as any) as any)
+      .select('*')
+      
+    if (error) throw error;
+    return (data as any) || [];
+  },
+
+  async updateBlock(sectionName: string, content: any): Promise<void> {
+    // Check if exists
+    const { data: existing } = await (supabase
+      .from('content_blocks' as any) as any)
+      .select('id')
+      .eq('section_name', sectionName)
+      .single();
+
+    if (existing) {
+       const { error } = await (supabase
+        .from('content_blocks' as any) as any)
+        .update({ content, updated_at: new Date().toISOString() })
+        .eq('section_name', sectionName);
+       if (error) throw error;
+    } else {
+       const { error } = await (supabase
+        .from('content_blocks' as any) as any)
+        .insert({ section_name: sectionName, content } as any);
+       if (error) throw error;
     }
   }
 };
