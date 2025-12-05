@@ -14,54 +14,39 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  // Use useRef to track scroll position without triggering re-renders of the effect
-  const lastScrollY = useRef(0);
-  
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const lastScrollRef = useRef(0);
   
   const { cartCount, openCart } = useCart();
   const { openAuthModal, isAuthenticated, user } = useAuth();
 
+  // Restore scroll-aware behavior but throttle with rAF to reduce re-renders
   useEffect(() => {
-    let lastScrollYVal = window.scrollY;
     let ticking = false;
 
-    const updateNavbar = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Sticky/Scrolled state
-      if (currentScrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        setIsScrolled(currentY > 10);
 
-      // Show/Hide logic
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollYVal && currentScrollY > 100) {
-        // Scrolling down & past header
-        setIsVisible(false);
-      } else {
-        // Scrolling up
-        setIsVisible(true);
-      }
+        if (currentY < 10) {
+          setIsVisible(true);
+        } else if (currentY > lastScrollRef.current && currentY > 100) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
 
-      lastScrollYVal = currentScrollY;
-      ticking = false;
+        lastScrollRef.current = currentY;
+        ticking = false;
+      });
     };
 
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateNavbar);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleNavClick = (name: string, subItem?: string) => {
@@ -95,8 +80,8 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   return (
     <nav 
       className={`bg-white fixed top-0 z-50 font-sans w-full transition-transform duration-300 ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      } ${isScrolled ? 'shadow-md' : 'shadow-none'}`}
+        isVisible ? 'translate-y-0 shadow-md' : '-translate-y-full shadow-none'
+      }`}
     >
       {/* Top Row: Search, Logo, Actions */}
       <div className="container mx-auto px-4 pt-4 pb-4 md:pt-6">
@@ -104,7 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
           
           {/* Left: Search Bar (Desktop) */}
           <div className="hidden lg:flex items-center w-full lg:w-1/3">
-            <div className="flex w-full max-w-[280px]">
+            <div className="flex w-full max-w-[320px]">
               <input 
                 type="text" 
                 placeholder="Search products..." 
@@ -116,6 +101,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               <button 
                 onClick={handleSearchSubmit}
                 className="bg-brand-accent px-4 py-2 flex items-center justify-center hover:bg-brand-accent/90 transition-colors rounded-r-sm"
+                aria-label="Search products"
               >
                 <Search className="h-5 w-5 text-gray-800" strokeWidth={2} />
               </button>
@@ -124,7 +110,11 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
           {/* Center: Logo (Mobile & Desktop) */}
           <div className="flex w-full lg:w-auto items-center justify-between lg:justify-center lg:flex-grow">
-            <button className="lg:hidden p-2 -ml-2 text-gray-700" onClick={() => setIsOpen(!isOpen)}>
+            <button
+              className="lg:hidden p-2 -ml-2 text-gray-700"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             
@@ -147,7 +137,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
             </div>
 
             {/* Mobile Cart Icon */}
-            <div className="lg:hidden relative mr-1 cursor-pointer" onClick={openCart}>
+            <div className="lg:hidden relative mr-1 cursor-pointer" onClick={openCart} aria-label="Open cart">
               <ShoppingCart className="h-6 w-6 text-brand-secondary" />
               <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {cartCount}
@@ -157,7 +147,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
           {/* Right: Actions (Desktop) */}
           <div className="hidden lg:flex items-center justify-end w-full lg:w-1/3 gap-6">
-            <div className="relative group cursor-pointer" onClick={openCart}>
+            <div className="relative group cursor-pointer" onClick={openCart} aria-label="Open cart">
               <ShoppingCart className="h-7 w-7 text-brand-secondary" strokeWidth={1.5} />
               <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}

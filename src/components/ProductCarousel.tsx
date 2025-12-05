@@ -113,6 +113,29 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
         <ChevronRight size={24} />
       </button>
 
+      {/* Dots / Tabs */}
+      <div
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm"
+        role="tablist"
+        aria-label="Product carousel slides"
+      >
+        {products.map((_, idx) => {
+          const isActive = currentIndex % totalItems === idx;
+          return (
+            <button
+              key={`dot-${idx}`}
+              onClick={() => setCurrentIndex(idx)}
+              role="tab"
+              aria-selected={isActive}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                isActive ? 'bg-brand-dark w-6' : 'bg-gray-400/60 w-2'
+              }`}
+            />
+          );
+        })}
+      </div>
+
       {/* Pause/Play Control */}
       <button
         onClick={() => setIsPaused(!isPaused)}

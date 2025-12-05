@@ -77,12 +77,12 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
     >
       {/* Badges */}
       {product.isBestSeller && !product.isSoldOut && (
-        <div className="absolute top-2 right-2 bg-green-600 text-white text-[11px] px-2 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
+        <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
           Top Trending
         </div>
       )}
       {product.isSoldOut && (
-        <div className="absolute top-0 left-0 bg-brand-secondary text-white text-[11px] px-3 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
+        <div className="absolute top-0 left-0 bg-brand-secondary text-white text-xs px-3 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
           Sold Out
         </div>
       )}
@@ -149,7 +149,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
           <h3 className="text-sm font-serif font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] leading-relaxed group-hover:text-brand-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-[11px] text-gray-500 uppercase tracking-wider mt-2 mb-2 h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap">{product.category}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mt-2 mb-2 h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap">{product.category}</p>
           
           {/* Star Ratings */}
           {renderStars(product.rating)}

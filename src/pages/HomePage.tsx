@@ -80,14 +80,12 @@ const HomePage: React.FC<HomePageProps> = ({
       {/* Featured Products */}
       <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <RevealOnScroll delay={200}>
-              <SectionHeader title="Featured Products" />
-              <ProductCarousel 
-                products={featuredProducts}
-                onProductClick={onProductClick}
-                itemsPerViewDesktop={4}
-              />
-          </RevealOnScroll>
+          <SectionHeader title="Featured Products" />
+          <ProductCarousel 
+            products={featuredProducts}
+            onProductClick={onProductClick}
+            itemsPerViewDesktop={4}
+          />
         </div>
       </section>
 
