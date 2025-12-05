@@ -62,7 +62,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
             className={`${star <= rating ? 'fill-brand-accent text-brand-accent' : 'text-gray-300'}`} 
           />
         ))}
-        <span className="text-[10px] text-gray-400 ml-1">({rating})</span>
+        <span className="text-xs text-gray-400 ml-1">({rating})</span>
       </div>
     );
   };
@@ -77,12 +77,12 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
     >
       {/* Badges */}
       {product.isBestSeller && !product.isSoldOut && (
-        <div className="absolute top-2 right-2 bg-green-600 text-white text-[9px] md:text-[10px] px-2 py-1 uppercase font-bold z-10 shadow-sm">
+        <div className="absolute top-2 right-2 bg-green-600 text-white text-[11px] px-2 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
           Top Trending
         </div>
       )}
       {product.isSoldOut && (
-        <div className="absolute top-0 left-0 bg-brand-secondary text-white text-[9px] md:text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm">
+        <div className="absolute top-0 left-0 bg-brand-secondary text-white text-[11px] px-3 py-1 uppercase font-bold z-10 shadow-sm tracking-wider">
           Sold Out
         </div>
       )}
@@ -108,20 +108,22 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
         {!isOffer && (
           <div className="absolute inset-x-0 bottom-0 p-2 md:p-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300 flex flex-col gap-2 justify-end pb-4 md:pb-6 bg-gradient-to-t from-white/95 via-white/80 to-transparent">
             {product.isSoldOut ? (
-              <button disabled className="w-full bg-gray-400 text-white px-4 py-2 text-[10px] md:text-xs uppercase font-medium cursor-not-allowed tracking-wider">
+              <button disabled className="w-full bg-gray-400 text-white px-4 py-2 text-xs uppercase font-medium cursor-not-allowed tracking-wider">
                 Sold Out
               </button>
             ) : (
               <div className="flex flex-col md:flex-row gap-1 md:gap-2 w-full">
                 <button 
                   onClick={handleAddToCart}
-                  className="flex-[2] bg-brand-primary text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-brand-dark transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  className="flex-[2] bg-brand-primary text-white py-2 text-xs uppercase font-medium hover:bg-brand-dark transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  aria-label={`Add ${product.name} to cart`}
                 >
                   Add to Cart
                 </button>
                 <button 
                   onClick={handleBuyNow}
-                  className="flex-[2] bg-brand-dark text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-black transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  className="flex-[2] bg-brand-dark text-white py-2 text-xs uppercase font-medium hover:bg-black transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  aria-label={`Buy ${product.name} now`}
                 >
                   Buy Now
                 </button>
@@ -131,6 +133,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
                     isWishlisted ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-400 hover:text-red-500'
                   }`}
                   title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+                  aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                 >
                   <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
                 </button>
@@ -143,17 +146,17 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
       {/* Details */}
       <div className={`p-3 md:p-4 text-center flex-grow flex flex-col justify-between ${isOffer ? 'pt-4 md:pt-6' : ''}`}>
         <div>
-          <h3 className="text-xs md:text-sm font-serif font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] leading-relaxed group-hover:text-brand-primary transition-colors">
+          <h3 className="text-sm font-serif font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] leading-relaxed group-hover:text-brand-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-[10px] md:text-[11px] text-gray-500 uppercase tracking-wider mt-2 mb-2 h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap">{product.category}</p>
+          <p className="text-[11px] text-gray-500 uppercase tracking-wider mt-2 mb-2 h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap">{product.category}</p>
           
           {/* Star Ratings */}
           {renderStars(product.rating)}
           
           <div className="flex justify-center items-center gap-2 text-sm mb-4">
             {product.originalPrice && (
-              <span className="text-gray-400 line-through text-[10px] md:text-xs">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+              <span className="text-gray-400 line-through text-xs">₹{product.originalPrice.toLocaleString('en-IN')}</span>
             )}
             <span className="font-bold text-gray-800 text-sm">₹{product.price.toLocaleString('en-IN')}</span>
           </div>
@@ -164,20 +167,22 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
             <div className="flex flex-col gap-2">
               <button 
                 disabled={product.isSoldOut}
-                className={`w-full py-2 text-[10px] md:text-xs uppercase font-bold tracking-widest transition-colors ${
+                className={`w-full py-2 text-xs uppercase font-bold tracking-widest transition-colors ${
                   product.isSoldOut 
                     ? 'bg-gray-300 text-white cursor-not-allowed' 
                     : 'bg-brand-primary text-white hover:bg-brand-secondary'
                 }`}
                 onClick={!product.isSoldOut ? handleAddToCart : undefined}
+                aria-label={product.isSoldOut ? "Sold Out" : `Add ${product.name} to cart`}
               >
                 {product.isSoldOut ? 'Sold Out' : 'Add to Cart'}
               </button>
               {!product.isSoldOut && (
                 <div className="flex gap-2">
                   <button 
-                    className="flex-[4] py-2 text-[10px] md:text-xs uppercase font-bold tracking-widest transition-colors border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
+                    className="flex-[4] py-2 text-xs uppercase font-bold tracking-widest transition-colors border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
                     onClick={handleBuyNow}
+                    aria-label={`Buy ${product.name} now`}
                   >
                     Buy Now
                   </button>
@@ -187,6 +192,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
                       isWishlisted ? 'border-red-500 text-red-500' : 'border-brand-primary text-brand-primary hover:bg-gray-50 hover:text-red-500'
                     }`}
                     title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+                    aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                   >
                     <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
                   </button>

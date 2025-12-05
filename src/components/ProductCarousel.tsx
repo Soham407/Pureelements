@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { Product } from '../types';
 
@@ -18,6 +18,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const extendedProducts = [...products, ...products];
@@ -59,6 +60,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
   // Auto-play
   useEffect(() => {
+    if (isPaused) return;
+
     const interval = setInterval(() => {
       if (!isAnimating) {
         setCurrentIndex(prev => prev + 1);
@@ -66,7 +69,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [isAnimating]);
+  }, [isAnimating, isPaused]);
 
   return (
     <div className="relative group">
@@ -108,6 +111,15 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
         aria-label="Next slide"
       >
         <ChevronRight size={24} />
+      </button>
+
+      {/* Pause/Play Control */}
+      <button
+        onClick={() => setIsPaused(!isPaused)}
+        className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-800 shadow-sm hover:bg-white transition-colors z-20"
+        aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
+      >
+        {isPaused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
       </button>
     </div>
   );

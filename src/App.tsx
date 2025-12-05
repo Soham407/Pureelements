@@ -237,13 +237,13 @@ function AppContent() {
     }
   };
 
-  // Show loading state
-  if (isLoading) {
-    return <SkeletonLoader />;
-  }
+  // Removed global blocking loader to allow app shell to render immediately
+  // if (isLoading) {
+  //   return <SkeletonLoader />;
+  // }
 
       return (
-    <div className={`min-h-screen bg-[#FFFBF2] font-sans relative overflow-x-hidden ${!isAdminRoute ? 'pt-[100px] lg:pt-[160px]' : ''}`}>
+    <div className={`min-h-screen bg-brand-surface font-sans relative overflow-x-hidden ${!isAdminRoute ? 'pt-[100px] lg:pt-[160px]' : ''}`}>
       {!isAdminRoute && <Navbar onNavigate={handleNavigate} navItems={navItems} />}
       {!isAdminRoute && <CartDrawer onCheckout={handleCheckoutClick} />}
       <AuthModal />
@@ -330,7 +330,7 @@ function AppContent() {
       {!isAdminRoute && <Footer onNavigate={handleNavigate} />}
       
       {/* Floating Whatsapp Button */}
-      <a href="#" className="fixed bottom-6 right-6 bg-[#25D366] text-white p-3 rounded-full shadow-lg z-50 hover:bg-[#128C7E] transition-colors group">
+      <a href="#" className="fixed bottom-6 right-6 bg-[#25D366] text-white p-3 rounded-full shadow-lg z-50 hover:bg-[#128C7E] transition-colors group" aria-label="Chat on WhatsApp">
          <div className="relative">
              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#25D366]"></div>
              <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 md:w-8 md:h-8"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.592 2.654-.698c1.005.572 1.903.87 3.05.87 3.182 0 5.77-2.587 5.769-5.766.001-3.182-2.584-5.768-5.768-5.768zm9.263 4.943c-1.014-2.688-3.375-4.727-6.216-5.366-2.883-.647-5.916.315-7.986 2.522-2.062 2.201-2.73 5.305-1.776 8.163.791 2.375 2.809 4.27 5.258 4.94.464.126.936.196 1.408.196 1.77 0 3.491-.689 4.785-1.921 2.193-2.086 3.033-5.3 2.181-8.31l-2.344.776c.642 2.26.012 4.673-1.636 6.241-.973.926-2.268 1.444-3.599 1.444-.356 0-.712-.054-1.062-.149-1.839-.503-3.355-1.926-3.95-3.709-.716-2.148-.214-4.481 1.334-6.135 1.555-1.658 3.834-2.381 6.002-1.895 2.134.48 3.908 2.012 4.67 4.031l2.337-.777z"/></svg>

@@ -67,7 +67,6 @@ const HomePage: React.FC<HomePageProps> = ({
 
       {/* Shop by Category */}
       <section className="py-10 md:py-16 container mx-auto px-4">
-        <RevealOnScroll>
             <SectionHeader title="Category" subtitle="Shop by" />
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-y-8 gap-x-4 md:gap-x-6 justify-items-center max-w-6xl mx-auto">
               {categories.map(cat => (
@@ -76,7 +75,6 @@ const HomePage: React.FC<HomePageProps> = ({
                 </div>
               ))}
             </div>
-        </RevealOnScroll>
       </section>
 
       {/* Featured Products */}

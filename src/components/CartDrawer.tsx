@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { CartItem } from '../types';
 
 interface Props {
@@ -112,16 +113,7 @@ const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
 
 const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
   const { cart, isCartOpen, closeCart } = useCart();
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (isCartOpen) {
-      // Focus close button when drawer opens
-      setTimeout(() => {
-        closeButtonRef.current?.focus();
-      }, 100);
-    }
-  }, [isCartOpen]);
+  const drawerRef = useFocusTrap(isCartOpen, closeCart);
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
@@ -149,6 +141,7 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
 
       {/* Drawer */}
       <div 
+        ref={drawerRef}
         className={`fixed top-0 right-0 h-full w-full md:w-[450px] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
           isCartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -163,7 +156,6 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
             onClick={closeCart}
             className="p-2 hover:bg-black/5 rounded-full transition-colors"
             aria-label="Close cart"
-            ref={closeButtonRef}
           >
             <X size={24} className="text-gray-600" />
           </button>

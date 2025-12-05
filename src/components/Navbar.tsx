@@ -25,42 +25,44 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   const { openAuthModal, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
+    let lastScrollYVal = window.scrollY;
     let ticking = false;
-    const controlNavbar = () => {
+
+    const updateNavbar = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Sticky/Scrolled state
+      if (currentScrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+
+      // Show/Hide logic
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollYVal && currentScrollY > 100) {
+        // Scrolling down & past header
+        setIsVisible(false);
+      } else {
+        // Scrolling up
+        setIsVisible(true);
+      }
+
+      lastScrollYVal = currentScrollY;
+      ticking = false;
+    };
+
+    const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (isOpen) return;
-
-          const currentScrollY = window.scrollY;
-
-          // Always show if at the top
-          if (currentScrollY < 10) {
-            setIsVisible(true);
-            setIsScrolled(false);
-            lastScrollY.current = currentScrollY;
-            ticking = false;
-            return;
-          }
-
-          setIsScrolled(true);
-
-          // Logic: Hide if scrolling down, Show if scrolling up
-          if (currentScrollY > lastScrollY.current) {
-            setIsVisible(false);
-          } else {
-            setIsVisible(true);
-          }
-
-          lastScrollY.current = currentScrollY;
-          ticking = false;
-        });
+        window.requestAnimationFrame(updateNavbar);
         ticking = true;
       }
     };
 
-    window.addEventListener('scroll', controlNavbar);
-    return () => window.removeEventListener('scroll', controlNavbar);
-  }, [isOpen]);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleNavClick = (name: string, subItem?: string) => {
     setSearchTerm(''); // Clear search when navigating

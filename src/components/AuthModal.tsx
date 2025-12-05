@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const AuthModal: React.FC = () => {
   const { 
@@ -18,16 +18,8 @@ const AuthModal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const firstInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isAuthModalOpen) {
-      // Small timeout to allow render
-      setTimeout(() => {
-        firstInputRef.current?.focus();
-      }, 100);
-    }
-  }, [isAuthModalOpen, authView]);
+  
+  const modalRef = useFocusTrap(isAuthModalOpen, closeAuthModal);
 
   if (!isAuthModalOpen) return null;
 
@@ -60,7 +52,7 @@ const AuthModal: React.FC = () => {
       ></div>
 
       {/* Modal Content */}
-      <div className="bg-white w-full max-w-md relative z-10 rounded-sm shadow-2xl overflow-hidden animate-fade-in-up">
+      <div ref={modalRef} className="bg-white w-full max-w-md relative z-10 rounded-sm shadow-2xl overflow-hidden animate-fade-in-up">
         <button 
           onClick={closeAuthModal}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
@@ -118,7 +110,6 @@ const AuthModal: React.FC = () => {
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-brand-primary focus:outline-none transition-colors rounded-sm text-sm bg-white"
                     placeholder="Enter your name"
-                    ref={authView === 'SIGNUP' ? firstInputRef : null}
                   />
                 </div>
               </div>
@@ -135,7 +126,6 @@ const AuthModal: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-brand-primary focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="name@example.com"
-                  ref={authView === 'LOGIN' ? firstInputRef : null}
                 />
               </div>
             </div>
