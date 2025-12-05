@@ -60,9 +60,15 @@ const RevealOnScroll: React.FC<Props> = ({ children, threshold = 0.1, delay = 0 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-1000 ease-out transform ${
+      className={`transition-all duration-1000 ease-out transform motion-safe:opacity-100 motion-safe:translate-y-0 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
       }`}
+      style={
+        // For users who prefer reduced motion, skip transitions
+        window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? { transition: 'none', transform: 'none', opacity: 1 }
+          : undefined
+      }
     >
       {children}
     </div>

@@ -4,6 +4,7 @@ import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { NavItem } from '../types';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface NavbarProps {
   navItems: NavItem[];
@@ -20,6 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   
   const { cartCount, openCart } = useCart();
   const { openAuthModal, isAuthenticated, user } = useAuth();
+  const mobileMenuRef = useFocusTrap(isOpen, () => setIsOpen(false));
 
   // Restore scroll-aware behavior but throttle with rAF to reduce re-renders
   useEffect(() => {
@@ -128,9 +130,9 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               <div className="flex flex-col items-start">
                 <h1 className="text-xl lg:text-3xl font-sans text-gray-700 uppercase tracking-wide leading-none" style={{ fontWeight: 400 }}>
                   PURE ELEMENTS
-                  <sup className="text-[8px] lg:text-[10px] top-[-0.5em] ml-0.5 text-gray-400">TM</sup>
+                  <sup className="text-[10px] lg:text-xs top-[-0.5em] ml-0.5 text-gray-400">TM</sup>
                 </h1>
-                <span className="text-[8px] lg:text-[11px] tracking-[0.35em] text-black uppercase font-medium mt-1 w-full text-justify">
+                <span className="text-[10px] lg:text-xs tracking-[0.3em] text-black uppercase font-medium mt-1 w-full text-justify">
                   PROMISE OF AYURVEDA
                 </span>
               </div>
@@ -139,7 +141,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
             {/* Mobile Cart Icon */}
             <div className="lg:hidden relative mr-1 cursor-pointer" onClick={openCart} aria-label="Open cart">
               <ShoppingCart className="h-6 w-6 text-brand-secondary" />
-              <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+              <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {cartCount}
               </span>
             </div>
@@ -226,7 +228,10 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
       {/* Mobile Menu Content */}
       {isOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 p-4 absolute w-full left-0 shadow-lg h-screen overflow-y-auto pb-24 top-full">
+        <div
+          ref={mobileMenuRef}
+          className="lg:hidden bg-white border-t border-gray-100 p-4 absolute w-full left-0 shadow-lg h-screen overflow-y-auto pb-24 top-full"
+        >
           <div className="mb-6 flex gap-2">
             <input 
               type="text" 
