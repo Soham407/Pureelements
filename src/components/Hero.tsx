@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Slide } from '../types';
 
 interface HeroProps {
@@ -9,13 +9,21 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ slides }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    let timer: NodeJS.Timeout;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 5000);
+    }
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isPlaying]);
+
+  const toggleAutoPlay = useCallback(() => {
+    setIsPlaying(prev => !prev);
+  }, []);
 
   const nextSlide = () => {
      setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -69,27 +77,43 @@ const Hero: React.FC<HeroProps> = ({ slides }) => {
       <button
         onClick={prevSlide}
         className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all md:opacity-0 md:group-hover:opacity-100 z-10"
+        aria-label="Previous slide"
       >
         <ChevronLeft size={20} className="md:w-6 md:h-6" />
       </button>
       <button
         onClick={nextSlide}
         className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-2 md:p-3 rounded-full backdrop-blur-sm transition-all md:opacity-0 md:group-hover:opacity-100 z-10"
+        aria-label="Next slide"
       >
         <ChevronRight size={20} className="md:w-6 md:h-6" />
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-        {slides.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentSlide ? 'bg-white w-8' : 'bg-white/50 w-2'
-            }`}
-          />
-        ))}
+      {/* Dots & Controls */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-4 z-10">
+        {/* Dots */}
+        <div className="flex space-x-2">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === currentSlide ? 'bg-white w-8' : 'bg-white/50 w-2'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+              aria-current={idx === currentSlide ? 'true' : 'false'}
+            />
+          ))}
+        </div>
+        
+        {/* Play/Pause Toggle */}
+        <button 
+          onClick={toggleAutoPlay}
+          className="text-white/70 hover:text-white transition-colors"
+          aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+        >
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+        </button>
       </div>
     </div>
   );

@@ -1,14 +1,127 @@
-
-import React from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { CartItem } from '../types';
 
 interface Props {
   onCheckout: () => void;
 }
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
+  const { setQuantity, removeFromCart } = useCart();
+  const [localQuantity, setLocalQuantity] = useState(item.quantity);
+  
+  // Sync local state with prop when prop changes (e.g. from other sources),
+  // but only if we are not currently debouncing a change? 
+  // Actually, simpler: just sync if the difference is large or if it's a fresh mount.
+  // But if we are typing/clicking fast, we don't want prop updates to overwrite local state immediately if they are lagging.
+  // However, since we do optimistic updates in context, prop should update fast.
+  useEffect(() => {
+    setLocalQuantity(item.quantity);
+  }, [item.quantity]);
+
+  const debouncedQuantity = useDebounce(localQuantity, 500);
+
+  useEffect(() => {
+    // Only trigger update if the debounced value is different from the actual item quantity
+    // and if it's valid.
+    if (debouncedQuantity !== item.quantity && debouncedQuantity > 0) {
+      setQuantity(item.id, debouncedQuantity);
+    }
+  }, [debouncedQuantity, item.id, item.quantity, setQuantity]);
+
+  const handleIncrement = () => setLocalQuantity(prev => prev + 1);
+  const handleDecrement = () => setLocalQuantity(prev => Math.max(1, prev - 1));
+
+  return (
+    <div className="flex gap-4 group">
+      {/* Image */}
+      <div className="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-sm overflow-hidden border border-gray-100">
+        <img 
+          src={item.image} 
+          alt={item.name} 
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start">
+            <h3 className="font-serif text-base font-medium text-gray-800 line-clamp-2 pr-4">
+              {item.name}
+            </h3>
+            <button 
+              onClick={() => removeFromCart(item.id)}
+              className="text-gray-400 hover:text-red-500 transition-colors p-1"
+              aria-label={`Remove ${item.name} from cart`}
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{item.category}</p>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          {/* Quantity Control */}
+          <div className="flex items-center border border-gray-200 rounded-sm">
+            <button 
+              onClick={handleDecrement}
+              className="p-1.5 hover:bg-gray-50 text-gray-500 disabled:opacity-50"
+              aria-label="Decrease quantity"
+              disabled={localQuantity <= 1}
+            >
+              <Minus size={14} />
+            </button>
+            <span className="w-8 text-center text-sm font-medium text-gray-700">{localQuantity}</span>
+            <button 
+              onClick={handleIncrement}
+              className="p-1.5 hover:bg-gray-50 text-gray-500"
+              aria-label="Increase quantity"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+
+          {/* Price */}
+          <div className="text-right">
+            <p className="font-bold text-gray-900">₹{(item.price * localQuantity).toLocaleString('en-IN')}</p>
+            {localQuantity > 1 && (
+              <p className="text-xs text-gray-400">₹{item.price.toLocaleString('en-IN')} each</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
-  const { cart, isCartOpen, closeCart, removeFromCart, updateQuantity } = useCart();
+  const { cart, isCartOpen, closeCart } = useCart();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isCartOpen) {
+      // Focus close button when drawer opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [isCartOpen]);
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
@@ -49,8 +162,10 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
           <button 
             onClick={closeCart}
             className="p-2 hover:bg-black/5 rounded-full transition-colors"
+            aria-label="Close cart"
+            ref={closeButtonRef}
           >
-            <X size={24} className="text-gray-500" />
+            <X size={24} className="text-gray-600" />
           </button>
         </div>
 
@@ -75,61 +190,7 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
           ) : (
             <div className="space-y-6">
               {cart.map((item) => (
-                <div key={item.id} className="flex gap-4 group">
-                  {/* Image */}
-                  <div className="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-sm overflow-hidden border border-gray-100">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-serif text-base font-medium text-gray-800 line-clamp-2 pr-4">
-                          {item.name}
-                        </h3>
-                        <button 
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{item.category}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2">
-                      {/* Quantity Control */}
-                      <div className="flex items-center border border-gray-200 rounded-sm">
-                        <button 
-                          onClick={() => updateQuantity(item.id, -1)}
-                          className="p-1.5 hover:bg-gray-50 text-gray-500"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-8 text-center text-sm font-medium text-gray-700">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="p-1.5 hover:bg-gray-50 text-gray-500"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      {/* Price */}
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
-                        {item.quantity > 1 && (
-                          <p className="text-xs text-gray-400">₹{item.price.toLocaleString('en-IN')} each</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CartItemRow key={item.id} item={item} />
               ))}
             </div>
           )}

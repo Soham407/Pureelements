@@ -103,7 +103,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
 
         {/* Quick Action Overlay (Only for default variant) */}
         {!isOffer && (
-          <div className="absolute inset-x-0 bottom-0 p-2 md:p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex flex-col gap-2 justify-end pb-4 md:pb-6 bg-gradient-to-t from-white/95 via-white/80 to-transparent">
+          <div className="absolute inset-x-0 bottom-0 p-2 md:p-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-300 flex flex-col gap-2 justify-end pb-4 md:pb-6 bg-gradient-to-t from-white/95 via-white/80 to-transparent">
             {product.isSoldOut ? (
               <button disabled className="w-full bg-gray-400 text-white px-4 py-2 text-[10px] md:text-xs uppercase font-medium cursor-not-allowed tracking-wider">
                 Sold Out

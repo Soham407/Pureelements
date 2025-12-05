@@ -24,6 +24,7 @@ import { ordersService } from './lib/database';
 import { useProducts } from './hooks/useProducts';
 import { useSiteContent } from './hooks/useSiteContent';
 import Loader from './components/Loader';
+import SkeletonLoader from './components/SkeletonLoader';
 import { Product, Order, NavItem, Slide, Category } from './types';
 import { useCart } from './contexts/CartContext';
 
@@ -238,7 +239,7 @@ function AppContent() {
 
   // Show loading state
   if (isLoading) {
-    return <Loader />;
+    return <SkeletonLoader />;
   }
 
       return (

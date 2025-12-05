@@ -63,44 +63,86 @@ const AddressSection: React.FC<Props> = ({
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${(savedAddresses.length > 0 && !showAddressForm && selectedAddressId) ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
-            <input {...register('fullName')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="John Doe" />
-            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message as string}</p>}
+            <input 
+              {...register('fullName')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="John Doe" 
+              aria-invalid={errors.fullName ? "true" : "false"}
+              autoComplete="name"
+            />
+            {errors.fullName && <p role="alert" className="text-red-500 text-xs mt-1">{errors.fullName.message as string}</p>}
          </div>
          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase">Phone Number</label>
-            <input {...register('phone')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="+91 98765 43210" />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message as string}</p>}
+            <input 
+              {...register('phone')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="+91 98765 43210" 
+              aria-invalid={errors.phone ? "true" : "false"}
+              autoComplete="tel"
+            />
+            {errors.phone && <p role="alert" className="text-red-500 text-xs mt-1">{errors.phone.message as string}</p>}
          </div>
          <div className="space-y-1 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 uppercase">Email Address</label>
-            <input type="email" {...register('email')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="john@example.com" />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
+            <input 
+              type="email" 
+              {...register('email')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="john@example.com" 
+              aria-invalid={errors.email ? "true" : "false"}
+              autoComplete="email"
+            />
+            {errors.email && <p role="alert" className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
          </div>
          <div className="space-y-1 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 uppercase">Street Address</label>
-            <input {...register('address')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Flat No, Building, Street" />
-            {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message as string}</p>}
+            <input 
+              {...register('address')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="Flat No, Building, Street" 
+              aria-invalid={errors.address ? "true" : "false"}
+              autoComplete="street-address"
+            />
+            {errors.address && <p role="alert" className="text-red-500 text-xs mt-1">{errors.address.message as string}</p>}
          </div>
          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase">City</label>
-            <input {...register('city')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="Pune" />
-            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message as string}</p>}
+            <input 
+              {...register('city')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="Pune" 
+              aria-invalid={errors.city ? "true" : "false"}
+              autoComplete="address-level2"
+            />
+            {errors.city && <p role="alert" className="text-red-500 text-xs mt-1">{errors.city.message as string}</p>}
          </div>
          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase">Pincode</label>
-            <input {...register('pincode')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" placeholder="411001" />
-            {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode.message as string}</p>}
+            <input 
+              {...register('pincode')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              placeholder="411001" 
+              aria-invalid={errors.pincode ? "true" : "false"}
+              autoComplete="postal-code"
+            />
+            {errors.pincode && <p role="alert" className="text-red-500 text-xs mt-1">{errors.pincode.message as string}</p>}
          </div>
          <div className="space-y-1 md:col-span-2">
             <label className="text-xs font-bold text-gray-500 uppercase">State</label>
-            <select {...register('state')} className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white">
+            <select 
+              {...register('state')} 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white"
+              aria-invalid={errors.state ? "true" : "false"}
+              autoComplete="address-level1"
+            >
                <option value="">Select State</option>
                <option value="Maharashtra">Maharashtra</option>
                <option value="Delhi">Delhi</option>
                <option value="Karnataka">Karnataka</option>
                <option value="Gujarat">Gujarat</option>
             </select>
-            {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state.message as string}</p>}
+            {errors.state && <p role="alert" className="text-red-500 text-xs mt-1">{errors.state.message as string}</p>}
          </div>
       </div>
     </div>

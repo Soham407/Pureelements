@@ -25,8 +25,6 @@ export const useSiteContent = (): UseSiteContentResult => {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
        if (!supabaseUrl) {

@@ -21,8 +21,6 @@ export const useProducts = (enabled: boolean = true): UseProductsResult => {
   const fetchData = useCallback(async () => {
     if (!enabled) return;
     
-    setLoading(true);
-    setError(null);
     try {
       // Check if Supabase is configured
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

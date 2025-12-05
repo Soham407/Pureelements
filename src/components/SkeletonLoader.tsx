@@ -1,97 +1,75 @@
 import React from 'react';
 
-interface SkeletonProps {
-  className?: string;
-  variant?: 'text' | 'rectangular' | 'circular';
-  width?: string | number;
-  height?: string | number;
-}
-
-const Skeleton: React.FC<SkeletonProps> = ({ 
-  className = '', 
-  variant = 'rectangular',
-  width,
-  height
-}) => {
-  const baseClasses = "animate-pulse bg-gray-200 rounded-sm";
-  
-  const variantClasses = {
-    text: "h-4 w-full rounded",
-    rectangular: "h-full w-full",
-    circular: "rounded-full"
-  };
-
-  const style = {
-    width: width,
-    height: height
-  };
-
-  return (
-    <div 
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
-      style={style}
-    />
-  );
-};
-
 export const ProductCardSkeleton: React.FC = () => {
   return (
-    <div className="flex flex-col h-full border border-gray-100 bg-white">
-      {/* Image Placeholder */}
-      <div className="aspect-[4/5] w-full bg-gray-100 animate-pulse" />
-      
-      {/* Content Placeholder */}
-      <div className="p-4 flex flex-col gap-3">
-        <Skeleton variant="text" className="w-3/4" />
-        <Skeleton variant="text" className="w-1/2 h-3" />
-        <div className="flex justify-center gap-1 my-1">
-           <Skeleton variant="circular" width={12} height={12} />
-           <Skeleton variant="circular" width={12} height={12} />
-           <Skeleton variant="circular" width={12} height={12} />
-           <Skeleton variant="circular" width={12} height={12} />
-           <Skeleton variant="circular" width={12} height={12} />
-        </div>
-        <Skeleton variant="text" className="w-1/3 mx-auto h-5" />
-      </div>
+    <div className="flex flex-col gap-3 animate-pulse">
+      <div className="aspect-[4/5] bg-gray-100 rounded-sm"></div>
+      <div className="h-4 w-3/4 bg-gray-100 rounded-sm"></div>
+      <div className="h-4 w-1/2 bg-gray-100 rounded-sm"></div>
     </div>
   );
 };
 
 export const ProductDetailsSkeleton: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
-        {/* Left: Images */}
-        <div className="lg:w-1/2 flex flex-col-reverse md:flex-row gap-4">
-           <div className="flex md:flex-col gap-4">
-              {[1,2,3,4].map(i => (
-                 <Skeleton key={i} width={80} height={100} />
-              ))}
-           </div>
-           <div className="flex-1 aspect-[4/5]">
-              <Skeleton className="w-full h-full" />
-           </div>
+    <div className="container mx-auto px-4 py-8 animate-pulse">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Image Gallery Skeleton */}
+        <div className="w-full md:w-1/2 flex gap-4">
+          <div className="hidden md:flex flex-col gap-4 w-20">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-20 h-24 bg-gray-100 rounded-sm"></div>
+            ))}
+          </div>
+          <div className="flex-1 aspect-[4/5] bg-gray-200 rounded-sm"></div>
         </div>
 
-        {/* Right: Info */}
-        <div className="lg:w-1/2 space-y-6">
-           <Skeleton variant="text" className="h-10 w-3/4" />
-           <Skeleton variant="text" className="h-4 w-1/4" />
-           <Skeleton variant="text" className="h-6 w-1/3" />
-           <Skeleton variant="text" className="h-8 w-1/4" />
-           <div className="space-y-2 py-8 border-y border-gray-100">
-              <Skeleton variant="text" />
-              <Skeleton variant="text" />
-              <Skeleton variant="text" className="w-2/3" />
-           </div>
-           <div className="flex gap-4">
-              <Skeleton height={50} width={120} />
-              <Skeleton height={50} className="flex-1" />
-           </div>
+        {/* Details Skeleton */}
+        <div className="w-full md:w-1/2 space-y-6">
+          <div className="h-4 w-24 bg-gray-100 rounded-sm"></div>
+          <div className="h-10 w-3/4 bg-gray-200 rounded-sm"></div>
+          <div className="h-6 w-1/4 bg-gray-100 rounded-sm"></div>
+          <div className="h-24 w-full bg-gray-50 rounded-sm"></div>
+          <div className="h-12 w-full bg-gray-200 rounded-sm"></div>
+          <div className="grid grid-cols-2 gap-4">
+             <div className="h-20 bg-gray-50 rounded-sm"></div>
+             <div className="h-20 bg-gray-50 rounded-sm"></div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Skeleton;
+const SkeletonLoader: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-white animate-pulse">
+      {/* Navbar Skeleton */}
+      <div className="h-20 md:h-24 bg-gray-100 border-b border-gray-200 mb-8"></div>
+
+      {/* Hero Skeleton */}
+      <div className="container mx-auto px-4 mb-12">
+        <div className="w-full h-[300px] md:h-[500px] bg-gray-200 rounded-sm"></div>
+      </div>
+
+      {/* Content Skeleton */}
+      <div className="container mx-auto px-4">
+        {/* Section Title */}
+        <div className="h-8 w-48 bg-gray-200 mx-auto mb-10 rounded-sm"></div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="flex flex-col gap-3">
+              <div className="aspect-[4/5] bg-gray-100 rounded-sm"></div>
+              <div className="h-4 w-3/4 bg-gray-100 rounded-sm"></div>
+              <div className="h-4 w-1/2 bg-gray-100 rounded-sm"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SkeletonLoader;

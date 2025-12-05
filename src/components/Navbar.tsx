@@ -25,29 +25,37 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
   const { openAuthModal, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
+    let ticking = false;
     const controlNavbar = () => {
-      if (isOpen) return;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (isOpen) return;
 
-      const currentScrollY = window.scrollY;
+          const currentScrollY = window.scrollY;
 
-      // Always show if at the top
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-        setIsScrolled(false);
-        lastScrollY.current = currentScrollY;
-        return;
+          // Always show if at the top
+          if (currentScrollY < 10) {
+            setIsVisible(true);
+            setIsScrolled(false);
+            lastScrollY.current = currentScrollY;
+            ticking = false;
+            return;
+          }
+
+          setIsScrolled(true);
+
+          // Logic: Hide if scrolling down, Show if scrolling up
+          if (currentScrollY > lastScrollY.current) {
+            setIsVisible(false);
+          } else {
+            setIsVisible(true);
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      setIsScrolled(true);
-
-      // Logic: Hide if scrolling down, Show if scrolling up
-      if (currentScrollY > lastScrollY.current) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', controlNavbar);
@@ -105,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               />
               <button 
                 onClick={handleSearchSubmit}
-                className="bg-[#F2C94C] px-4 py-2 flex items-center justify-center hover:bg-[#E0B83E] transition-colors rounded-r-sm"
+                className="bg-brand-accent px-4 py-2 flex items-center justify-center hover:bg-[#E0B83E] transition-colors rounded-r-sm"
               >
                 <Search className="h-5 w-5 text-gray-800" strokeWidth={2} />
               </button>
@@ -121,7 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
             <div className="flex items-center justify-center gap-3 cursor-pointer select-none" onClick={() => handleNavClick('HOME')}>
               {/* Logo Icon Placeholder */}
               <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full border-[3px] border-gray-500 p-0.5 flex-shrink-0 flex items-center justify-center">
-                 <div className="w-full h-full rounded-full bg-[#F5A623] border-[2px] border-white"></div>
+                 <div className="w-full h-full rounded-full bg-brand-accent border-[2px] border-white"></div>
               </div>
 
               {/* Logo Text */}
@@ -138,8 +146,8 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
             {/* Mobile Cart Icon */}
             <div className="lg:hidden relative mr-1 cursor-pointer" onClick={openCart}>
-              <ShoppingCart className="h-6 w-6 text-[#3A5A40]" />
-              <span className="absolute -top-1.5 -right-1.5 bg-[#3A5A40] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+              <ShoppingCart className="h-6 w-6 text-brand-secondary" />
+              <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {cartCount}
               </span>
             </div>
@@ -148,8 +156,8 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
           {/* Right: Actions (Desktop) */}
           <div className="hidden lg:flex items-center justify-end w-full lg:w-1/3 gap-6">
             <div className="relative group cursor-pointer" onClick={openCart}>
-              <ShoppingCart className="h-7 w-7 text-[#3A5A40]" strokeWidth={1.5} />
-              <span className="absolute -top-1.5 -right-1.5 bg-[#3A5A40] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+              <ShoppingCart className="h-7 w-7 text-brand-secondary" strokeWidth={1.5} />
+              <span className="absolute -top-1.5 -right-1.5 bg-brand-secondary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
             </div>
@@ -167,7 +175,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
       </div>
 
       {/* Divider Line */}
-      <div className={`w-full h-[1px] bg-[#F2C94C] hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-100'}`}></div>
+      <div className={`w-full h-[1px] bg-brand-accent hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-100'}`}></div>
 
       {/* Bottom Row: Navigation (Desktop) */}
       <div className="hidden lg:block py-3 bg-white relative">
@@ -181,11 +189,11 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <div 
-                  className="flex items-center gap-1 cursor-pointer hover:text-[#F5A623] transition-colors py-2"
+                  className="flex items-center gap-1 cursor-pointer hover:text-brand-accent transition-colors py-2"
                   onClick={() => handleNavClick(item.name)}
                 >
                   {item.name}
-                  {item.hasDropdown && <ChevronDown size={14} className="mt-0.5 text-gray-400 group-hover:text-[#F5A623] transition-transform" />}
+                  {item.hasDropdown && <ChevronDown size={14} className="mt-0.5 text-gray-400 group-hover:text-brand-accent transition-transform" />}
                 </div>
 
                 {/* Dropdown Menu */}
@@ -199,7 +207,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                     onMouseEnter={() => setActiveDropdown(item.name)}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <div className="bg-white shadow-xl border-t-2 border-[#F5A623] rounded-b-sm flex flex-col py-2">
+                    <div className="bg-white shadow-xl border-t-2 border-brand-accent rounded-b-sm flex flex-col py-2">
                       {item.subItems.map((subItem) => (
                         <button
                           key={subItem} 
@@ -207,7 +215,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                             e.preventDefault();
                             handleNavClick(item.name, subItem);
                           }}
-                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-[#F5A623] hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
+                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-brand-accent hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
                         >
                           {subItem}
                         </button>
@@ -222,7 +230,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
       </div>
 
       {/* Divider Line for Bottom of Nav (Only when not scrolled) */}
-      <div className={`w-full h-[1px] bg-[#F2C94C] opacity-50 hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-50'}`}></div>
+      <div className={`w-full h-[1px] bg-brand-accent opacity-50 hidden lg:block transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-50'}`}></div>
 
       {/* Mobile Menu Content */}
       {isOpen && (
@@ -235,7 +243,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border border-gray-300 px-3 py-2 text-sm outline-none bg-white"
             />
-            <button onClick={handleSearchSubmit} className="bg-[#F2C94C] px-3 py-2">
+            <button onClick={handleSearchSubmit} className="bg-brand-accent px-3 py-2">
               <Search className="h-4 w-4 text-gray-800" />
             </button>
           </div>

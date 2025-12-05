@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, CartItem } from '../types';
 import { useAuth } from './AuthContext';
@@ -9,6 +8,7 @@ interface CartContextType {
   addToCart: (product: Product, quantity?: number) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   updateQuantity: (productId: number, delta: number) => Promise<void>;
+  setQuantity: (productId: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   cartCount: number;
   isCartOpen: boolean;
@@ -135,6 +135,42 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const setQuantity = async (productId: number, quantity: number) => {
+    if (quantity <= 0) {
+      await removeFromCart(productId);
+      return;
+    }
+
+    if (!isAuthenticated || !user) {
+      setCart((prevCart) => 
+        prevCart.map((item) => 
+          item.id === productId ? { ...item, quantity } : item
+        )
+      );
+      return;
+    }
+
+    try {
+      // Optimistic update
+      setCart((prevCart) => 
+        prevCart.map((item) => 
+          item.id === productId ? { ...item, quantity } : item
+        )
+      );
+      await cartService.updateQuantity(user.id, productId, quantity);
+    } catch (error) {
+      console.error('Error setting quantity:', error);
+      // Revert on error (simplified, ideally would fetch fresh cart)
+      const cartData = await cartService.getCart(user.id);
+      const cartItems: CartItem[] = cartData.map(item => ({
+        ...item.product,
+        quantity: item.quantity
+      }));
+      setCart(cartItems);
+      throw error;
+    }
+  };
+
   const clearCart = async () => {
     if (!isAuthenticated || !user) {
       setCart([]);
@@ -161,6 +197,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addToCart, 
       removeFromCart, 
       updateQuantity, 
+      setQuantity,
       clearCart,
       cartCount, 
       isCartOpen, 

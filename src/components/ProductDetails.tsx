@@ -8,6 +8,7 @@ import { useWishlist } from '../contexts/WishlistContext';
 import ImageWithFallback from './ImageWithFallback';
 import DOMPurify from 'dompurify';
 import { productsService } from '../lib/database';
+import { CROSS_SELL_RULES } from '../lib/crossSellRules';
 
 interface Props {
   product: Product;
@@ -15,16 +16,6 @@ interface Props {
   onNavigate: (category: string, subCategory?: string) => void;
   onProductClick: (product: Product) => void;
 }
-
-// Simple rule engine for cross-sells: Main ID -> Complementary ID
-const CROSS_SELL_RULES: Record<number, number> = {
-  104: 106, // Face Cleanser -> Face Pack
-  105: 309, // Hair Oil -> Shampoo
-  309: 308, // Shampoo -> Conditioner
-  302: 102, // Night Cream -> Face Oil
-  108: 107, // Aloe Gel -> Rose Water
-  102: 302, // Face Oil -> Night Cream
-};
 
 const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }) => {
   const { addToCart, openCart } = useCart();
@@ -38,11 +29,8 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
   const [complementaryProduct, setComplementaryProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   
-  // Zoom Effect State
-  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({
-    transformOrigin: 'center center',
-    transform: 'scale(1)'
-  });
+  // Zoom Effect Ref
+  const imageContainerRef = React.useRef<HTMLDivElement>(null);
 
   const isWishlisted = isInWishlist(product.id);
 
@@ -52,7 +40,12 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
     setActiveImage(product.image);
     setQuantity(1); // Ensure quantity resets to 1
     setOpenSection('description'); // Reset accordion
-    setZoomStyle({ transformOrigin: 'center center', transform: 'scale(1)' });
+    
+    // Reset zoom
+    if (imageContainerRef.current) {
+      imageContainerRef.current.style.setProperty('--zoom-origin', 'center center');
+      imageContainerRef.current.style.setProperty('--zoom-scale', '1');
+    }
     
     // 2. Scroll to Top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -110,21 +103,19 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
   }, [product]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current) return;
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
     
-    setZoomStyle({
-      transformOrigin: `${x}% ${y}%`,
-      transform: 'scale(2.5)'
-    });
+    imageContainerRef.current.style.setProperty('--zoom-origin', `${x}% ${y}%`);
+    imageContainerRef.current.style.setProperty('--zoom-scale', '2.5');
   };
 
   const handleMouseLeave = () => {
-    setZoomStyle({
-      transformOrigin: 'center center',
-      transform: 'scale(1)'
-    });
+    if (!imageContainerRef.current) return;
+    imageContainerRef.current.style.setProperty('--zoom-origin', 'center center');
+    imageContainerRef.current.style.setProperty('--zoom-scale', '1');
   };
 
   const handleAddToCart = () => {
@@ -191,12 +182,16 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                   className="flex-1 aspect-[4/5] bg-gray-50 relative overflow-hidden cursor-crosshair group"
                   onMouseMove={handleMouseMove}
                   onMouseLeave={handleMouseLeave}
+                  ref={imageContainerRef}
                >
                   <ImageWithFallback 
                       src={activeImage} 
                       alt={product.name} 
                       className="w-full h-full object-cover transition-transform duration-200 ease-out will-change-transform" 
-                      style={zoomStyle}
+                      style={{ 
+                        transformOrigin: 'var(--zoom-origin, center center)', 
+                        transform: 'scale(var(--zoom-scale, 1))' 
+                      }}
                   />
                   
                   {product.isSoldOut && (
@@ -348,22 +343,24 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                             {section}
                             {openSection === section.toLowerCase() ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
-                        <div className={`overflow-hidden transition-all duration-300 ${
-                            openSection === section.toLowerCase() ? 'max-h-96 pb-4 opacity-100' : 'max-h-0 opacity-0'
+                        <div className={`grid transition-all duration-300 ease-in-out ${
+                            openSection === section.toLowerCase() ? 'grid-rows-[1fr] opacity-100 pb-4' : 'grid-rows-[0fr] opacity-0'
                         }`}>
-                            <div className="text-sm text-gray-600 leading-relaxed font-light">
-                                {section === 'Description' && (
-                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.fullDescription || product.description || '') }} />
-                                )}
-                                {section === 'Ingredients' && (product.ingredients || "Full ingredient list not available.")}
-                                {section === 'How to Use' && (product.howToUse || "Apply gently on affected area.")}
-                                {section === 'Legal Info' && (
-                                    <div className="space-y-2 text-xs">
-                                        <p><span className="font-bold">Generic Name:</span> {product.legalInfo?.genericName || product.name}</p>
-                                        <p><span className="font-bold">Country of Origin:</span> India</p>
-                                        <p><span className="font-bold">Manufactured By:</span> Pure Elements, Pune, Maharashtra.</p>
-                                    </div>
-                                )}
+                            <div className="overflow-hidden">
+                                <div className="text-sm text-gray-600 leading-relaxed font-light">
+                                    {section === 'Description' && (
+                                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.fullDescription || product.description || '') }} />
+                                    )}
+                                    {section === 'Ingredients' && (product.ingredients || "Full ingredient list not available.")}
+                                    {section === 'How to Use' && (product.howToUse || "Apply gently on affected area.")}
+                                    {section === 'Legal Info' && (
+                                        <div className="space-y-2 text-xs">
+                                            <p><span className="font-bold">Generic Name:</span> {product.legalInfo?.genericName || product.name}</p>
+                                            <p><span className="font-bold">Country of Origin:</span> India</p>
+                                            <p><span className="font-bold">Manufactured By:</span> Pure Elements, Pune, Maharashtra.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

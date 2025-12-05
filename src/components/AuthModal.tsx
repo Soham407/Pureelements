@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -18,6 +18,16 @@ const AuthModal: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      // Small timeout to allow render
+      setTimeout(() => {
+        firstInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isAuthModalOpen, authView]);
 
   if (!isAuthModalOpen) return null;
 
@@ -54,6 +64,7 @@ const AuthModal: React.FC = () => {
         <button 
           onClick={closeAuthModal}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
+          aria-label="Close modal"
         >
           <X size={24} />
         </button>
@@ -107,6 +118,7 @@ const AuthModal: React.FC = () => {
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
                     placeholder="Enter your name"
+                    ref={authView === 'SIGNUP' ? firstInputRef : null}
                   />
                 </div>
               </div>
@@ -123,6 +135,7 @@ const AuthModal: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="name@example.com"
+                  ref={authView === 'LOGIN' ? firstInputRef : null}
                 />
               </div>
             </div>
