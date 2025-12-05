@@ -31,7 +31,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
 
   if (isOrderPlaced) {
     return (
-      <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-brand-surface flex items-center justify-center p-4">
         <div className="bg-white p-8 md:p-12 rounded-sm shadow-xl max-w-lg w-full text-center animate-fade-in-up">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-green-600" />
@@ -46,7 +46,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
           </div>
           <button 
             onClick={onNavigateHome}
-            className="bg-[#8B7E66] text-white px-8 py-3 uppercase font-bold tracking-widest text-sm hover:bg-[#7A6D55] transition-colors w-full"
+            className="bg-brand-primary text-white px-8 py-3 uppercase font-bold tracking-widest text-sm hover:bg-brand-primary/90 transition-colors w-full"
           >
             Continue Shopping
           </button>
@@ -57,10 +57,10 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
 
   if (cartCount === 0) {
     return (
-        <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center">
+        <div className="min-h-screen bg-brand-surface flex items-center justify-center">
             <div className="text-center">
                 <h2 className="font-serif text-2xl text-gray-800 mb-4">Your cart is empty</h2>
-                <button onClick={onNavigateHome} className="text-[#8B7E66] font-bold hover:underline">
+                <button onClick={onNavigateHome} className="text-brand-primary font-bold hover:underline">
                     Go back to shop
                 </button>
             </div>
@@ -69,7 +69,7 @@ const CheckoutPage: React.FC<Props> = ({ onNavigateHome }) => {
   }
 
   return (
-    <div className="bg-[#FFFBF2] min-h-screen py-10 font-sans">
+    <div className="bg-brand-surface min-h-screen py-10 font-sans">
       <div className="container mx-auto px-4 max-w-6xl">
         <h1 className="font-serif text-3xl md:text-4xl text-gray-800 mb-8 text-center">Checkout</h1>
 

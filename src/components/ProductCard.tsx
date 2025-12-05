@@ -59,7 +59,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
           <Star 
             key={star} 
             size={12} 
-            className={`${star <= rating ? 'fill-[#F5A623] text-[#F5A623]' : 'text-gray-300'}`} 
+            className={`${star <= rating ? 'fill-brand-accent text-brand-accent' : 'text-gray-300'}`} 
           />
         ))}
         <span className="text-[10px] text-gray-400 ml-1">({rating})</span>
@@ -82,7 +82,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
         </div>
       )}
       {product.isSoldOut && (
-        <div className="absolute top-0 left-0 bg-[#5D6D55] text-white text-[9px] md:text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm">
+        <div className="absolute top-0 left-0 bg-brand-secondary text-white text-[9px] md:text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm">
           Sold Out
         </div>
       )}
@@ -94,6 +94,9 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
           alt={product.name} 
           fallbackText={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+          decoding="async"
+          width={400}
         />
         
         {/* Quick View Icon Overlay */}
@@ -112,13 +115,13 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
               <div className="flex flex-col md:flex-row gap-1 md:gap-2 w-full">
                 <button 
                   onClick={handleAddToCart}
-                  className="flex-[2] bg-[#8B8B7A] text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-brand-dark transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  className="flex-[2] bg-brand-primary text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-brand-dark transition-colors shadow-md tracking-wider whitespace-nowrap"
                 >
                   Add to Cart
                 </button>
                 <button 
                   onClick={handleBuyNow}
-                  className="flex-[2] bg-[#2C2C2C] text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-black transition-colors shadow-md tracking-wider whitespace-nowrap"
+                  className="flex-[2] bg-brand-dark text-white py-2 text-[9px] md:text-[10px] lg:text-xs uppercase font-medium hover:bg-black transition-colors shadow-md tracking-wider whitespace-nowrap"
                 >
                   Buy Now
                 </button>
@@ -140,7 +143,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
       {/* Details */}
       <div className={`p-3 md:p-4 text-center flex-grow flex flex-col justify-between ${isOffer ? 'pt-4 md:pt-6' : ''}`}>
         <div>
-          <h3 className="text-xs md:text-sm font-serif font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] leading-relaxed group-hover:text-[#8B7E66] transition-colors">
+          <h3 className="text-xs md:text-sm font-serif font-medium text-gray-800 line-clamp-2 min-h-[2.5rem] leading-relaxed group-hover:text-brand-primary transition-colors">
             {product.name}
           </h3>
           <p className="text-[10px] md:text-[11px] text-gray-500 uppercase tracking-wider mt-2 mb-2 h-4 md:h-5 overflow-hidden text-ellipsis whitespace-nowrap">{product.category}</p>
@@ -164,7 +167,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
                 className={`w-full py-2 text-[10px] md:text-xs uppercase font-bold tracking-widest transition-colors ${
                   product.isSoldOut 
                     ? 'bg-gray-300 text-white cursor-not-allowed' 
-                    : 'bg-[#8B8B7A] text-white hover:bg-[#5D6D55]'
+                    : 'bg-brand-primary text-white hover:bg-brand-secondary'
                 }`}
                 onClick={!product.isSoldOut ? handleAddToCart : undefined}
               >
@@ -173,7 +176,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
               {!product.isSoldOut && (
                 <div className="flex gap-2">
                   <button 
-                    className="flex-[4] py-2 text-[10px] md:text-xs uppercase font-bold tracking-widest transition-colors border border-[#8B8B7A] text-[#8B8B7A] hover:bg-[#8B8B7A] hover:text-white"
+                    className="flex-[4] py-2 text-[10px] md:text-xs uppercase font-bold tracking-widest transition-colors border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
                     onClick={handleBuyNow}
                   >
                     Buy Now
@@ -181,7 +184,7 @@ const ProductCard: React.FC<Props> = ({ product, featured = false, variant = 'de
                   <button
                     onClick={handleWishlistClick}
                     className={`flex-1 flex items-center justify-center border py-2 transition-colors ${
-                      isWishlisted ? 'border-red-500 text-red-500' : 'border-[#8B8B7A] text-[#8B8B7A] hover:bg-gray-50 hover:text-red-500'
+                      isWishlisted ? 'border-red-500 text-red-500' : 'border-brand-primary text-brand-primary hover:bg-gray-50 hover:text-red-500'
                     }`}
                     title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                   >

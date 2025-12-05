@@ -30,7 +30,7 @@ const Footer: React.FC<Props> = ({ onNavigate }) => {
   };
 
   return (
-    <footer className="bg-[#8B8B7A] text-white pt-16 pb-8">
+    <footer className="bg-brand-primary text-white pt-16 pb-8">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           
@@ -89,7 +89,7 @@ const Footer: React.FC<Props> = ({ onNavigate }) => {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="bg-white text-[#8B8B7A] px-4 py-2 rounded-sm hover:bg-gray-100 transition-colors disabled:opacity-70"
+                className="bg-white text-brand-primary px-4 py-2 rounded-sm hover:bg-gray-100 transition-colors disabled:opacity-70"
               >
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>

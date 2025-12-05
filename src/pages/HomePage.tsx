@@ -10,6 +10,7 @@ import { CONCERNS, TESTIMONIALS, STORES } from '../constants';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Slide, Category } from '../types';
 import { productsService } from '../lib/database';
+import ErrorState from '../components/ErrorState';
 
 interface HomePageProps {
   heroSlides: Slide[];
@@ -29,6 +30,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [bestsellerProducts, setBestsellerProducts] = useState<Product[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [offerProducts, setOfferProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +48,7 @@ const HomePage: React.FC<HomePageProps> = ({
             setOfferProducts(offers);
         } catch (error) {
             console.error("Error fetching homepage products:", error);
+            setError("Failed to load some products. Please try refreshing the page.");
         }
     };
     fetchData();
@@ -55,6 +58,12 @@ const HomePage: React.FC<HomePageProps> = ({
     <>
       <SEO />
       <Hero slides={heroSlides} />
+
+      {error && (
+        <div className="container mx-auto px-4 py-8">
+           <ErrorState message={error} onRetry={() => window.location.reload()} />
+        </div>
+      )}
 
       {/* Shop by Category */}
       <section className="py-10 md:py-16 container mx-auto px-4">
@@ -85,7 +94,7 @@ const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Gifting Collection */}
-      <section className="py-10 md:py-16 bg-[#F9F3E5]">
+      <section className="py-10 md:py-16 bg-brand-surface">
         <div className="container mx-auto px-4">
           <RevealOnScroll>
               <SectionHeader title="Gifting Collection" />
@@ -114,7 +123,7 @@ const HomePage: React.FC<HomePageProps> = ({
                  {/* Banner 3 */}
                  <div className="relative aspect-square md:aspect-[4/3] group overflow-hidden cursor-pointer shadow-md" onClick={() => navigate('/shop/GIFTING')}>
                     <img src="https://picsum.photos/id/1072/800/600" alt="Pure Fragrances" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
-                    <div className="absolute inset-0 bg-[#5D6D55]/50 flex flex-col justify-center items-center text-white p-6 text-center">
+                    <div className="absolute inset-0 bg-brand-secondary/50 flex flex-col justify-center items-center text-white p-6 text-center">
                        <h3 className="font-serif text-2xl md:text-3xl mb-2">Sapphire</h3>
                        <p className="text-[10px] uppercase tracking-[0.2em] opacity-90">Luxurious Ayurvedic Gift Set</p>
                     </div>
@@ -135,7 +144,7 @@ const HomePage: React.FC<HomePageProps> = ({
               {CONCERNS.map((concern, idx) => (
                 <div key={idx} className="relative aspect-[3/4] cursor-pointer group overflow-hidden bg-gray-200">
                    <img src={concern.image} alt={concern.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                   <div className="absolute bottom-0 left-0 right-0 bg-[#C69C6D]/90 text-white py-3 md:py-4 text-center">
+                   <div className="absolute bottom-0 left-0 right-0 bg-brand-primary/90 text-white py-3 md:py-4 text-center">
                       <h3 className="font-sans text-sm md:text-xl font-normal tracking-wide">{concern.title}</h3>
                    </div>
                 </div>
@@ -154,7 +163,7 @@ const HomePage: React.FC<HomePageProps> = ({
                        <img src="/src/assets/bestsellers-bg.png" className="w-full h-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-1000" alt="Bestsellers" />
                        <div className="absolute inset-0 flex flex-col items-start justify-center p-8 bg-black/10">
                           <h2 className="text-white font-serif text-4xl md:text-5xl drop-shadow-lg text-left leading-tight mb-4">Our<br/>Bestsellers</h2>
-                          <button onClick={() => navigate('/shop/BESTSELLERS')} className="bg-white text-black px-6 py-2 text-sm uppercase tracking-widest hover:bg-[#C19A6B] hover:text-white transition-colors">
+                          <button onClick={() => navigate('/shop/BESTSELLERS')} className="bg-white text-black px-6 py-2 text-sm uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-colors">
                             View All
                           </button>
                        </div>
@@ -183,7 +192,7 @@ const HomePage: React.FC<HomePageProps> = ({
                <div className="relative z-10 w-full md:w-1/2 p-6 md:p-16 text-right md:text-left flex flex-col items-end md:items-start text-white pointer-events-none">
                   <h2 className="text-2xl md:text-5xl font-serif mb-4 leading-tight">Set of Signature Perfumes.<br/>Perfect Gift for Any Occasion.</h2>
                   
-                  <div className="bg-[#F4A460]/95 text-white p-4 md:p-10 rounded-sm shadow-xl backdrop-blur-sm mt-4 md:mt-8 max-w-lg">
+                  <div className="bg-brand-accent/95 text-white p-4 md:p-10 rounded-sm shadow-xl backdrop-blur-sm mt-4 md:mt-8 max-w-lg">
                      <p className="font-serif text-lg md:text-2xl font-medium leading-relaxed text-center">"Indulge in the essence of togetherness with our couple's perfume set."</p>
                   </div>
                </div>
@@ -192,17 +201,17 @@ const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Video Section */}
-      <section className="py-12 md:py-20 bg-[#2D241E] text-white">
+      <section className="py-12 md:py-20 bg-brand-dark text-white">
         <div className="container mx-auto px-4">
            <RevealOnScroll>
-              <div className="relative w-full aspect-video md:w-4/5 mx-auto shadow-2xl overflow-hidden group cursor-pointer border border-[#8B7E66]/30">
+              <div className="relative w-full aspect-video md:w-4/5 mx-auto shadow-2xl overflow-hidden group cursor-pointer border border-brand-primary/30">
                  <img src="https://picsum.photos/id/452/1280/720" alt="Video Thumbnail" className="w-full h-full object-cover opacity-75 group-hover:scale-105 transition-transform duration-700" />
                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 p-4 text-center">
-                    <h2 className="font-serif text-2xl md:text-5xl text-[#EBD9B6] mb-2 md:mb-4 drop-shadow-xl tracking-wide">Soulful Scents of Pure Elements</h2>
+                    <h2 className="font-serif text-2xl md:text-5xl text-brand-surface mb-2 md:mb-4 drop-shadow-xl tracking-wide">Soulful Scents of Pure Elements</h2>
                     <div className="flex items-center gap-4 mb-4 md:mb-8 scale-75 md:scale-100">
-                       <span className="h-px w-12 bg-[#EBD9B6]"></span>
-                       <p className="text-[#EBD9B6] tracking-[0.3em] uppercase text-sm font-bold">Luxury Collection</p>
-                       <span className="h-px w-12 bg-[#EBD9B6]"></span>
+                       <span className="h-px w-12 bg-brand-surface"></span>
+                       <p className="text-brand-surface tracking-[0.3em] uppercase text-sm font-bold">Luxury Collection</p>
+                       <span className="h-px w-12 bg-brand-surface"></span>
                     </div>
                     <button className="bg-[#E60023] p-4 md:p-5 rounded-full hover:scale-110 transition-transform shadow-lg group-hover:shadow-red-900/50">
                        <Play fill="white" className="text-white h-6 w-6 md:h-8 md:w-8 ml-1" />
@@ -232,12 +241,12 @@ const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Customer Testimonials */}
-      <section className="py-10 md:py-16 bg-[#FFFBF2]">
+      <section className="py-10 md:py-16 bg-brand-surface">
          <div className="container mx-auto px-4">
             <RevealOnScroll>
                <SectionHeader title="Customer Testimonials" />
                <div className="text-center mb-6 md:mb-10 -mt-6">
-                  <a href="#" className="text-[#E48B47] font-bold text-sm uppercase tracking-wide hover:underline">View All</a>
+                  <a href="#" className="text-brand-accent font-bold text-sm uppercase tracking-wide hover:underline">View All</a>
                </div>
                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   {TESTIMONIALS.map((t, i) => (
@@ -274,7 +283,7 @@ const HomePage: React.FC<HomePageProps> = ({
             <RevealOnScroll>
                <div className="relative rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row h-auto md:h-[500px]">
                   {/* Text Content */}
-                  <div className="w-full md:w-1/2 bg-[#C19A6B] p-8 md:p-16 flex flex-col justify-center text-white relative z-10 order-2 md:order-1">
+                  <div className="w-full md:w-1/2 bg-brand-primary p-8 md:p-16 flex flex-col justify-center text-white relative z-10 order-2 md:order-1">
                      <div className="space-y-4 md:space-y-6">
                         <p className="text-base md:text-lg leading-relaxed font-light border-l-4 border-white/30 pl-4 md:pl-6">
                           Each product is meticulously crafted by <strong className="font-bold">Dr. Anand Mandhane, M.D. (Ayu Med)</strong>, drawing from over two decades of expertise.
@@ -284,7 +293,7 @@ const HomePage: React.FC<HomePageProps> = ({
                         </p>
                         <button 
                           onClick={() => navigate('/about')}
-                          className="inline-block mt-4 text-xs font-bold uppercase tracking-widest border border-white px-6 py-3 hover:bg-white hover:text-[#C19A6B] transition-colors"
+                          className="inline-block mt-4 text-xs font-bold uppercase tracking-widest border border-white px-6 py-3 hover:bg-white hover:text-brand-primary transition-colors"
                         >
                           Read Our Story
                         </button>
@@ -293,7 +302,7 @@ const HomePage: React.FC<HomePageProps> = ({
                   {/* Image */}
                   <div className="w-full md:w-1/2 relative h-[300px] md:h-full order-1 md:order-2">
                      <img src="https://picsum.photos/id/1005/800/800" alt="Dr Anand" className="w-full h-full object-cover" />
-                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#C19A6B] md:bg-gradient-to-r md:from-[#C19A6B] md:to-transparent md:w-20"></div>
+                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-primary md:bg-gradient-to-r md:from-brand-primary md:to-transparent md:w-20"></div>
                   </div>
                </div>
             </RevealOnScroll>
@@ -301,7 +310,7 @@ const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Values Grid */}
-      <section className="py-10 md:py-16 bg-[#FFFBF2]">
+      <section className="py-10 md:py-16 bg-brand-surface">
          <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                {[
@@ -313,9 +322,9 @@ const HomePage: React.FC<HomePageProps> = ({
                  <div key={idx} className="relative aspect-square group overflow-hidden shadow-lg cursor-pointer" onClick={() => navigate('/about')}>
                     <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                       <div className="bg-brand-cream/90 backdrop-blur-sm p-2 md:p-6 w-5/6 h-5/6 md:w-3/4 md:h-3/4 flex flex-col items-center justify-center text-center border border-[#8B7E66]/20">
-                          <h3 className="font-serif text-lg md:text-2xl text-[#5D4037] italic mb-1 md:mb-3">{item.title}</h3>
-                          <span className="text-[8px] md:text-[10px] uppercase border-b border-[#5D4037] pb-0.5 text-[#5D4037] tracking-wider">{item.sub}</span>
+                       <div className="bg-brand-cream/90 backdrop-blur-sm p-2 md:p-6 w-5/6 h-5/6 md:w-3/4 md:h-3/4 flex flex-col items-center justify-center text-center border border-brand-primary/20">
+                          <h3 className="font-serif text-lg md:text-2xl text-brand-dark italic mb-1 md:mb-3">{item.title}</h3>
+                          <span className="text-[8px] md:text-[10px] uppercase border-b border-brand-dark pb-0.5 text-brand-dark tracking-wider">{item.sub}</span>
                        </div>
                     </div>
                  </div>
@@ -339,7 +348,7 @@ const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Stores */}
-      <section className="py-12 md:py-20 bg-[#F4F4F4]">
+      <section className="py-12 md:py-20 bg-brand-light">
          <div className="container mx-auto px-4">
             <SectionHeader title="Our Exclusive Stores" />
             <div className="flex overflow-x-auto gap-4 md:gap-6 pb-8 scrollbar-hide snap-x snap-mandatory px-4 md:px-0 -mx-4 md:mx-0">

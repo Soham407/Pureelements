@@ -154,9 +154,9 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
         }`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#FFFBF2]">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-brand-surface">
           <h2 className="font-serif text-2xl text-gray-800 flex items-center gap-2">
-            <ShoppingBag className="text-[#8B7E66]" />
+            <ShoppingBag className="text-brand-primary" />
             Your Cart ({cart.length})
           </h2>
           <button 
@@ -182,7 +182,7 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
               </div>
               <button 
                 onClick={closeCart}
-                className="mt-4 px-6 py-2 bg-[#8B7E66] text-white text-sm uppercase font-bold tracking-wider hover:bg-[#7A6D55] transition-colors"
+                className="mt-4 px-6 py-2 bg-brand-primary text-white text-sm uppercase font-bold tracking-wider hover:bg-brand-primary/90 transition-colors"
               >
                 Start Shopping
               </button>
@@ -215,7 +215,7 @@ const CartDrawer: React.FC<Props> = ({ onCheckout }) => {
             </div>
 
             <button 
-              className="w-full bg-[#2C2C2C] text-white py-4 uppercase font-bold tracking-widest text-sm hover:bg-black transition-colors shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-brand-dark text-white py-4 uppercase font-bold tracking-widest text-sm hover:bg-black transition-colors shadow-lg flex items-center justify-center gap-2"
               onClick={onCheckout}
             >
               Checkout <span className="font-normal opacity-75">| ₹{subtotal.toLocaleString('en-IN')}</span>

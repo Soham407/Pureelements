@@ -74,7 +74,7 @@ const AuthModal: React.FC = () => {
           <button
             className={`flex-1 py-4 text-sm font-bold tracking-widest uppercase transition-colors ${
               authView === 'LOGIN' 
-                ? 'bg-white text-[#8B7E66] border-b-2 border-[#8B7E66]' 
+                ? 'bg-white text-brand-primary border-b-2 border-brand-primary' 
                 : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
             }`}
             onClick={() => switchView('LOGIN')}
@@ -84,7 +84,7 @@ const AuthModal: React.FC = () => {
           <button
             className={`flex-1 py-4 text-sm font-bold tracking-widest uppercase transition-colors ${
               authView === 'SIGNUP' 
-                ? 'bg-white text-[#8B7E66] border-b-2 border-[#8B7E66]' 
+                ? 'bg-white text-brand-primary border-b-2 border-brand-primary' 
                 : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
             }`}
             onClick={() => switchView('SIGNUP')}
@@ -116,7 +116,7 @@ const AuthModal: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-brand-primary focus:outline-none transition-colors rounded-sm text-sm bg-white"
                     placeholder="Enter your name"
                     ref={authView === 'SIGNUP' ? firstInputRef : null}
                   />
@@ -133,7 +133,7 @@ const AuthModal: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-brand-primary focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="name@example.com"
                   ref={authView === 'LOGIN' ? firstInputRef : null}
                 />
@@ -144,7 +144,7 @@ const AuthModal: React.FC = () => {
               <div className="flex justify-between items-center">
                 <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">Password</label>
                 {authView === 'LOGIN' && (
-                  <a href="#" className="text-xs text-[#8B7E66] hover:underline">Forgot?</a>
+                  <a href="#" className="text-xs text-brand-primary hover:underline">Forgot?</a>
                 )}
               </div>
               <div className="relative">
@@ -154,7 +154,7 @@ const AuthModal: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-[#8B7E66] focus:outline-none transition-colors rounded-sm text-sm bg-white"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 focus:border-brand-primary focus:outline-none transition-colors rounded-sm text-sm bg-white"
                   placeholder="••••••••"
                 />
               </div>
@@ -167,7 +167,7 @@ const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#2C2C2C] text-white py-4 uppercase font-bold tracking-widest text-xs hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg group"
+              className="w-full bg-brand-dark text-white py-4 uppercase font-bold tracking-widest text-xs hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg group"
             >
               {isLoading ? (
                 <Loader2 size={16} className="animate-spin" />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 import { ProductCardSkeleton } from './SkeletonLoader';
+import ErrorState from './ErrorState';
 import { ChevronRight, Filter, X, Search, ChevronDown, ChevronLeft } from 'lucide-react';
 import { Product, NavItem } from '../types';
 import { productsService } from '../lib/database';
@@ -29,6 +30,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
   // Data Fetching State
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const LIMIT = 12;
@@ -46,6 +48,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      setError(null);
       try {
         let fetchedProducts: Product[] = [];
         let fetchedTotal = 0;
@@ -71,6 +74,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
         setTotal(fetchedTotal);
       } catch (error) {
         console.error('Error fetching products:', error);
+        setError('Failed to load products. Please check your connection and try again.');
         setProducts([]);
       } finally {
         setLoading(false);
@@ -105,15 +109,15 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
       {/* Breadcrumb & Mobile Filter Toggle */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
         <div className="text-xs text-gray-500 uppercase tracking-widest flex items-center flex-wrap">
-          <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate('HOME')}>Home</span>
+          <span className="cursor-pointer hover:text-brand-primary" onClick={() => onNavigate('HOME')}>Home</span>
           <span className="mx-2 text-gray-300">/</span>
-          <span className={`font-bold ${!activeSubCategory ? 'text-[#8B7E66]' : 'text-gray-800'}`}>
+          <span className={`font-bold ${!activeSubCategory ? 'text-brand-primary' : 'text-gray-800'}`}>
             {isSearchMode ? `Search Results` : formatTitle(activeCategory)}
           </span>
           {activeSubCategory && (
             <>
               <span className="mx-2 text-gray-300">/</span>
-              <span className="text-[#8B7E66] font-bold">{activeSubCategory}</span>
+              <span className="text-brand-primary font-bold">{activeSubCategory}</span>
             </>
           )}
         </div>
@@ -121,7 +125,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
         <div className="flex gap-4 self-start md:self-auto">
           {!isSearchMode && (
             <button 
-              className="md:hidden flex items-center gap-2 bg-[#2C2C2C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hover:bg-black transition-colors"
+              className="md:hidden flex items-center gap-2 bg-brand-dark text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hover:bg-black transition-colors"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
             >
               {isMobileFilterOpen ? <X size={16}/> : <Filter size={16} />}
@@ -132,7 +136,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
           {/* Sort Dropdown */}
           <div className="relative" ref={sortRef}>
             <button 
-              className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded text-sm font-medium text-gray-700 hover:border-[#8B7E66]"
+              className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded text-sm font-medium text-gray-700 hover:border-brand-primary"
               onClick={() => setIsSortOpen(!isSortOpen)}
             >
               Sort by: {sortOrder === 'RECOMMENDED' ? 'Recommended' : sortOrder === 'LOW_HIGH' ? 'Price: Low to High' : 'Price: High to Low'}
@@ -155,7 +159,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
         {!isSearchMode && (
             <div className={`lg:w-1/4 flex-shrink-0 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-white border border-gray-100 p-6 sticky top-24 shadow-sm rounded-sm">
-                <h3 className="font-serif text-xl font-bold mb-6 border-b border-gray-200 pb-4 text-[#2C2C2C]">
+                <h3 className="font-serif text-xl font-bold mb-6 border-b border-gray-200 pb-4 text-brand-dark">
                     {currentNav ? formatTitle(currentNav.name) : formatTitle(activeCategory)}
                 </h3>
                 
@@ -164,8 +168,8 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                         <button 
                             className={`w-full text-left py-2 px-3 text-sm transition-all duration-200 rounded-sm flex items-center justify-between group ${
                                 !activeSubCategory 
-                                ? 'bg-[#FFFBF2] text-[#8B7E66] font-bold border-l-2 border-[#8B7E66]' 
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-[#8B7E66]'
+                                ? 'bg-brand-surface text-brand-primary font-bold border-l-2 border-brand-primary' 
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
                             }`}
                             onClick={() => handleSidebarClick(activeCategory, undefined)}
                         >
@@ -179,8 +183,8 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                             <button 
                                 className={`w-full text-left py-2 px-3 text-sm transition-all duration-200 rounded-sm flex items-center justify-between group ${
                                     activeSubCategory === sub 
-                                    ? 'bg-[#FFFBF2] text-[#8B7E66] font-bold border-l-2 border-[#8B7E66]' 
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-[#8B7E66]'
+                                    ? 'bg-brand-surface text-brand-primary font-bold border-l-2 border-brand-primary' 
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
                                 }`}
                                 onClick={() => handleSidebarClick(activeCategory, sub)}
                             >
@@ -199,7 +203,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
            <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-100 pb-4">
               <div>
                   <h1 className="font-serif text-2xl md:text-3xl text-gray-800 flex items-center gap-2">
-                    {isSearchMode && <Search className="text-[#8B7E66]" />}
+                    {isSearchMode && <Search className="text-brand-primary" />}
                     {isSearchMode 
                         ? `Search: "${searchQuery}"` 
                         : (activeSubCategory || formatTitle(activeCategory))
@@ -219,6 +223,16 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                  </div>
                ))}
              </div>
+           ) : error ? (
+             <ErrorState 
+                message={error} 
+                onRetry={() => {
+                   setPage(1);
+                   // Trigger re-fetch by toggling a dummy state or just calling the effect dependencies
+                   // In this case, we can just reload the page or rely on the user to change filters
+                   window.location.reload(); 
+                }} 
+             />
            ) : products.length > 0 ? (
              <>
                 <div className={`grid grid-cols-2 ${isSearchMode ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6`}>
@@ -238,7 +252,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                         <button 
                             disabled={page === 1}
                             onClick={() => setPage(p => Math.max(1, p - 1))}
-                            className="p-2 border border-gray-200 rounded-sm hover:border-[#8B7E66] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 border border-gray-200 rounded-sm hover:border-brand-primary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <ChevronLeft size={20} />
                         </button>
@@ -248,8 +262,8 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                                 onClick={() => setPage(p)}
                                 className={`w-10 h-10 flex items-center justify-center border rounded-sm transition-colors ${
                                     page === p 
-                                    ? 'bg-[#8B7E66] text-white border-[#8B7E66]' 
-                                    : 'border-gray-200 hover:border-[#8B7E66] text-gray-600'
+                                    ? 'bg-brand-primary text-white border-brand-primary' 
+                                    : 'border-gray-200 hover:border-brand-primary text-gray-600'
                                 }`}
                             >
                                 {p}
@@ -258,7 +272,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                         <button 
                             disabled={page === totalPages}
                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            className="p-2 border border-gray-200 rounded-sm hover:border-[#8B7E66] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 border border-gray-200 rounded-sm hover:border-brand-primary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <ChevronRight size={20} />
                         </button>
@@ -266,14 +280,29 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                 )}
              </>
            ) : (
-             <div className="py-24 text-center bg-[#F9F9F9] rounded-lg border border-dashed border-gray-300">
-                <p className="text-gray-500 font-serif text-lg mb-2">
-                    {isSearchMode ? `No products matching "${searchQuery}"` : "No products found in this category."}
+             <div className="py-24 text-center bg-[#F9F9F9] rounded-lg border border-dashed border-gray-300 flex flex-col items-center justify-center">
+                <div className="bg-gray-100 p-4 rounded-full mb-4">
+                    <Search className="text-gray-400" size={32} />
+                </div>
+                <h3 className="font-serif text-xl font-bold text-gray-800 mb-2">
+                    {isSearchMode ? "No matches found" : "No products found"}
+                </h3>
+                <p className="text-gray-500 font-light max-w-md mb-6">
+                    {isSearchMode 
+                        ? `We couldn't find any products matching "${searchQuery}". Try checking for typos or using different keywords.` 
+                        : "We couldn't find any products in this category at the moment."}
                 </p>
-                {!isSearchMode && (
+                {isSearchMode ? (
+                    <button 
+                    onClick={() => onNavigate('HOME')} 
+                    className="bg-brand-primary text-white px-6 py-2 text-xs uppercase font-bold tracking-wider hover:bg-brand-secondary transition-colors"
+                    >
+                    Browse All Categories
+                    </button>
+                ) : (
                     <button 
                     onClick={() => handleSidebarClick(activeCategory, undefined)} 
-                    className="mt-6 bg-[#8B7E66] text-white px-6 py-2 text-xs uppercase font-bold tracking-wider hover:bg-[#5D6D55] transition-colors"
+                    className="bg-brand-primary text-white px-6 py-2 text-xs uppercase font-bold tracking-wider hover:bg-brand-secondary transition-colors"
                     >
                     Clear Filters
                     </button>

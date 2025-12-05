@@ -78,14 +78,14 @@ export const productsService = {
     // Get total count
     const { count, error: countError } = await supabase
       .from('products')
-      .select('*', { count: 'exact', head: true });
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at', { count: 'exact', head: true });
     
     if (countError) throw countError;
     
     // Get paginated data
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at')
       .order('created_at', { ascending: false })
       .range(from, to);
     
@@ -118,7 +118,7 @@ export const productsService = {
     
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at')
       .in('id', ids);
     
     if (error) throw error;
@@ -184,7 +184,7 @@ export const productsService = {
 
     let query = supabase
       .from('products')
-      .select('*', { count: 'exact' });
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at', { count: 'exact' });
 
     if (category === 'OFFERS') {
        query = query.not('original_price', 'is', null);
@@ -234,7 +234,7 @@ export const productsService = {
     // Get paginated search results
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at')
       .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -251,7 +251,7 @@ export const productsService = {
     // 1. Try to get manually marked bestsellers first
     const { data: manualBestsellers, error: manualError } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at')
       .eq('is_best_seller', true)
       .limit(limit);
 
@@ -274,7 +274,7 @@ export const productsService = {
   async getFeatured(limit: number = 4): Promise<Product[]> {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at')
       .eq('is_featured', true)
       .limit(limit);
     

@@ -23,7 +23,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, isOpen, onClose }) => {
       {/* Modal */}
       <div className="bg-white w-full max-w-2xl relative z-10 rounded-sm shadow-2xl flex flex-col max-h-[90vh] animate-fade-in-up">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-[#FFFBF2]">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-brand-surface">
            <div>
               <h3 className="font-serif text-xl font-bold text-gray-800">Order Details</h3>
               <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">#{order.id}</p>
@@ -61,7 +61,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, isOpen, onClose }) => {
            {/* Items List */}
            <div>
                <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                   <Package size={18} className="text-[#8B7E66]" /> Items Ordered
+                   <Package size={18} className="text-brand-primary" /> Items Ordered
                </h4>
                <div className="space-y-4">
                    {order.items.map((item, idx) => (
@@ -85,7 +85,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, isOpen, onClose }) => {
                {/* Address (Mocked for prototype as Order type implies simplified structure) */}
                <div>
                    <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                       <MapPin size={18} className="text-[#8B7E66]" /> Shipping Address
+                       <MapPin size={18} className="text-brand-primary" /> Shipping Address
                    </h4>
                    <div className="text-sm text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-sm">
                        <p className="font-bold text-gray-800 mb-1">Ananya Sharma</p>
@@ -99,7 +99,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, isOpen, onClose }) => {
                {/* Payment Summary */}
                <div>
                    <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                       <CreditCard size={18} className="text-[#8B7E66]" /> Payment Summary
+                       <CreditCard size={18} className="text-brand-primary" /> Payment Summary
                    </h4>
                    <div className="bg-gray-50 p-4 rounded-sm space-y-2">
                        <div className="flex justify-between text-sm text-gray-600">
@@ -131,7 +131,7 @@ const OrderDetailsModal: React.FC<Props> = ({ order, isOpen, onClose }) => {
         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
             <button 
                 onClick={onClose}
-                className="bg-[#2C2C2C] text-white px-6 py-3 uppercase font-bold tracking-widest text-xs hover:bg-black transition-colors rounded-sm"
+                className="bg-brand-dark text-white px-6 py-3 uppercase font-bold tracking-widest text-xs hover:bg-black transition-colors rounded-sm"
             >
                 Close Details
             </button>

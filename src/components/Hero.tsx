@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { Slide } from '../types';
+import ImageWithFallback from './ImageWithFallback';
 
 interface HeroProps {
   slides: Slide[];
@@ -41,16 +42,19 @@ const Hero: React.FC<HeroProps> = ({ slides }) => {
         className="flex h-full transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
-        {slides.map((slide) => (
+        {slides.map((slide, index) => (
           <div
             key={slide.id}
             className="w-full h-full flex-shrink-0 relative"
           >
             {/* Background Image */}
-            <img
+            <ImageWithFallback
               src={slide.image}
               alt={slide.title}
               className="w-full h-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding={index === 0 ? "sync" : "async"}
+              width={1200}
             />
             <div className="absolute inset-0 bg-black/30 md:bg-gradient-to-r md:from-black/40 md:to-transparent"></div>
 

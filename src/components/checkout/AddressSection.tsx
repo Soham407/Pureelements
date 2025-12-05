@@ -25,7 +25,7 @@ const AddressSection: React.FC<Props> = ({
   return (
     <div className="bg-white p-6 md:p-8 shadow-sm rounded-sm">
       <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
-         <Truck className="text-[#8B7E66]" />
+         <Truck className="text-brand-primary" />
          <h2 className="font-serif text-xl font-bold text-gray-800">Shipping Details</h2>
       </div>
 
@@ -38,7 +38,7 @@ const AddressSection: React.FC<Props> = ({
               <div 
                 key={addr.id}
                 onClick={() => onSelectAddress(addr)}
-                className={`border p-4 rounded-sm cursor-pointer transition-all relative ${selectedAddressId === addr.id ? 'border-[#8B7E66] bg-[#FFFBF2] ring-1 ring-[#8B7E66]' : 'border-gray-200 hover:border-gray-300'}`}
+                className={`border p-4 rounded-sm cursor-pointer transition-all relative ${selectedAddressId === addr.id ? 'border-brand-primary bg-brand-surface ring-1 ring-brand-primary' : 'border-gray-200 hover:border-gray-300'}`}
               >
                 {addr.isDefault && <span className="absolute top-2 right-2 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase font-bold">Default</span>}
                 <p className="font-bold text-gray-800 text-sm">{addr.fullName}</p>
@@ -51,7 +51,7 @@ const AddressSection: React.FC<Props> = ({
             <button
               type="button"
               onClick={onAddNewAddress}
-              className={`border border-dashed p-4 rounded-sm flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-[#8B7E66] hover:border-[#8B7E66] transition-colors ${showAddressForm ? 'border-[#8B7E66] text-[#8B7E66] bg-gray-50' : 'border-gray-300'}`}
+              className={`border border-dashed p-4 rounded-sm flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-brand-primary hover:border-brand-primary transition-colors ${showAddressForm ? 'border-brand-primary text-brand-primary bg-gray-50' : 'border-gray-300'}`}
             >
               <Plus size={20} />
               <span className="text-xs font-bold uppercase">Add New Address</span>
@@ -65,7 +65,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
             <input 
               {...register('fullName')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="John Doe" 
               aria-invalid={errors.fullName ? "true" : "false"}
               autoComplete="name"
@@ -76,7 +76,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">Phone Number</label>
             <input 
               {...register('phone')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="+91 98765 43210" 
               aria-invalid={errors.phone ? "true" : "false"}
               autoComplete="tel"
@@ -88,7 +88,7 @@ const AddressSection: React.FC<Props> = ({
             <input 
               type="email" 
               {...register('email')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="john@example.com" 
               aria-invalid={errors.email ? "true" : "false"}
               autoComplete="email"
@@ -99,7 +99,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">Street Address</label>
             <input 
               {...register('address')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="Flat No, Building, Street" 
               aria-invalid={errors.address ? "true" : "false"}
               autoComplete="street-address"
@@ -110,7 +110,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">City</label>
             <input 
               {...register('city')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="Pune" 
               aria-invalid={errors.city ? "true" : "false"}
               autoComplete="address-level2"
@@ -121,7 +121,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">Pincode</label>
             <input 
               {...register('pincode')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white" 
               placeholder="411001" 
               aria-invalid={errors.pincode ? "true" : "false"}
               autoComplete="postal-code"
@@ -132,7 +132,7 @@ const AddressSection: React.FC<Props> = ({
             <label className="text-xs font-bold text-gray-500 uppercase">State</label>
             <select 
               {...register('state')} 
-              className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none bg-white"
+              className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none bg-white"
               aria-invalid={errors.state ? "true" : "false"}
               autoComplete="address-level1"
             >

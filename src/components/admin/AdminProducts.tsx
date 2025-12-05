@@ -170,12 +170,12 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
               placeholder="Search products..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-[#8B7E66] bg-white"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-brand-primary bg-white"
             />
          </div>
          <button 
             onClick={handleAddNew}
-            className="bg-[#8B7E66] text-white px-4 py-2 rounded-sm text-sm font-bold uppercase tracking-wider hover:bg-[#7A6D55]"
+            className="bg-brand-primary text-white px-4 py-2 rounded-sm text-sm font-bold uppercase tracking-wider hover:bg-brand-primary/90"
          >
             + Add New
          </button>
@@ -272,7 +272,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                   <td className="p-4 text-right">
                      <button 
                        onClick={() => handleEditClick(product)}
-                       className="text-gray-400 hover:text-[#8B7E66] transition-colors p-1"
+                       className="text-gray-400 hover:text-brand-primary transition-colors p-1"
                      >
                        <Edit size={18} />
                      </button>
@@ -315,7 +315,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                   onClick={() => handlePageChange(pageNum)}
                   className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-bold ${
                     currentPage === pageNum 
-                      ? 'bg-[#8B7E66] text-white' 
+                      ? 'bg-brand-primary text-white' 
                       : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
                   }`}
                 >
@@ -357,7 +357,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              name="name" 
                              value={editingProduct.name} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -368,7 +368,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              name="price" 
                              value={editingProduct.price} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -379,7 +379,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              name="originalPrice" 
                              value={editingProduct.originalPrice || ''} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none bg-white" 
                           />
                       </div>
                       <div>
@@ -388,7 +388,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              name="mainCategory" 
                              value={editingProduct.mainCategory || ''} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none bg-white" 
                              required
                           >
                              <option value="">Select Main Category</option>
@@ -405,7 +405,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                                name="subCategory" 
                                value={editingProduct.subCategory || ''} 
                                onChange={handleChange}
-                               className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none bg-white" 
+                               className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none bg-white" 
                             >
                                <option value="">Select Sub Category (Optional)</option>
                                {availableSubCategories.map(sub => (
@@ -430,7 +430,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              name="image" 
                              value={editingProduct.image} 
                              onChange={handleChange}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm font-mono text-gray-500 bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none text-sm font-mono text-gray-500 bg-white" 
                           />
                       </div>
                       <div className="col-span-2">
@@ -440,7 +440,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              value={editingProduct.description || ''} 
                              onChange={handleChange}
                              rows={3}
-                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-[#8B7E66] outline-none text-sm bg-white" 
+                             className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none text-sm bg-white" 
                           />
                       </div>
                       <div className="col-span-2 flex gap-6 pt-2">
@@ -450,7 +450,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                                 name="isSoldOut" 
                                 checked={editingProduct.isSoldOut || false} 
                                 onChange={handleCheckboxChange}
-                                className="w-4 h-4 accent-[#8B7E66]"
+                                className="w-4 h-4 accent-brand-primary"
                               />
                               <span className="text-sm font-medium text-gray-700">Mark as Sold Out</span>
                           </label>
@@ -460,7 +460,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                                 name="isBestSeller" 
                                 checked={editingProduct.isBestSeller || false} 
                                 onChange={handleCheckboxChange}
-                                className="w-4 h-4 accent-[#8B7E66]"
+                                className="w-4 h-4 accent-brand-primary"
                               />
                               <span className="text-sm font-medium text-gray-700">Mark as Best Seller</span>
                           </label>
@@ -470,7 +470,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                                 name="isFeatured" 
                                 checked={editingProduct.isFeatured || false} 
                                 onChange={handleCheckboxChange}
-                                className="w-4 h-4 accent-[#8B7E66]"
+                                className="w-4 h-4 accent-brand-primary"
                               />
                               <span className="text-sm font-medium text-gray-700">Mark as Featured</span>
                           </label>
@@ -487,7 +487,7 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                   </button>
                   <button 
                     onClick={handleSave}
-                    className="px-6 py-2 bg-[#8B7E66] text-white font-bold uppercase text-sm rounded-sm hover:bg-[#7A6D55] transition-colors flex items-center gap-2"
+                    className="px-6 py-2 bg-brand-primary text-white font-bold uppercase text-sm rounded-sm hover:bg-brand-primary/90 transition-colors flex items-center gap-2"
                   >
                     <Save size={16} /> Save Changes
                   </button>

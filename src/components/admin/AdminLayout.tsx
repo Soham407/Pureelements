@@ -57,7 +57,7 @@ const AdminLayout: React.FC<Props> = ({
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* Sidebar */}
-      <div className="w-64 bg-[#2C2C2C] text-white flex flex-col flex-shrink-0">
+      <div className="w-64 bg-brand-dark text-white flex flex-col flex-shrink-0">
         <div className="p-6 border-b border-gray-700">
           <h1 className="font-serif text-xl font-bold tracking-wide">ADMIN PANEL</h1>
           <p className="text-xs text-gray-400 mt-1">Pure Elements</p>
@@ -67,7 +67,7 @@ const AdminLayout: React.FC<Props> = ({
           <button
             onClick={() => setCurrentView('DASHBOARD')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
-              currentView === 'DASHBOARD' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              currentView === 'DASHBOARD' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <LayoutDashboard size={20} />
@@ -77,7 +77,7 @@ const AdminLayout: React.FC<Props> = ({
           <button
             onClick={() => setCurrentView('PRODUCTS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
-              currentView === 'PRODUCTS' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              currentView === 'PRODUCTS' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <Package size={20} />
@@ -87,7 +87,7 @@ const AdminLayout: React.FC<Props> = ({
           <button
             onClick={() => setCurrentView('ORDERS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
-              currentView === 'ORDERS' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              currentView === 'ORDERS' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <ShoppingCart size={20} />
@@ -97,7 +97,7 @@ const AdminLayout: React.FC<Props> = ({
           <button
             onClick={() => setCurrentView('CONTENT')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
-              currentView === 'CONTENT' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              currentView === 'CONTENT' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <ImageIcon size={20} />
@@ -107,7 +107,7 @@ const AdminLayout: React.FC<Props> = ({
           <button
             onClick={() => setCurrentView('SETTINGS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-colors ${
-              currentView === 'SETTINGS' ? 'bg-[#8B7E66] text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+              currentView === 'SETTINGS' ? 'bg-brand-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <Settings size={20} />

@@ -29,7 +29,8 @@ export const useProducts = (enabled: boolean = true): UseProductsResult => {
       }
 
       // Fetch all products (pagination can be added later if needed)
-      const { products: allProducts } = await productsService.getAll(1, 1000);
+      // Reducing limit to 50 for performance optimization
+      const { products: allProducts } = await productsService.getAll(1, 50);
       setProducts(allProducts);
 
       // Fetch bestsellers

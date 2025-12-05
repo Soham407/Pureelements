@@ -96,7 +96,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
       <button
         onClick={prevSlide}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-white shadow-lg p-2 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 z-10 hover:bg-[#8B7E66] hover:text-white hidden md:block"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-white shadow-lg p-2 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 z-10 hover:bg-brand-primary hover:text-white hidden md:block"
         aria-label="Previous slide"
       >
         <ChevronLeft size={24} />
@@ -104,7 +104,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
       <button
         onClick={nextSlide}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white shadow-lg p-2 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 group-hover:-translate-x-2 transition-all duration-300 z-10 hover:bg-[#8B7E66] hover:text-white hidden md:block"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white shadow-lg p-2 rounded-full text-gray-800 opacity-0 group-hover:opacity-100 group-hover:-translate-x-2 transition-all duration-300 z-10 hover:bg-brand-primary hover:text-white hidden md:block"
         aria-label="Next slide"
       >
         <ChevronRight size={24} />

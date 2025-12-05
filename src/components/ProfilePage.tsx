@@ -96,7 +96,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-16 min-h-screen bg-[#FFFBF2]">
+    <div className="container mx-auto px-4 py-10 md:py-16 min-h-screen bg-brand-surface">
       <div className="max-w-6xl mx-auto">
         <h1 className="font-serif text-3xl md:text-4xl text-gray-800 mb-8">My Account</h1>
         
@@ -105,7 +105,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
           <div className="w-full md:w-1/4">
              <div className="bg-white p-6 shadow-sm rounded-sm sticky top-24">
                 <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-100">
-                    <div className="w-12 h-12 bg-[#8B7E66] rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
                         {user.name.charAt(0)}
                     </div>
                     <div>
@@ -118,7 +118,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                     <button 
                         onClick={() => setActiveTab('DETAILS')}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-sm ${
-                            activeTab === 'DETAILS' ? 'bg-[#FFFBF2] text-[#8B7E66]' : 'text-gray-600 hover:bg-gray-50'
+                            activeTab === 'DETAILS' ? 'bg-brand-surface text-brand-primary' : 'text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         <User size={18} /> My Details
@@ -126,7 +126,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                     <button 
                         onClick={() => setActiveTab('ORDERS')}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-sm ${
-                            activeTab === 'ORDERS' ? 'bg-[#FFFBF2] text-[#8B7E66]' : 'text-gray-600 hover:bg-gray-50'
+                            activeTab === 'ORDERS' ? 'bg-brand-surface text-brand-primary' : 'text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         <Package size={18} /> My Orders
@@ -134,7 +134,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                     <button 
                         onClick={() => setActiveTab('WISHLIST')}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-sm ${
-                            activeTab === 'WISHLIST' ? 'bg-[#FFFBF2] text-[#8B7E66]' : 'text-gray-600 hover:bg-gray-50'
+                            activeTab === 'WISHLIST' ? 'bg-brand-surface text-brand-primary' : 'text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         <Heart size={18} /> My Wishlist
@@ -142,7 +142,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                     <button 
                         onClick={() => setActiveTab('ADDRESS')}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-sm ${
-                            activeTab === 'ADDRESS' ? 'bg-[#FFFBF2] text-[#8B7E66]' : 'text-gray-600 hover:bg-gray-50'
+                            activeTab === 'ADDRESS' ? 'bg-brand-surface text-brand-primary' : 'text-gray-600 hover:bg-gray-50'
                         }`}
                     >
                         <MapPin size={18} /> Saved Addresses
@@ -165,7 +165,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                 <div className="bg-white p-6 md:p-8 shadow-sm rounded-sm animate-fade-in">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="font-serif text-2xl text-gray-800">Personal Information</h2>
-                        <button className="text-[#8B7E66] text-sm flex items-center gap-1 hover:underline">
+                        <button className="text-brand-primary text-sm flex items-center gap-1 hover:underline">
                             <Edit2 size={14} /> Edit
                         </button>
                     </div>
@@ -241,7 +241,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                             <div className="mt-4 pt-4 flex justify-end">
                                 <button 
                                     onClick={() => setSelectedOrder(order)}
-                                    className="text-[#8B7E66] text-sm font-bold uppercase tracking-wide flex items-center gap-1 hover:text-[#5D6D55]"
+                                    className="text-brand-primary text-sm font-bold uppercase tracking-wide flex items-center gap-1 hover:text-brand-secondary"
                                 >
                                     View Details <ChevronRight size={16} />
                                 </button>
@@ -275,7 +275,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                         <div className="bg-white p-12 text-center rounded-sm">
                             <Heart size={48} className="mx-auto text-gray-300 mb-4" />
                             <p className="text-gray-500">Your wishlist is empty.</p>
-                            <button className="mt-4 text-[#8B7E66] font-bold underline hover:text-[#5D6D55]">Start Shopping</button>
+                            <button className="mt-4 text-brand-primary font-bold underline hover:text-brand-secondary">Start Shopping</button>
                         </div>
                     )}
                  </div>
@@ -288,7 +288,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                         <h2 className="font-serif text-2xl text-gray-800">Saved Addresses</h2>
                         <button 
                             onClick={handleAddAddress}
-                            className="bg-[#8B7E66] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#5D6D55] transition-colors rounded-sm"
+                            className="bg-brand-primary text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-brand-secondary transition-colors rounded-sm"
                         >
                              + Add New
                         </button>
@@ -299,14 +299,14 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                     ) : addresses.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {addresses.map(address => (
-                                <div key={address.id} className={`border p-5 rounded-sm relative ${address.isDefault ? 'border-[#8B7E66] bg-[#FFFBF2]' : 'border-gray-200'}`}>
+                                <div key={address.id} className={`border p-5 rounded-sm relative ${address.isDefault ? 'border-brand-primary bg-brand-surface' : 'border-gray-200'}`}>
                                     {address.isDefault && (
-                                        <div className="absolute top-4 right-4 bg-[#8B7E66] text-white text-[10px] px-2 py-0.5 uppercase font-bold tracking-wider">Default</div>
+                                        <div className="absolute top-4 right-4 bg-brand-primary text-white text-[10px] px-2 py-0.5 uppercase font-bold tracking-wider">Default</div>
                                     )}
                                     {!address.isDefault && (
                                         <button 
                                             onClick={() => handleSetDefaultAddress(address)}
-                                            className="absolute top-4 right-4 text-gray-400 hover:text-[#8B7E66] text-[10px] uppercase font-bold tracking-wider"
+                                            className="absolute top-4 right-4 text-gray-400 hover:text-brand-primary text-[10px] uppercase font-bold tracking-wider"
                                         >
                                             Set Default
                                         </button>
@@ -322,7 +322,7 @@ const ProfilePage: React.FC<Props> = ({ onProductClick }) => {
                                     <div className="flex gap-4 text-xs font-bold uppercase tracking-wide">
                                         <button 
                                             onClick={() => handleEditAddress(address)}
-                                            className="text-[#8B7E66] hover:underline"
+                                            className="text-brand-primary hover:underline"
                                         >
                                             Edit
                                         </button>

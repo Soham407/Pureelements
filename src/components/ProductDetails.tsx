@@ -140,13 +140,13 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
         
         {/* Breadcrumb */}
         <div className="text-xs text-gray-500 uppercase tracking-widest mb-8 flex items-center flex-wrap">
-          <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate('HOME')}>Home</span>
+          <span className="cursor-pointer hover:text-brand-primary" onClick={() => onNavigate('HOME')}>Home</span>
           <span className="mx-2">/</span>
-          <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate(product.mainCategory || 'SHOP')}>{product.mainCategory}</span>
+          <span className="cursor-pointer hover:text-brand-primary" onClick={() => onNavigate(product.mainCategory || 'SHOP')}>{product.mainCategory}</span>
           {product.subCategory && (
               <>
                  <span className="mx-2">/</span>
-                 <span className="cursor-pointer hover:text-[#8B7E66]" onClick={() => onNavigate(product.mainCategory || 'SHOP', product.subCategory)}>{product.subCategory}</span>
+                 <span className="cursor-pointer hover:text-brand-primary" onClick={() => onNavigate(product.mainCategory || 'SHOP', product.subCategory)}>{product.subCategory}</span>
               </>
           )}
           <span className="mx-2">/</span>
@@ -164,7 +164,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                     <div 
                         key={idx} 
                         className={`w-16 h-16 md:w-20 md:h-24 flex-shrink-0 cursor-pointer border-2 transition-all bg-gray-50 ${
-                            activeImage === img ? 'border-[#8B7E66]' : 'border-transparent hover:border-gray-200'
+                            activeImage === img ? 'border-brand-primary' : 'border-transparent hover:border-gray-200'
                         }`}
                         onClick={() => setActiveImage(img)}
                     >
@@ -195,13 +195,13 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                   />
                   
                   {product.isSoldOut && (
-                    <div className="absolute top-0 left-0 bg-[#5D6D55] text-white text-xs px-4 py-2 uppercase font-bold z-10 pointer-events-none">
+                    <div className="absolute top-0 left-0 bg-brand-secondary text-white text-xs px-4 py-2 uppercase font-bold z-10 pointer-events-none">
                       Sold Out
                     </div>
                   )}
                   {product.isBestSeller && !product.isSoldOut && (
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-3 py-1 uppercase font-bold z-10 shadow-sm border border-gray-100 flex items-center gap-1 pointer-events-none">
-                      <Sparkles size={10} className="text-[#F5A623]" /> Best Seller
+                      <Sparkles size={10} className="text-brand-accent" /> Best Seller
                     </div>
                   )}
                   
@@ -219,7 +219,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             <p className="text-sm text-gray-500 uppercase tracking-widest mb-4">{product.category}</p>
 
             <div className="flex items-center gap-4 mb-6">
-               <div className="flex items-center text-[#F5A623]">
+               <div className="flex items-center text-brand-accent">
                   {[1,2,3,4,5].map(star => (
                       <Star key={star} size={16} fill={star <= (product.rating || 5) ? "currentColor" : "none"} className={star <= (product.rating || 5) ? "" : "text-gray-300"} />
                   ))}
@@ -271,7 +271,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                            </div>
                            <button 
                                onClick={handleAddToCart}
-                               className="flex-1 bg-white border border-[#2C2C2C] text-[#2C2C2C] uppercase font-bold tracking-widest text-xs hover:bg-gray-50 transition-colors"
+                               className="flex-1 bg-white border border-brand-dark text-brand-dark uppercase font-bold tracking-widest text-xs hover:bg-gray-50 transition-colors"
                            >
                                Add to Cart
                            </button>
@@ -286,7 +286,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                        </div>
                        <button 
                           onClick={handleBuyNow}
-                          className="w-full bg-[#2C2C2C] text-white py-4 uppercase font-bold tracking-widest text-xs hover:bg-black transition-colors shadow-lg"
+                          className="w-full bg-brand-dark text-white py-4 uppercase font-bold tracking-widest text-xs hover:bg-black transition-colors shadow-lg"
                        >
                           Buy Now
                        </button>
@@ -306,8 +306,8 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
             
             {/* --- FEATURE: FREQUENTLY BOUGHT TOGETHER --- */}
             {complementaryProduct && !complementaryProduct.isSoldOut && (
-                <div className="mb-10 p-4 bg-[#FFFBF2] border border-[#8B7E66]/20 rounded-sm">
-                    <h3 className="font-serif text-lg text-[#8B7E66] mb-3 flex items-center gap-2">
+                <div className="mb-10 p-4 bg-brand-surface border border-brand-primary/20 rounded-sm">
+                    <h3 className="font-serif text-lg text-brand-primary mb-3 flex items-center gap-2">
                         <Sparkles size={18} /> Complete Your Routine
                     </h3>
                     <div className="flex gap-4 items-center">
@@ -324,7 +324,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                                 addToCart(complementaryProduct);
                                 showToast(`${complementaryProduct.name} added!`);
                             }}
-                            className="bg-white border border-[#8B7E66] text-[#8B7E66] px-3 py-1.5 text-[10px] uppercase font-bold hover:bg-[#8B7E66] hover:text-white transition-colors"
+                            className="bg-white border border-brand-primary text-brand-primary px-3 py-1.5 text-[10px] uppercase font-bold hover:bg-brand-primary hover:text-white transition-colors"
                         >
                             + Add
                         </button>
@@ -337,7 +337,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                 {['Description', 'Ingredients', 'How to Use', 'Legal Info'].map((section) => (
                     <div key={section} className="border-b border-gray-200">
                         <button 
-                            className="w-full flex items-center justify-between py-4 text-sm font-bold uppercase tracking-wider text-gray-800 hover:text-[#8B7E66] transition-colors"
+                            className="w-full flex items-center justify-between py-4 text-sm font-bold uppercase tracking-wider text-gray-800 hover:text-brand-primary transition-colors"
                             onClick={() => toggleSection(section.toLowerCase())}
                         >
                             {section}
@@ -392,7 +392,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                                         })}
                                     </span>
                                 </div>
-                                <div className="flex items-center text-[#F5A623] mb-2">
+                                <div className="flex items-center text-brand-accent mb-2">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                             key={star}
@@ -415,20 +415,20 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
 
             {/* USPs */}
             <div className="grid grid-cols-2 gap-4 mt-8">
-               <div className="flex items-center gap-3 bg-[#FFFBF2] p-3 rounded-sm">
-                   <CheckCircle2 size={16} className="text-[#8B7E66]" />
+               <div className="flex items-center gap-3 bg-brand-surface p-3 rounded-sm">
+                   <CheckCircle2 size={16} className="text-brand-primary" />
                    <span className="text-xs font-bold uppercase text-gray-600">100% Ayurvedic</span>
                </div>
-               <div className="flex items-center gap-3 bg-[#FFFBF2] p-3 rounded-sm">
-                   <CheckCircle2 size={16} className="text-[#8B7E66]" />
+               <div className="flex items-center gap-3 bg-brand-surface p-3 rounded-sm">
+                   <CheckCircle2 size={16} className="text-brand-primary" />
                    <span className="text-xs font-bold uppercase text-gray-600">Cruelty Free</span>
                </div>
-               <div className="flex items-center gap-3 bg-[#FFFBF2] p-3 rounded-sm">
-                   <CheckCircle2 size={16} className="text-[#8B7E66]" />
+               <div className="flex items-center gap-3 bg-brand-surface p-3 rounded-sm">
+                   <CheckCircle2 size={16} className="text-brand-primary" />
                    <span className="text-xs font-bold uppercase text-gray-600">Paraben Free</span>
                </div>
-               <div className="flex items-center gap-3 bg-[#FFFBF2] p-3 rounded-sm">
-                   <CheckCircle2 size={16} className="text-[#8B7E66]" />
+               <div className="flex items-center gap-3 bg-brand-surface p-3 rounded-sm">
+                   <CheckCircle2 size={16} className="text-brand-primary" />
                    <span className="text-xs font-bold uppercase text-gray-600">Made in India</span>
                </div>
             </div>
@@ -448,7 +448,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                              <div className="aspect-[4/5] bg-gray-50 overflow-hidden rounded-sm mb-2">
                                 <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt={p.name} />
                              </div>
-                             <p className="text-xs font-bold text-gray-800 line-clamp-1 group-hover:text-[#8B7E66]">{p.name}</p>
+                             <p className="text-xs font-bold text-gray-800 line-clamp-1 group-hover:text-brand-primary">{p.name}</p>
                              <p className="text-xs text-gray-500">₹{p.price}</p>
                          </div>
                     ))}
@@ -462,7 +462,7 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                 <div className="text-center mb-10">
                     <h2 className="font-serif text-3xl text-gray-800 relative inline-block">
                         You May Also Like
-                        <span className="block h-px w-1/2 bg-[#8B7E66] mx-auto mt-4"></span>
+                        <span className="block h-px w-1/2 bg-brand-primary mx-auto mt-4"></span>
                     </h2>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

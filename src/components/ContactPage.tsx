@@ -19,7 +19,7 @@ const ContactPage: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen pb-16">
-      <div className="bg-[#FFFBF2] py-16 mb-10">
+      <div className="bg-brand-surface py-16 mb-10">
          <div className="container mx-auto px-4">
              <SectionHeader title="Contact Us" subtitle="Get in Touch" />
          </div>
@@ -30,12 +30,12 @@ const ContactPage: React.FC = () => {
           
           {/* Contact Info */}
           <div className="w-full md:w-1/3 space-y-8 animate-fade-in">
-             <div className="bg-[#FFFBF2] p-8 rounded-sm border border-[#8B7E66]/20 h-full">
+             <div className="bg-brand-surface p-8 rounded-sm border border-brand-primary/20 h-full">
                 <h3 className="font-serif text-xl text-gray-800 mb-6">Reach Us At</h3>
                 
                 <div className="space-y-8">
                    <div className="flex items-start gap-4">
-                      <div className="bg-white p-3 rounded-full shadow-sm text-[#8B7E66]">
+                      <div className="bg-white p-3 rounded-full shadow-sm text-brand-primary">
                          <Phone size={20} />
                       </div>
                       <div>
@@ -46,7 +46,7 @@ const ContactPage: React.FC = () => {
                    </div>
 
                    <div className="flex items-start gap-4">
-                      <div className="bg-white p-3 rounded-full shadow-sm text-[#8B7E66]">
+                      <div className="bg-white p-3 rounded-full shadow-sm text-brand-primary">
                          <Mail size={20} />
                       </div>
                       <div>
@@ -57,7 +57,7 @@ const ContactPage: React.FC = () => {
                    </div>
 
                    <div className="flex items-start gap-4">
-                      <div className="bg-white p-3 rounded-full shadow-sm text-[#8B7E66]">
+                      <div className="bg-white p-3 rounded-full shadow-sm text-brand-primary">
                          <MapPin size={20} />
                       </div>
                       <div>
@@ -67,7 +67,7 @@ const ContactPage: React.FC = () => {
                             Behind Aaimata Mandir,<br/>
                             Bibwewadi, Pune - 411037
                          </p>
-                         <a href="#" className="text-[#8B7E66] text-xs font-bold underline mt-2 inline-block">View on Google Maps</a>
+                         <a href="#" className="text-brand-primary text-xs font-bold underline mt-2 inline-block">View on Google Maps</a>
                       </div>
                    </div>
                 </div>
@@ -86,7 +86,7 @@ const ContactPage: React.FC = () => {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors bg-white"
+                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none transition-colors bg-white"
                         placeholder="John Doe"
                       />
                    </div>
@@ -97,7 +97,7 @@ const ContactPage: React.FC = () => {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors bg-white"
+                        className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none transition-colors bg-white"
                         placeholder="john@example.com"
                       />
                    </div>
@@ -110,14 +110,14 @@ const ContactPage: React.FC = () => {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => setFormData({...formData, message: e.target.value})}
-                      className="w-full border border-gray-200 p-3 rounded-sm focus:border-[#8B7E66] outline-none transition-colors resize-none bg-white"
+                      className="w-full border border-gray-200 p-3 rounded-sm focus:border-brand-primary outline-none transition-colors resize-none bg-white"
                       placeholder="How can we help you?"
                    ></textarea>
                 </div>
 
                 <button 
                   type="submit"
-                  className="bg-[#2C2C2C] text-white px-8 py-3.5 uppercase font-bold tracking-widest text-xs hover:bg-black transition-all flex items-center gap-2"
+                  className="bg-brand-dark text-white px-8 py-3.5 uppercase font-bold tracking-widest text-xs hover:bg-black transition-all flex items-center gap-2"
                 >
                    Send Message <Send size={16} />
                 </button>

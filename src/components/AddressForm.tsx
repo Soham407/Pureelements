@@ -103,7 +103,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 required
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -114,7 +114,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
                 placeholder="10-digit mobile number"
               />
             </div>
@@ -129,7 +129,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
               value={formData.addressLine1}
               onChange={handleChange}
               placeholder="House No, Building, Street"
-              className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+              className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
             />
           </div>
 
@@ -141,7 +141,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
               value={formData.addressLine2}
               onChange={handleChange}
               placeholder="Area, Landmark"
-              className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+              className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
             />
           </div>
 
@@ -154,7 +154,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 required
                 value={formData.city}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -164,7 +164,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 required
                 value={formData.state}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm bg-white"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm bg-white"
               >
                 <option value="">Select State</option>
                 {INDIAN_STATES.map(state => (
@@ -182,7 +182,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
                 value={formData.pincode}
                 onChange={handleChange}
                 maxLength={6}
-                className="w-full px-4 py-2 border border-gray-200 focus:border-[#8B7E66] focus:outline-none rounded-sm text-sm"
+                className="w-full px-4 py-2 border border-gray-200 focus:border-brand-primary focus:outline-none rounded-sm text-sm"
               />
             </div>
           </div>
@@ -194,7 +194,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
               name="isDefault"
               checked={formData.isDefault}
               onChange={handleChange}
-              className="w-4 h-4 text-[#8B7E66] border-gray-300 rounded focus:ring-[#8B7E66]"
+              className="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
             />
             <label htmlFor="isDefault" className="text-sm text-gray-700">Set as default address</label>
           </div>
@@ -212,7 +212,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ userId, address, onClose, onS
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-[#2C2C2C] text-white font-bold uppercase tracking-wider text-xs hover:bg-black transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-brand-dark text-white font-bold uppercase tracking-wider text-xs hover:bg-black transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : 'Save Address'}
             </button>

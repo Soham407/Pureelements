@@ -50,8 +50,8 @@ const AdminDashboard: React.FC<Props> = ({ products, orders }) => {
     {
       title: 'Total Products',
       value: products.length,
-      icon: <Package className="text-[#8B7E66]" size={24} />,
-      bg: 'bg-[#FFFBF2]'
+      icon: <Package className="text-brand-primary" size={24} />,
+      bg: 'bg-brand-surface'
     }
   ];
 

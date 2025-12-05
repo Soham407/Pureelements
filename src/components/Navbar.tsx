@@ -113,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
               />
               <button 
                 onClick={handleSearchSubmit}
-                className="bg-brand-accent px-4 py-2 flex items-center justify-center hover:bg-[#E0B83E] transition-colors rounded-r-sm"
+                className="bg-brand-accent px-4 py-2 flex items-center justify-center hover:bg-brand-accent/90 transition-colors rounded-r-sm"
               >
                 <Search className="h-5 w-5 text-gray-800" strokeWidth={2} />
               </button>
@@ -134,7 +134,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
 
               {/* Logo Text */}
               <div className="flex flex-col items-start">
-                <h1 className="text-xl lg:text-3xl font-sans text-[#4A4A4A] uppercase tracking-wide leading-none" style={{ fontWeight: 400 }}>
+                <h1 className="text-xl lg:text-3xl font-sans text-gray-700 uppercase tracking-wide leading-none" style={{ fontWeight: 400 }}>
                   PURE ELEMENTS
                   <sup className="text-[8px] lg:text-[10px] top-[-0.5em] ml-0.5 text-gray-400">TM</sup>
                 </h1>
@@ -180,7 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
       {/* Bottom Row: Navigation (Desktop) */}
       <div className="hidden lg:block py-3 bg-white relative">
         <div className="container mx-auto px-4">
-          <ul className="flex flex-nowrap items-center justify-center gap-5 xl:gap-8 text-[13px] font-bold text-[#4A4A4A] tracking-wider relative whitespace-nowrap">
+          <ul className="flex flex-nowrap items-center justify-center gap-5 xl:gap-8 text-[13px] font-bold text-gray-700 tracking-wider relative whitespace-nowrap">
             {navItems.map((item) => (
               <li 
                 key={item.name} 
@@ -215,7 +215,7 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                             e.preventDefault();
                             handleNavClick(item.name, subItem);
                           }}
-                          className="px-4 py-2 text-left text-[#4A4A4A] hover:text-brand-accent hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
+                          className="px-4 py-2 text-left text-gray-700 hover:text-brand-accent hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
                         >
                           {subItem}
                         </button>
