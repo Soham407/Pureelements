@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Slide } from '../types';
 import ImageWithFallback from './ImageWithFallback';
 
@@ -10,21 +10,13 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ slides }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isPlaying) {
-      timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-      }, 5000);
-    }
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
     return () => clearInterval(timer);
-  }, [slides.length, isPlaying]);
-
-  const toggleAutoPlay = useCallback(() => {
-    setIsPlaying(prev => !prev);
-  }, []);
+  }, [slides.length]);
 
   const nextSlide = () => {
      setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -93,9 +85,8 @@ const Hero: React.FC<HeroProps> = ({ slides }) => {
         <ChevronRight size={20} className="md:w-6 md:h-6" />
       </button>
 
-      {/* Dots & Controls */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-4 z-10">
-        {/* Dots */}
+      {/* Dots */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center z-10">
         <div className="flex space-x-2">
           {slides.map((_, idx) => (
             <button
@@ -109,15 +100,6 @@ const Hero: React.FC<HeroProps> = ({ slides }) => {
             />
           ))}
         </div>
-        
-        {/* Play/Pause Toggle */}
-        <button 
-          onClick={toggleAutoPlay}
-          className="text-white/70 hover:text-white transition-colors"
-          aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
-        >
-          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-        </button>
       </div>
     </div>
   );

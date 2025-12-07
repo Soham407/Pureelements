@@ -5,10 +5,12 @@ import SEO from '../components/SEO';
 import SectionHeader from '../components/SectionHeader';
 import CategoryCircle from '../components/CategoryCircle';
 import ProductCarousel from '../components/ProductCarousel';
+import StoreCarousel from '../components/StoreCarousel';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { Play, Leaf, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Slide, Category, ConcernsContent, GiftingContent, BestsellersConfig, VideoContent, StoreContent, Testimonial } from '../types';
 import { productsService } from '../lib/database';
+import { storesData } from '../data/stores';
 import ErrorState from '../components/ErrorState';
 
 interface HomePageProps {
@@ -21,7 +23,6 @@ interface HomePageProps {
   bestsellersConfig: BestsellersConfig | null;
   videoSection: VideoContent | null;
   testimonials: Testimonial[];
-  stores: StoreContent[];
 }
 
 
@@ -35,8 +36,7 @@ const HomePage: React.FC<HomePageProps> = ({
   gifting,
   bestsellersConfig,
   videoSection,
-  testimonials,
-  stores
+  testimonials
 }) => {
   const navigate = useNavigate();
   const [bestsellerProducts, setBestsellerProducts] = useState<Product[]>([]);
@@ -97,6 +97,7 @@ const HomePage: React.FC<HomePageProps> = ({
             products={featuredProducts}
             onProductClick={onProductClick}
             itemsPerViewDesktop={4}
+            hideIndicators={true}
           />
         </div>
       </section>
@@ -170,6 +171,7 @@ const HomePage: React.FC<HomePageProps> = ({
                            products={bestsellerProducts}
                            onProductClick={onProductClick}
                            itemsPerViewDesktop={3}
+                           hideIndicators={true}
                        />
                     </div>
                 </div>
@@ -230,6 +232,7 @@ const HomePage: React.FC<HomePageProps> = ({
                     onProductClick={onProductClick}
                     variant="offer"
                     itemsPerViewDesktop={4}
+                    hideIndicators={true}
                 />
             </RevealOnScroll>
           </div>
@@ -346,20 +349,10 @@ const HomePage: React.FC<HomePageProps> = ({
       <section className="py-12 md:py-20 bg-brand-light">
          <div className="container mx-auto px-4">
             <SectionHeader title="Our Exclusive Stores" />
-            <div className="flex overflow-x-auto gap-4 md:gap-6 pb-8 scrollbar-hide snap-x snap-mandatory px-4 md:px-0 -mx-4 md:mx-0">
-               {stores.map(store => (
-                  <div key={store.id} className="min-w-[280px] md:min-w-[350px] bg-white shadow-lg snap-center group cursor-pointer first:ml-4 last:mr-4 md:first:ml-0 md:last:mr-0" onClick={() => navigate('/stores')}>
-                     <div className="h-[180px] md:h-[220px] overflow-hidden relative">
-                        <img src={store.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={store.name} />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
-                     </div>
-                     <div className="p-4 md:p-5 text-center bg-white border-t border-gray-100">
-                        <h4 className="font-serif text-sm font-bold text-gray-800 leading-relaxed">{store.name}</h4>
-                        <p className="text-xs text-gray-500 mt-1">{store.location}</p>
-                     </div>
-                  </div>
-               ))}
-            </div>
+            <StoreCarousel 
+               stores={storesData}
+               onStoreClick={() => navigate('/stores')}
+            />
          </div>
       </section>
     </>

@@ -281,7 +281,6 @@ function AppContent() {
             bestsellersConfig={bestsellersConfig}
             videoSection={videoSection}
             testimonials={testimonials}
-            stores={stores}
             onProductClick={handleProductClick}
           />
         } />

@@ -8,13 +8,15 @@ interface ProductCarouselProps {
   onProductClick?: (product: Product) => void;
   variant?: 'default' | 'offer';
   itemsPerViewDesktop?: number;
+  hideIndicators?: boolean;
 }
 
 const ProductCarousel: React.FC<ProductCarouselProps> = ({ 
   products, 
   onProductClick, 
   variant = 'default',
-  itemsPerViewDesktop = 4 
+  itemsPerViewDesktop = 4,
+  hideIndicators = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -114,36 +116,40 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
       </button>
 
       {/* Dots / Tabs */}
-      <div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm"
-        role="tablist"
-        aria-label="Product carousel slides"
-      >
-        {products.map((_, idx) => {
-          const isActive = currentIndex % totalItems === idx;
-          return (
-            <button
-              key={`dot-${idx}`}
-              onClick={() => setCurrentIndex(idx)}
-              role="tab"
-              aria-selected={isActive}
-              aria-label={`Go to slide ${idx + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                isActive ? 'bg-brand-dark w-6' : 'bg-gray-400/60 w-2'
-              }`}
-            />
-          );
-        })}
-      </div>
+      {!hideIndicators && (
+        <div
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm"
+          role="tablist"
+          aria-label="Product carousel slides"
+        >
+          {products.map((_, idx) => {
+            const isActive = currentIndex % totalItems === idx;
+            return (
+              <button
+                key={`dot-${idx}`}
+                onClick={() => setCurrentIndex(idx)}
+                role="tab"
+                aria-selected={isActive}
+                aria-label={`Go to slide ${idx + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  isActive ? 'bg-brand-dark w-6' : 'bg-gray-400/60 w-2'
+                }`}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* Pause/Play Control */}
-      <button
-        onClick={() => setIsPaused(!isPaused)}
-        className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-800 shadow-sm hover:bg-white transition-colors z-20"
-        aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
-      >
-        {isPaused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
-      </button>
+      {!hideIndicators && (
+        <button
+          onClick={() => setIsPaused(!isPaused)}
+          className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-800 shadow-sm hover:bg-white transition-colors z-20"
+          aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
+        >
+          {isPaused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
+        </button>
+      )}
     </div>
   );
 };
