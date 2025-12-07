@@ -443,7 +443,151 @@ const AdminProducts: React.FC<Props> = ({ products, navItems, onUpdateProduct, o
                              className="w-full border border-gray-200 p-2 rounded-sm focus:border-brand-primary outline-none text-sm bg-white" 
                           />
                       </div>
-                      <div className="col-span-2 flex gap-6 pt-2">
+
+                      {/* Variants Section */}
+                      <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                          <h4 className="text-sm font-bold text-gray-800 mb-3 flex justify-between items-center">
+                              Product Variants
+                              <button 
+                                onClick={() => setEditingProduct(prev => {
+                                    if(!prev) return null;
+                                    const currentVariants = prev.variants || [];
+                                    const newVariant: any = { 
+                                        id: 0, 
+                                        productId: prev.id, // Corrected to camelCase matches type
+                                        size: '', 
+                                        price: prev.price, 
+                                        stock: 0, 
+                                        sku: '', 
+                                        isDefault: currentVariants.length === 0, // Corrected to camelCase
+                                        created_at: new Date().toISOString()
+                                    };
+                                    return {
+                                        ...prev, 
+                                        variants: [...currentVariants, newVariant]
+                                    };
+                                })}
+                                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded"
+                              >
+                                + Add Variant
+                              </button>
+                          </h4>
+                          
+                          {editingProduct.variants && editingProduct.variants.length > 0 ? (
+                              <div className="space-y-2">
+                                  {editingProduct.variants.map((variant, idx) => (
+                                      <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-gray-50 p-2 rounded border border-gray-100">
+                                          <div className="col-span-3">
+                                              <input 
+                                                  placeholder="Size (e.g. 50ml)"
+                                                  value={variant.size}
+                                                  onChange={(e) => {
+                                                      const val = e.target.value;
+                                                      setEditingProduct(prev => prev ? ({
+                                                          ...prev,
+                                                          variants: prev.variants?.map((v, i) => i === idx ? { ...v, size: val } : v)
+                                                      }) : null);
+                                                  }}
+                                                  className="w-full text-xs p-1 border rounded"
+                                              />
+                                          </div>
+                                          <div className="col-span-3">
+                                              <input 
+                                                  type="number"
+                                                  placeholder="Price"
+                                                  value={variant.price}
+                                                  onChange={(e) => {
+                                                      const val = parseFloat(e.target.value);
+                                                      setEditingProduct(prev => prev ? ({
+                                                          ...prev,
+                                                          variants: prev.variants?.map((v, i) => i === idx ? { ...v, price: val } : v)
+                                                      }) : null);
+                                                  }}
+                                                  className="w-full text-xs p-1 border rounded"
+                                              />
+                                          </div>
+                                          <div className="col-span-2">
+                                              <input 
+                                                  type="number"
+                                                  placeholder="Stock"
+                                                  value={variant.stock || 0}
+                                                  onChange={(e) => {
+                                                      const val = parseInt(e.target.value);
+                                                      setEditingProduct(prev => prev ? ({
+                                                          ...prev,
+                                                          variants: prev.variants?.map((v, i) => i === idx ? { ...v, stock: val } : v)
+                                                      }) : null);
+                                                  }}
+                                                  className="w-full text-xs p-1 border rounded"
+                                              />
+                                          </div>
+                                          <div className="col-span-3">
+                                              <input 
+                                                  placeholder="SKU"
+                                                  value={variant.sku || ''}
+                                                  onChange={(e) => {
+                                                      const val = e.target.value;
+                                                      setEditingProduct(prev => prev ? ({
+                                                          ...prev,
+                                                          variants: prev.variants?.map((v, i) => i === idx ? { ...v, sku: val } : v)
+                                                      }) : null);
+                                                  }}
+                                                  className="w-full text-xs p-1 border rounded"
+                                              />
+                                          </div>
+                                          <div className="col-span-1 text-right">
+                                              <button 
+                                                  onClick={() => setEditingProduct(prev => prev ? ({
+                                                      ...prev,
+                                                      variants: prev.variants?.filter((_, i) => i !== idx)
+                                                  }) : null)}
+                                                  className="text-red-500 hover:text-red-700"
+                                              >
+                                                  <X size={14} />
+                                              </button>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          ) : (
+                              <p className="text-xs text-gray-400 italic">No variants added. Default price will be used.</p>
+                          )}
+                      </div>
+
+                      {/* Concerns Section */}
+                      <div className="col-span-2 border-t border-gray-100 pt-4 mt-2">
+                           <h4 className="text-sm font-bold text-gray-800 mb-3">Shop By Concern Tags</h4>
+                           <div className="flex flex-wrap gap-2">
+                               {["Acne", "Pigmentation", "Dry Skin", "Oily Skin", "Anti-Ageing", "Hair Fall", "Dandruff", "Sensitive Skin"].map(concern => (
+                                   <label key={concern} className={`
+                                       text-xs cursor-pointer px-3 py-1 rounded-full border transition-colors select-none
+                                       ${editingProduct.concerns?.includes(concern) 
+                                          ? 'bg-brand-primary text-white border-brand-primary' 
+                                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}
+                                   `}>
+                                       <input 
+                                           type="checkbox" 
+                                           className="hidden"
+                                           checked={editingProduct.concerns?.includes(concern) || false}
+                                           onChange={(e) => {
+                                              const checked = e.target.checked;
+                                              setEditingProduct(prev => {
+                                                  if (!prev) return null;
+                                                  const current = prev.concerns || [];
+                                                  const newConcerns = checked 
+                                                      ? [...current, concern]
+                                                      : current.filter(c => c !== concern);
+                                                  return { ...prev, concerns: newConcerns };
+                                              });
+                                           }}
+                                       />
+                                       {concern}
+                                   </label>
+                               ))}
+                           </div>
+                      </div>
+
+                      <div className="col-span-2 flex gap-6 pt-4 border-t border-gray-100 mt-2">
                           <label className="flex items-center gap-2 cursor-pointer">
                               <input 
                                 type="checkbox" 

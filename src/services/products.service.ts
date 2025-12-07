@@ -139,46 +139,84 @@ export const productsService = {
 
   async create(product: Omit<Product, 'id'>): Promise<Product> {
     const dbProduct = productToDbFormat(product);
-    const { data, error } = await supabase
+    
+    // 1. Create the parent product
+    const { data: newProduct, error } = await supabase
       .from('products')
       .insert(dbProduct as any)
       .select()
-      .single();
+      .single<any>();
     
     if (error) throw error;
-    // Transform from snake_case to camelCase
-    return productFromDbFormat(data);
+    if (!newProduct) throw new Error('Failed to create product');
+
+    // 2. If there are variants, insert them
+    if (product.variants && product.variants.length > 0) {
+      const variantsToInsert = product.variants.map((v: any) => ({
+        product_id: newProduct.id,
+        size: v.size,
+        price: v.price,
+        stock: v.stock || 0,
+        sku: v.sku,
+        is_default: v.isDefault || false
+      }));
+
+      const { error: variantError } = await supabase
+        .from('product_variants')
+        .insert(variantsToInsert as any);
+
+      if (variantError) console.error('Error adding variants:', variantError);
+    }
+
+    return this.getById(newProduct.id) as Promise<Product>;
   },
 
   async update(id: number, updates: Partial<Product>): Promise<Product> {
-    // Exclude id from updates and convert to snake_case
-    const { id: _, ...updatesWithoutId } = updates;
-    const dbUpdates = productToDbFormat(updatesWithoutId);
+    const { variants, ...productUpdates } = updates;
+    const dbUpdates = productToDbFormat(productUpdates);
     
-    // Check if we have any fields to update
-    if (Object.keys(dbUpdates).length === 0) {
-      throw new Error('No fields to update');
+    // 1. Update basic product fields
+    if (Object.keys(dbUpdates).length > 0) {
+      const { error } = await supabase
+        .from('products')
+        .update(dbUpdates)
+        .eq('id', id);
+      
+      if (error) throw error;
+    }
+
+    // 2. Handle Variants (Full Replacement Strategy)
+    if (variants) {
+      // A. Delete existing variants
+      const { error: deleteError } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('product_id', id);
+      
+      if (deleteError) throw deleteError;
+
+      // B. Insert new variants
+      if (variants.length > 0) {
+        const variantsToInsert = variants.map((v: any) => ({
+          product_id: id,
+          size: v.size,
+          price: v.price,
+          stock: v.stock || 0,
+          sku: v.sku,
+          is_default: v.isDefault || false
+        }));
+
+        const { error: insertError } = await supabase
+          .from('product_variants')
+          .insert(variantsToInsert as any);
+        
+        if (insertError) throw insertError;
+      }
     }
     
-    // Perform the update and get the updated row
-    const { data, error } = await (supabase
-      .from('products') as any)
-      .update(dbUpdates)
-      .eq('id', id)
-      .select()
-      .maybeSingle();
-    
-    if (error) {
-      console.error('Database update error:', error);
-      throw error;
-    }
-    
-    if (!data) {
-      throw new Error(`Product with id ${id} not found or update failed`);
-    }
-    
-    // Transform from snake_case to camelCase
-    return productFromDbFormat(data);
+    const result = await this.getById(id);
+    if (!result) throw new Error("Product not found after update");
+    return result;
   },
 
   async delete(id: number): Promise<void> {
