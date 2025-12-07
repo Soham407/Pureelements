@@ -1,4 +1,14 @@
 
+export interface ProductVariant {
+  id: number;
+  productId: number;
+  size: string;
+  price: number;
+  stock: number;
+  sku?: string;
+  isDefault: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -29,6 +39,8 @@ export interface Product {
     countryOfOrigin?: string;
   };
   reviews?: Review[];
+  variants?: ProductVariant[];
+  concerns?: string[];
 }
 
 export interface Review {
@@ -127,6 +139,7 @@ export interface Address {
 
 export interface CartItem extends Product {
   quantity: number;
+  variant?: ProductVariant;
 }
 
 export interface ContentBlock {

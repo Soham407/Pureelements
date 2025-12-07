@@ -193,15 +193,17 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                 {/* Dropdown Menu */}
                 {item.hasDropdown && item.subItems && (
                   <div 
-                    className={`absolute left-0 top-full pt-2 w-56 z-[100] transition-all duration-200 ease-in-out ${
+                    className={`absolute left-0 top-full pt-2 z-[100] transition-all duration-200 ease-in-out ${
                       activeDropdown === item.name 
                         ? 'opacity-100 visible translate-y-0 pointer-events-auto' 
                         : 'opacity-0 invisible -translate-y-2 pointer-events-none'
-                    }`}
+                    } ${item.subItems.length > 8 ? 'w-[600px] -left-10' : 'w-56'}`}
                     onMouseEnter={() => setActiveDropdown(item.name)}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <div className="bg-white shadow-xl border-t-2 border-brand-accent rounded-b-sm flex flex-col py-2">
+                    <div className={`bg-white shadow-xl border-t-2 border-brand-accent rounded-b-sm py-4 ${
+                      item.subItems.length > 8 ? 'grid grid-cols-3 gap-x-4 gap-y-2 px-6' : 'flex flex-col py-2'
+                    }`}>
                       {item.subItems.map((subItem) => (
                         <button
                           key={subItem} 
@@ -209,7 +211,9 @@ const Navbar: React.FC<NavbarProps> = ({ navItems, onNavigate }) => {
                             e.preventDefault();
                             handleNavClick(item.name, subItem);
                           }}
-                          className="px-4 py-2 text-left text-gray-700 hover:text-brand-accent hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal w-full"
+                          className={`text-left text-gray-700 hover:text-brand-accent hover:bg-gray-50 transition-colors text-sm font-normal capitalize whitespace-normal ${
+                            item.subItems && item.subItems.length > 8 ? 'px-2 py-1 rounded-sm' : 'px-4 py-2 w-full'
+                          }`}
                         >
                           {subItem}
                         </button>

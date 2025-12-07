@@ -30,6 +30,7 @@ export const productToDbFormat = (product: Partial<Product>): any => {
   if (product.size !== undefined) dbProduct.size = product.size;
   if (product.fullDescription !== undefined) dbProduct.full_description = product.fullDescription;
   if (product.legalInfo !== undefined) dbProduct.legal_info = product.legalInfo;
+  if (product.concerns !== undefined) dbProduct.concerns = product.concerns;
   
   return dbProduct;
 };
@@ -67,6 +68,16 @@ export const productFromDbFormat = (dbProduct: any): Product => {
       authorName: r.user_name,
       createdAt: r.created_at
     })) : undefined,
+    variants: dbProduct.variants ? dbProduct.variants.map((v: any) => ({
+      id: v.id,
+      productId: v.product_id,
+      size: v.size,
+      price: v.price,
+      stock: v.stock,
+      sku: v.sku,
+      isDefault: v.is_default,
+    })) : undefined,
+    concerns: dbProduct.concerns || undefined,
   };
 };
 
@@ -102,7 +113,8 @@ export const productsService = {
       .from('products')
       .select(`
         *,
-        reviews (*)
+        reviews (*),
+        variants:product_variants (*)
       `)
       .eq('id', id)
       .single();
@@ -178,13 +190,13 @@ export const productsService = {
     if (error) throw error;
   },
 
-  async getByCategory(category: string, subCategory?: string, page: number = 1, limit: number = 20, sort?: string): Promise<{ products: Product[]; total: number }> {
+  async getByCategory(category: string, subCategory?: string, page: number = 1, limit: number = 20, sort?: string, concern?: string): Promise<{ products: Product[]; total: number }> {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
     let query = supabase
       .from('products')
-      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at', { count: 'exact' });
+      .select('id, name, category, price, original_price, image, description, is_sold_out, is_best_seller, is_featured, is_new, rating, main_category, sub_category, created_at, concerns', { count: 'exact' });
 
     if (category === 'OFFERS') {
        query = query.not('original_price', 'is', null);
@@ -194,6 +206,10 @@ export const productsService = {
     
     if (subCategory) {
       query = query.eq('sub_category', subCategory);
+    }
+
+    if (concern) {
+      query = query.contains('concerns', [concern]);
     }
     
     // Sorting

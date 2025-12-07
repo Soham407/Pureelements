@@ -74,7 +74,10 @@ const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
               <Trash2 size={16} />
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">{item.category}</p>
+          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">
+            {item.category}
+            {item.variant && <span className="text-gray-400"> | {item.variant.size}</span>}
+          </p>
         </div>
 
         <div className="flex items-center justify-between mt-2">

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Database } from '../types/supabase';
-import { Product, Order, User, NavItem, Slide, Category, Review, Address, ContentBlock } from '../types';
+import { Product, Order, User, NavItem, Slide, Category, Review, Address, ContentBlock, ProductVariant } from '../types';
 import { productsService, productFromDbFormat, productToDbFormat } from '../services/products.service';
 import { ordersService } from '../services/orders.service';
 
@@ -101,9 +101,10 @@ export const categoriesService = {
   },
 
   async update(id: number, updates: Partial<Category>): Promise<Category> {
-    const { data, error } = await supabase
-      .from('categories')
-      .update(updates)
+    const { id: _, ...safeUpdates } = updates;
+    const { data, error } = await (supabase
+      .from('categories') as any)
+      .update(safeUpdates)
       .eq('id', id)
       .select()
       .single();
@@ -128,12 +129,14 @@ export const categoriesService = {
 
 // ==================== CART ====================
 export const cartService = {
-  async getCart(userId: string): Promise<Array<{ product: Product; quantity: number }>> {
+  async getCart(userId: string): Promise<Array<{ product: Product; quantity: number; variant?: ProductVariant }>> {
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
         quantity,
-        products (*)
+        variant_id,
+        products (*),
+        variant:product_variants (*)
       `)
       .eq('user_id', userId);
     
@@ -143,18 +146,34 @@ export const cartService = {
 
     return cartItems.map(item => ({
       product: productFromDbFormat(item.products),
-      quantity: item.quantity
+      quantity: item.quantity,
+      variant: item.variant ? {
+        id: item.variant.id,
+        productId: item.variant.product_id,
+        size: item.variant.size,
+        price: item.variant.price,
+        stock: item.variant.stock,
+        sku: item.variant.sku,
+        isDefault: item.variant.is_default
+      } : undefined
     }));
   },
 
-  async addToCart(userId: string, productId: number, quantity: number): Promise<void> {
+  async addToCart(userId: string, productId: number, quantity: number, variantId?: number): Promise<void> {
     // Check if item already exists
-    const { data: existing } = await supabase
+    let query = supabase
       .from('cart_items')
       .select('*')
       .eq('user_id', userId)
-      .eq('product_id', productId)
-      .single();
+      .eq('product_id', productId);
+
+    if (variantId) {
+      query = query.eq('variant_id', variantId);
+    } else {
+      query = query.is('variant_id', null);
+    }
+
+    const { data: existing } = await query.single();
     
     if (existing) {
       // Update quantity
@@ -171,7 +190,8 @@ export const cartService = {
         .insert({
           user_id: userId,
           product_id: productId,
-          quantity
+          quantity,
+          variant_id: variantId
         } as any);
       
       if (error) throw error;

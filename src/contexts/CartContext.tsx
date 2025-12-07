@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product, CartItem } from '../types';
+import { Product, CartItem, ProductVariant } from '../types';
 import { useAuth } from './AuthContext';
 import { cartService } from '../lib/database';
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number) => Promise<void>;
+  addToCart: (product: Product, quantity?: number, variant?: ProductVariant) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   updateQuantity: (productId: number, delta: number) => Promise<void>;
   setQuantity: (productId: number, quantity: number) => Promise<void>;
@@ -38,7 +38,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const cartData = await cartService.getCart(user.id);
         const cartItems: CartItem[] = cartData.map(item => ({
           ...item.product,
-          quantity: item.quantity
+          quantity: item.quantity,
+          variant: item.variant,
+          // If variant exists, override price and add size to name for display context
+          price: item.variant ? item.variant.price : item.product.price,
+          // We keep the original product id, but referencing variant info for checking
         }));
         setCart(cartItems);
       } catch (error) {
@@ -51,28 +55,45 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadCart();
   }, [user, isAuthenticated]);
 
-  const addToCart = async (product: Product, quantity = 1) => {
+  const addToCart = async (product: Product, quantity = 1, variant?: ProductVariant) => {
     if (!isAuthenticated || !user) {
       // For non-authenticated users, use localStorage as fallback
       setCart((prevCart) => {
-        const existingItem = prevCart.find((item) => item.id === product.id);
+        // Find existing item with SAME product ID and SAME variant ID (if applicable)
+        const existingItem = prevCart.find((item) => 
+          item.id === product.id && 
+          ((!item.variant && !variant) || (item.variant?.id === variant?.id))
+        );
+        
         if (existingItem) {
           return prevCart.map((item) =>
-            item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+            (item.id === product.id && ((!item.variant && !variant) || (item.variant?.id === variant?.id))) 
+              ? { ...item, quantity: item.quantity + quantity } 
+              : item
           );
         }
-        return [...prevCart, { ...product, quantity: quantity }];
+        
+        // Add new item with variant overrides if present
+        const newItem: CartItem = {
+          ...product,
+          quantity,
+          variant,
+          price: variant ? variant.price : product.price
+        };
+        return [...prevCart, newItem];
       });
       return;
     }
 
     try {
-      await cartService.addToCart(user.id, product.id, quantity);
+      await cartService.addToCart(user.id, product.id, quantity, variant?.id);
       // Reload cart
       const cartData = await cartService.getCart(user.id);
       const cartItems: CartItem[] = cartData.map(item => ({
         ...item.product,
-        quantity: item.quantity
+        quantity: item.quantity,
+        variant: item.variant,
+        price: item.variant ? item.variant.price : item.product.price,
       }));
       setCart(cartItems);
     } catch (error) {

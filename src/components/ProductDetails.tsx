@@ -21,6 +21,10 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
   const { addToCart, openCart } = useCart();
   const { showToast } = useToast();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  
+  // Set initial selected variant (default or first one)
+  const defaultVariant = product.variants?.find(v => v.isDefault) || product.variants?.[0];
+  const [selectedVariant, setSelectedVariant] = useState(defaultVariant);
 
   const [activeImage, setActiveImage] = useState(product.image);
   const [quantity, setQuantity] = useState(1);
@@ -37,6 +41,9 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
   // Reset state when product changes & Handle History & Fetch Related
   useEffect(() => {
     // 1. Reset View State
+    const defVariant = product.variants?.find(v => v.isDefault) || product.variants?.[0];
+    setSelectedVariant(defVariant);
+    
     setActiveImage(product.image);
     setQuantity(1); // Ensure quantity resets to 1
     setOpenSection('description'); // Reset accordion
@@ -119,8 +126,9 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
-    showToast(`${quantity} x ${product.name} added to cart!`);
+    addToCart(product, quantity, selectedVariant);
+    const sizeText = selectedVariant ? ` (${selectedVariant.size})` : '';
+    showToast(`${quantity} x ${product.name}${sizeText} added to cart!`);
   };
 
   const handleBuyNow = () => {
@@ -237,21 +245,45 @@ const ProductDetails: React.FC<Props> = ({ product, onNavigate, onProductClick }
                </span>
             </div>
 
-            <div className="flex items-center gap-4 mb-8">
-               <span className="text-2xl font-bold text-gray-800">₹{product.price.toLocaleString('en-IN')}</span>
+            <div className="flex items-center gap-4 mb-6">
+               <span className="text-2xl font-bold text-gray-800">
+                 ₹{(selectedVariant ? selectedVariant.price : product.price).toLocaleString('en-IN')}
+               </span>
                {product.originalPrice && (
                    <>
                      <span className="text-lg text-gray-400 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                      <span className="text-xs font-bold text-red-500 uppercase bg-red-50 px-2 py-1 rounded">
-                        {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% Off
+                        {Math.round(((product.originalPrice - (selectedVariant ? selectedVariant.price : product.price)) / product.originalPrice) * 100)}% Off
                      </span>
                    </>
                )}
             </div>
+
+            {/* Variant Selector */}
+            {product.variants && product.variants.length > 0 && (
+                <div className="mb-8">
+                    <p className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">Select Size</p>
+                    <div className="flex flex-wrap gap-3">
+                        {product.variants.map(variant => (
+                            <button 
+                                key={variant.id}
+                                onClick={() => setSelectedVariant(variant)}
+                                className={`px-4 py-2 border text-sm font-medium transition-all duration-200 ${
+                                    selectedVariant?.id === variant.id 
+                                    ? 'border-brand-primary bg-brand-surface text-brand-primary ring-1 ring-brand-primary' 
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                }`}
+                            >
+                                {variant.size}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
             
             {/* Actions */}
             <div className="space-y-4 mb-10">
-               {!product.isSoldOut ? (
+               {!product.isSoldOut && (!selectedVariant || selectedVariant.stock > 0) ? (
                    <>
                        <div className="flex gap-4">
                            <div className="flex items-center border border-gray-300 w-32">

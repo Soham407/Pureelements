@@ -33,7 +33,13 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [selectedConcern, setSelectedConcern] = useState<string | undefined>(undefined);
   const LIMIT = 12;
+
+  const CONCERNS = [
+    "Acne", "Pigmentation", "Dry Skin", "Oily Skin", "Anti-Ageing", 
+    "Hair Fall", "Dandruff", "Sensitive Skin"
+  ];
 
   useOnClickOutside(sortRef, () => setIsSortOpen(false));
 
@@ -41,6 +47,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
     setActiveCategory(initialCategory);
     setActiveSubCategory(initialSubCategory);
     setSearchQuery(initialSearchQuery || '');
+    setSelectedConcern(undefined); // Reset concern on category change
     setPage(1); // Reset page on category change
   }, [initialCategory, initialSubCategory, initialSearchQuery]);
 
@@ -65,7 +72,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
            fetchedTotal = result.total;
         } else {
            // Standard Category Fetch (handles OFFERS too now)
-           const result = await productsService.getByCategory(activeCategory, activeSubCategory, page, LIMIT, apiSort);
+           const result = await productsService.getByCategory(activeCategory, activeSubCategory, page, LIMIT, apiSort, selectedConcern);
            fetchedProducts = result.products;
            fetchedTotal = result.total;
         }
@@ -82,7 +89,7 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
     };
 
     fetchProducts();
-  }, [activeCategory, activeSubCategory, searchQuery, page, sortOrder]); // Re-fetch on sort change is inefficient if client-side, but if we move to server-side sort it's needed.
+  }, [activeCategory, activeSubCategory, searchQuery, page, sortOrder, selectedConcern]); // Re-fetch on sort change is inefficient if client-side, but if we move to server-side sort it's needed.
 
   const handleSidebarClick = (categoryName: string, subCategoryName?: string) => {
     setActiveCategory(categoryName);
@@ -194,6 +201,31 @@ const ProductListing: React.FC<Props> = ({ navItems, initialCategory, initialSub
                         </li>
                     ))}
                 </ul>
+
+                {/* Concerns Filter */}
+                {!currentNav && activeCategory !== 'OFFERS' && activeCategory !== 'SEARCH' && (
+                    <div className="mt-8 border-t border-gray-100 pt-6">
+                        <h4 className="font-bold text-sm text-gray-800 uppercase tracking-widest mb-4">Shop By Concern</h4>
+                        <ul className="space-y-2">
+                             {CONCERNS.map(concern => (
+                                 <li key={concern} className="flex items-center gap-3">
+                                     <div 
+                                        className={`w-4 h-4 border rounded-sm cursor-pointer flex items-center justify-center ${selectedConcern === concern ? 'bg-brand-primary border-brand-primary' : 'border-gray-300'}`}
+                                        onClick={() => setSelectedConcern(selectedConcern === concern ? undefined : concern)}
+                                     >
+                                        {selectedConcern === concern && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                     </div>
+                                     <span 
+                                        className={`text-sm cursor-pointer hover:text-brand-primary ${selectedConcern === concern ? 'font-bold text-gray-800' : 'text-gray-600'}`}
+                                        onClick={() => setSelectedConcern(selectedConcern === concern ? undefined : concern)}
+                                     >
+                                        {concern}
+                                     </span>
+                                 </li>
+                             ))}
+                        </ul>
+                    </div>
+                )}
             </div>
             </div>
         )}
